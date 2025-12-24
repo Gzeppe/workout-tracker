@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+workouts.db
+.vscode/
+.DS_Store
