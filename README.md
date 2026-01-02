@@ -1,9 +1,9 @@
-# Workout Tracker (CLI) — Python + SQLite
+# Workout Tracker (CLI) - Python + SQLite
 
 A command-line workout tracker that logs workouts, exercises, and sets to a SQLite database and generates end-of-workout summaries including PRs, streaks, and improvement suggestions.
 
 ## Why This Project
-I built this project to practice designing a real-world, data-driven application with persistent storage, analytics, and rule-based feedback — similar to how production systems track user activity and generate insights over time.
+I built this project to practice designing a real-world, data-driven application with persistent storage, analytics, and rule-based feedback - similar to how production systems track user activity and generate insights over time.
 
 ## Backend Concepts Demonstrated
 - Relational data modeling (workouts, exercises, sets)
