@@ -1,13 +1,14 @@
+[variables]
+PYTHONUNBUFFERED = "1"
+
 [phases.setup]
-nixPkgs = ["python310"]
+nixPkgs = ["python310", "postgresql"]
 
 [phases.install]
 cmds = ["pip install -r requirements.txt"]
 
 [phases.build]
-cmds = [
-  "cd web && python manage.py collectstatic --noinput"
-]
+cmds = ["cd web && python manage.py collectstatic --noinput"]
 
 [start]
-cmd = "cd web && python manage.py migrate && python manage.py load_exercises && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT"
+cmd = "bash start.sh"
