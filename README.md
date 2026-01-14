@@ -1,40 +1,80 @@
-# Workout Tracker (CLI) - Python + SQLite
+# Workout Tracker
 
-A command-line workout tracker that logs workouts, exercises, and sets to a SQLite database and generates end-of-workout summaries including PRs, streaks, and improvement suggestions.
-
-## Why This Project
-I built this project to practice designing a real-world, data-driven application with persistent storage, analytics, and rule-based feedback - similar to how production systems track user activity and generate insights over time.
-
-## Backend Concepts Demonstrated
-- Relational data modeling (workouts, exercises, sets)
-- CRUD operations with persistent storage
-- Analytics and aggregation logic
-- Business rules and conditional recommendations
-- Separation of concerns (database logic vs application logic)
-
-## Design Decisions
-- SQLite was chosen for simplicity and portability while maintaining relational integrity.
-- A CLI interface keeps the focus on backend logic and data modeling.
-- Analytics are computed dynamically rather than stored to avoid data inconsistency.
+A comprehensive workout tracking application with CLI and web interfaces, featuring workout analytics, personal records tracking, and motivational insights.
 
 ## Features
-- Log workouts by day and mood
-- Pick exercises from a curated, seeded list
-- Track sets: weight (0 = bodyweight), reps, and quality (bad/ok/good/great)
-- Dumbbell-aware logging (defaults to pair when tagged dumbbell)
-- Optional finisher: multiple items (cardio/core/stretching), default 10 minutes
-- Edit and delete sets
-- End-of-workout summary:
-  - All-time PRs per exercise (max weight, best set volume, best workout volume)
-  - Good/Great streaks (consecutive workouts with high-quality sets)
-  - Comparison vs previous workout (volume, weight, reps)
-  - Improvement rules (e.g., under-target reps, fewer than 3 sets)
+
+- **User Authentication**: Secure registration and login system
+- **Workout Logging**: Track exercises, sets, reps, and quality
+- **Rest Timer**: Built-in timer with audio alerts
+- **Workout Analysis**:
+  - Personal records (PRs) tracking
+  - Progress comparisons
+  - Performance streaks
+  - Areas for improvement
+  - Context-aware motivational messages
+- **Calendar View**: Visual workout history
+- **Mobile Responsive**: Works on all devices
 
 ## Tech Stack
-- Python 3.x
-- SQLite (built-in `sqlite3`)
-- No external dependencies
 
-## Run Locally
-```bash
-python workout_app.py
+- **Backend**: Django 5.2.9, Python 3.10
+- **Database**: PostgreSQL (production), SQLite (development)
+- **Frontend**: Tailwind CSS (via CDN)
+- **Deployment**: Railway.app
+- **Web Server**: Gunicorn
+
+## Local Development
+
+### Prerequisites
+- Python 3.10+
+- pip
+
+### Setup
+
+1. Clone the repository
+2. Create virtual environment:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Run migrations:
+   ```bash
+   cd web
+   python manage.py migrate
+   python manage.py load_exercises
+   python manage.py runserver
+   ```
+
+5. Visit http://localhost:8000
+
+## Deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed Railway deployment instructions.
+
+### Quick Deploy Checklist
+1. Push code to GitHub
+2. Connect to Railway
+3. Add PostgreSQL
+4. Set environment variables
+5. Deploy!
+
+## Security Features
+
+- Environment-based configuration
+- HTTPS enforcement
+- Secure cookies
+- CSRF protection
+- Password hashing
+- SQL injection protection
+
+## License
+
+Open source - personal use
+

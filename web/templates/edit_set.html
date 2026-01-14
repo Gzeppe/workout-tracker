@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Edit Set{% endblock %}
+{% block content %}
+  <div class="bg-slate-900 rounded-2xl p-6 shadow max-w-xl">
+    <h1 class="text-2xl font-semibold mb-2">Edit Set</h1>
+    <div class="text-slate-400 text-sm mb-6">
+      {{ set.exercise.name }} | {{ set.exercise.equipment }}
+    </div>
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+
+      <label class="block">
+        <span class="text-slate-300 text-sm">Weight (0 = bodyweight)</span>
+        <input name="weight_lb" type="number" min="0"
+               value="{{ set.weight_lb }}"
+               class="w-full bg-slate-800 rounded-xl p-3 mt-1" required />
+      </label>
+
+      <label class="block">
+        <span class="text-slate-300 text-sm">Reps</span>
+        <input name="reps" type="number" min="0"
+               value="{{ set.reps }}"
+               class="w-full bg-slate-800 rounded-xl p-3 mt-1" required />
+      </label>
+
+      <label class="block">
+        <span class="text-slate-300 text-sm">Quality</span>
+        <select name="quality" class="w-full bg-slate-800 rounded-xl p-3 mt-1" required>
+          {% for q in qualities %}
+            <option value="{{ q }}" {% if q == set.quality %}selected{% endif %}>
+              {{ q|capfirst }}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <div class="flex gap-3">
+        <button class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold">
+          Save
+        </button>
+        <a class="px-5 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold"
+           href="{% url 'workout_detail' set.workout.id %}">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

@@ -1,6 +1,40 @@
+# Python
 .venv/
 __pycache__/
 *.pyc
+*.py[cod]
+*.so
+
+# Django
 workouts.db
+db.sqlite3
+db.sqlite3-journal
+*.log
+/staticfiles/
+/media/
+local_settings.py
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Temporary files
+tmpclaude-*
+exercise_data.json
