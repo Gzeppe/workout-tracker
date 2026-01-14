@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Delete Workout{% endblock %}
+{% block content %}
+  <div class="bg-slate-900 rounded-2xl p-6 shadow max-w-xl">
+    <h1 class="text-2xl font-semibold mb-2">Delete workout?</h1>
+
+    <div class="text-slate-400 text-sm mb-4">
+      {{ workout.day }} — {{ workout.mood }} — {{ workout.started_at|date:"M j, Y  h:i A" }}
+    </div>
+
+    <div class="bg-slate-800 rounded-xl p-4 mb-6">
+      <div class="text-slate-200 font-semibold">This will permanently delete:</div>
+      <ul class="text-slate-300 text-sm list-disc ml-5 mt-2">
+        <li>The workout</li>
+        <li>{{ set_count }} logged set{{ set_count|pluralize }}</li>
+      </ul>
+    </div>
+
+    <form method="post" class="flex gap-3">
+      {% csrf_token %}
+      <button type="submit"
+              class="px-5 py-3 rounded-xl bg-rose-700 hover:bg-rose-600 font-semibold">
+        Yes, delete
+      </button>
+
+      <a href="{% url 'workout_detail' workout.id %}"
+         class="px-5 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold">
+        Cancel
+      </a>
+    </form>
+  </div>
+{% endblock %}

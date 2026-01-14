@@ -1,52 +1,80 @@
-\# Workout Tracker (CLI) — Python + SQLite
+# Workout Tracker
 
+A comprehensive workout tracking application with CLI and web interfaces, featuring workout analytics, personal records tracking, and motivational insights.
 
+## Features
 
-A command-line workout tracker that logs workouts, exercises, and sets to a SQLite database and generates an end-of-workout summary with PRs, streaks, and improvement suggestions.
+- **User Authentication**: Secure registration and login system
+- **Workout Logging**: Track exercises, sets, reps, and quality
+- **Rest Timer**: Built-in timer with audio alerts
+- **Workout Analysis**:
+  - Personal records (PRs) tracking
+  - Progress comparisons
+  - Performance streaks
+  - Areas for improvement
+  - Context-aware motivational messages
+- **Calendar View**: Visual workout history
+- **Mobile Responsive**: Works on all devices
 
+## Tech Stack
 
+- **Backend**: Django 5.2.9, Python 3.10
+- **Database**: PostgreSQL (production), SQLite (development)
+- **Frontend**: Tailwind CSS (via CDN)
+- **Deployment**: Railway.app
+- **Web Server**: Gunicorn
 
-\## Features
+## Local Development
 
-\- Log workouts by day + mood
+### Prerequisites
+- Python 3.10+
+- pip
 
-\- Pick exercises from a curated list (seeded in-order)
+### Setup
 
-\- Track sets: weight (0 = bodyweight), reps, quality (bad/ok/good/great)
+1. Clone the repository
+2. Create virtual environment:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   ```
 
-\- Dumbbell-aware logging (defaults to pair when tagged dumbbell)
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-\- Optional finisher: add multiple items (cardio/core/stretching), default 10 minutes
+4. Run migrations:
+   ```bash
+   cd web
+   python manage.py migrate
+   python manage.py load_exercises
+   python manage.py runserver
+   ```
 
-\- Edit/delete sets
+5. Visit http://localhost:8000
 
-\- End-of-workout summary:
+## Deployment
 
-&nbsp; - All-time PRs per exercise (max weight, best set volume, best workout volume)
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed Railway deployment instructions.
 
-&nbsp; - Good/Great streaks (consecutive workouts where all sets were good/great)
+### Quick Deploy Checklist
+1. Push code to GitHub
+2. Connect to Railway
+3. Add PostgreSQL
+4. Set environment variables
+5. Deploy!
 
-&nbsp; - Compare vs last time (volume/weight/reps deltas)
+## Security Features
 
-&nbsp; - Improvement rules (e.g., under-target reps, <3 sets)
+- Environment-based configuration
+- HTTPS enforcement
+- Secure cookies
+- CSRF protection
+- Password hashing
+- SQL injection protection
 
+## License
 
-
-\## Tech Stack
-
-\- Python 3.x
-
-\- SQLite (built-in `sqlite3`)
-
-\- No external dependencies (simple and portable)
-
-
-
-\## Run Locally
-
-```bash
-
-python workout\_app.py
-
-
+Open source - personal use
 

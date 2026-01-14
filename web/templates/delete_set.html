@@ -1,0 +1,14 @@
+<h1>Delete Set</h1>
+
+<p>Are you sure you want to delete this set?</p>
+
+<ul>
+  <li><strong>{{ set.exercise.name }}</strong></li>
+  <li>{{ set.weight_lb }} lbs x {{ set.reps }} ({{ set.quality }})</li>
+</ul>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Yes, delete</button>
+  <a href="{% url 'workout_detail' set.workout.id %}">Cancel</a>
+</form>
