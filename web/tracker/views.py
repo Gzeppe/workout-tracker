@@ -112,7 +112,11 @@ def start_workout(request):
 @login_required
 def workout_detail(request, workout_id: int):
     w = get_object_or_404(Workout, id=workout_id, user=request.user)
-    exercises = Exercise.objects.filter(day=w.day)  # ordered by model Meta sort_order
+    # Show all exercises for Combination day, otherwise filter by day
+    if w.day == "Combination":
+        exercises = Exercise.objects.all()  # ordered by model Meta sort_order
+    else:
+        exercises = Exercise.objects.filter(day=w.day)  # ordered by model Meta sort_order
     sets = w.sets.select_related("exercise").all()
 
     if request.method == "POST":
