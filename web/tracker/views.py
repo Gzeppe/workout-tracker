@@ -434,3 +434,8 @@ def delete_workout(request, workout_id: int):
         "delete_workout.html",
         {"workout": w, "set_count": w.sets.count()},
     )
+
+
+def about(request):
+    """About page explaining the app and workout recommendations"""
+    return render(request, "about.html")
