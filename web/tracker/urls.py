@@ -5,6 +5,8 @@ urlpatterns = [
     path("", views.dashboard, name="dashboard"),
     path("register/", views.register, name="register"),
     path("about/", views.about, name="about"),
+    path("privacy/", views.privacy, name="privacy"),
+    path("account/delete/", views.delete_account, name="delete_account"),
     path("start/", views.start_workout, name="start_workout"),
 
     path("workouts/<int:workout_id>/", views.workout_detail, name="workout_detail"),

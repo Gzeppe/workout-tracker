@@ -16,3 +16,6 @@ dj-database-url==2.3.0
 
 # Static file serving
 whitenoise==6.8.2
+
+# Rate limiting
+django-ratelimit==4.1.0

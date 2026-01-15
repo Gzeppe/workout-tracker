@@ -1,12 +1,18 @@
 import calendar
+import re
 
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.views.decorators.http import require_http_methods
+from django_ratelimit.decorators import ratelimit
+from django_ratelimit.exceptions import Ratelimited
 
 from .models import Workout, Exercise, SetEntry
 
@@ -16,22 +22,53 @@ MOODS = ["Exhausted", "Low Energy", "Normal", "Energetic"]
 QUALITIES = ["bad", "ok", "good", "great"]
 
 
+def ratelimited_error(request, exception):
+    """Custom view for rate limited requests"""
+    return render(request, "ratelimited.html", status=429)
+
+
+@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def register(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
 
     if request.method == "POST":
         username = request.POST.get("username", "").strip()
+        email = request.POST.get("email", "").strip().lower()
         password = request.POST.get("password", "").strip()
         password_confirm = request.POST.get("password_confirm", "").strip()
 
         errors = []
 
+        # Username validation
         if not username or len(username) < 3:
             errors.append("Username must be at least 3 characters long.")
+        elif len(username) > 30:
+            errors.append("Username cannot exceed 30 characters.")
+        elif not re.match(r'^[a-zA-Z0-9_]+$', username):
+            errors.append("Username can only contain letters, numbers, and underscores.")
 
-        if not password or len(password) < 6:
-            errors.append("Password must be at least 6 characters long.")
+        # Email validation
+        if not email:
+            errors.append("Email address is required.")
+        else:
+            try:
+                validate_email(email)
+            except ValidationError:
+                errors.append("Please enter a valid email address.")
+            else:
+                if User.objects.filter(email=email).exists():
+                    errors.append("This email is already registered.")
+
+        # Password validation
+        if not password or len(password) < 8:
+            errors.append("Password must be at least 8 characters long.")
+        else:
+            try:
+                # Use Django's password validators
+                validate_password(password)
+            except ValidationError as e:
+                errors.extend(e.messages)
 
         if password != password_confirm:
             errors.append("Passwords do not match.")
@@ -40,11 +77,11 @@ def register(request):
             errors.append("Username already taken.")
 
         if not errors:
-            user = User.objects.create_user(username=username, password=password)
+            user = User.objects.create_user(username=username, email=email, password=password)
             login(request, user)
             return redirect("dashboard")
 
-        return render(request, "registration/register.html", {"errors": errors, "username": username})
+        return render(request, "registration/register.html", {"errors": errors, "username": username, "email": email})
 
     return render(request, "registration/register.html")
 
@@ -439,3 +476,34 @@ def delete_workout(request, workout_id: int):
 def about(request):
     """About page explaining the app and workout recommendations"""
     return render(request, "about.html")
+
+
+def privacy(request):
+    """Privacy policy and disclaimer page"""
+    return render(request, "privacy.html")
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def delete_account(request):
+    """Allow users to delete their account and all associated data"""
+    if request.method == "POST":
+        password = request.POST.get("password", "")
+        confirm = request.POST.get("confirm", "")
+
+        errors = []
+
+        if confirm != "DELETE":
+            errors.append("Please type DELETE to confirm.")
+
+        if not request.user.check_password(password):
+            errors.append("Incorrect password.")
+
+        if not errors:
+            # Delete the user (CASCADE will delete all workouts and sets)
+            request.user.delete()
+            return redirect("login")
+
+        return render(request, "delete_account.html", {"errors": errors})
+
+    return render(request, "delete_account.html")

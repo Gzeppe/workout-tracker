@@ -11,12 +11,21 @@
         <span class="text-slate-300 text-sm">Username</span>
         <input type="text" name="username" value="{{ username }}" autofocus
                class="w-full bg-slate-800 rounded-xl p-3 mt-1" required>
+        <span class="text-slate-500 text-xs">Letters, numbers, and underscores only. 3-30 characters.</span>
+      </label>
+
+      <label class="block">
+        <span class="text-slate-300 text-sm">Email</span>
+        <input type="email" name="email" value="{{ email }}"
+               class="w-full bg-slate-800 rounded-xl p-3 mt-1" required>
+        <span class="text-slate-500 text-xs">Used for password recovery.</span>
       </label>
 
       <label class="block">
         <span class="text-slate-300 text-sm">Password</span>
         <input type="password" name="password"
                class="w-full bg-slate-800 rounded-xl p-3 mt-1" required>
+        <span class="text-slate-500 text-xs">At least 8 characters. Avoid common passwords.</span>
       </label>
 
       <label class="block">

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Delete Account{% endblock %}
+{% block content %}
+
+<div class="bg-slate-900 rounded-2xl p-6 shadow max-w-md mx-auto">
+  <h1 class="text-2xl font-semibold mb-2 text-rose-400">Delete Account</h1>
+  <p class="text-slate-400 text-sm mb-6">This action cannot be undone.</p>
+
+  <div class="bg-rose-900/20 border border-rose-700/50 rounded-xl p-4 mb-6">
+    <p class="text-rose-200 text-sm">
+      <strong>Warning:</strong> Deleting your account will permanently remove:
+    </p>
+    <ul class="list-disc list-inside mt-2 text-rose-300 text-sm space-y-1">
+      <li>Your account and profile</li>
+      <li>All workout history</li>
+      <li>All sets and exercise data</li>
+      <li>All personal records</li>
+    </ul>
+  </div>
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+
+    <label class="block">
+      <span class="text-slate-300 text-sm">Enter your password</span>
+      <input type="password" name="password"
+             class="w-full bg-slate-800 rounded-xl p-3 mt-1" required>
+    </label>
+
+    <label class="block">
+      <span class="text-slate-300 text-sm">Type DELETE to confirm</span>
+      <input type="text" name="confirm" placeholder="DELETE"
+             class="w-full bg-slate-800 rounded-xl p-3 mt-1" required>
+    </label>
+
+    {% if errors %}
+      <div class="bg-rose-900/40 border border-rose-700 rounded-xl p-3 text-sm text-rose-200">
+        <ul class="list-disc list-inside space-y-1">
+          {% for error in errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <div class="flex gap-3 pt-2">
+      <a href="{% url 'dashboard' %}" class="flex-1 px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold text-center">
+        Cancel
+      </a>
+      <button type="submit" class="flex-1 px-5 py-3 rounded-xl bg-rose-700 hover:bg-rose-600 font-semibold">
+        Delete My Account
+      </button>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

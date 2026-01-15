@@ -45,6 +45,12 @@
 
       <!-- Footer -->
       <div class="text-center mt-8 py-4 text-slate-500 text-sm">
+        <a href="{% url 'privacy' %}" class="hover:text-slate-300">Privacy Policy</a>
+        {% if user.is_authenticated %}
+        <span class="mx-2">|</span>
+        <a href="{% url 'delete_account' %}" class="hover:text-rose-400">Delete Account</a>
+        {% endif %}
+        <span class="mx-2">|</span>
         Built by <span class="text-slate-300 font-semibold">Gtech LLC</span>
       </div>
     </div>
