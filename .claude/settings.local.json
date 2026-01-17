@@ -4,7 +4,10 @@
       "Bash(python manage.py runserver:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Read(//c/Users/Swag/computer_science/**)",
+      "Bash(python manage.py makemigrations:*)",
+      "Bash(python manage.py migrate:*)"
     ]
   }
 }

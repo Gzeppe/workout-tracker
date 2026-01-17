@@ -17,7 +17,7 @@ from django_ratelimit.exceptions import Ratelimited
 from .models import Workout, Exercise, SetEntry
 
 
-DAYS = ["Back & Biceps", "Chest & Triceps", "Legs", "Core", "Shoulders & Traps", "Combination"]
+DAYS = ["Custom Workout", "Back & Biceps", "Chest & Triceps", "Legs", "Core", "Shoulders & Traps"]
 MOODS = ["Exhausted", "Low Energy", "Normal", "Energetic"]
 QUALITIES = ["bad", "ok", "good", "great"]
 
@@ -150,17 +150,19 @@ def start_workout(request):
 @login_required
 def workout_detail(request, workout_id: int):
     w = get_object_or_404(Workout, id=workout_id, user=request.user)
-    # Show all exercises for Combination day, otherwise filter by day
-    if w.day == "Combination":
-        exercises = Exercise.objects.all()
+    # Custom Workout: no exercise dropdown, user types exercise name
+    # Other days: filter exercises by day
+    is_custom = w.day == "Custom Workout"
+    if is_custom:
+        exercises = []
     else:
         exercises = Exercise.objects.filter(day=w.day)
-    sets = w.sets.select_related("exercise").all()
+    sets = w.sets.select_related("exercise").order_by("position", "created_at")
 
     return render(
         request,
         "workout_detail.html",
-        {"workout": w, "exercises": exercises, "sets": sets, "qualities": QUALITIES},
+        {"workout": w, "exercises": exercises, "sets": sets, "qualities": QUALITIES, "is_custom": is_custom},
     )
 
 
@@ -171,38 +173,62 @@ def add_set(request, workout_id: int):
     w = get_object_or_404(Workout, id=workout_id, user=request.user)
 
     exercise_id = (request.POST.get("exercise_id") or "").strip()
+    custom_exercise_name = (request.POST.get("custom_exercise_name") or "").strip()
+    custom_equipment = (request.POST.get("custom_equipment") or "").strip()
     weight_lb = (request.POST.get("weight_lb") or "").strip()
     reps = (request.POST.get("reps") or "").strip()
     quality = (request.POST.get("quality") or "").strip()
+    duration_minutes = (request.POST.get("duration_minutes") or "0").strip()
 
-    if not exercise_id.isdigit():
-        return HttpResponseBadRequest("Invalid exercise")
+    # Determine if using custom exercise or dropdown selection
+    # Priority: custom_exercise_name takes precedence over exercise_id
+    ex = None
+    use_custom = bool(custom_exercise_name)
+
+    if not use_custom:
+        # No custom name entered, must use dropdown (unless Custom Workout day)
+        if w.day == "Custom Workout":
+            return HttpResponseBadRequest("Exercise name required")
+        if not exercise_id.isdigit():
+            return HttpResponseBadRequest("Please enter an exercise name or select from the list")
+        ex = get_object_or_404(Exercise, id=int(exercise_id))
+
     if not weight_lb.isdigit():
         return HttpResponseBadRequest("Invalid weight")
     if not reps.isdigit():
         return HttpResponseBadRequest("Invalid reps")
     if quality not in QUALITIES:
         return HttpResponseBadRequest("Invalid quality")
+    if duration_minutes and not duration_minutes.isdigit():
+        return HttpResponseBadRequest("Invalid duration")
 
-    ex = get_object_or_404(Exercise, id=int(exercise_id))
     weight_lb_i = int(weight_lb)
     reps_i = int(reps)
+    duration_seconds = int(duration_minutes) * 60 if duration_minutes else 0
 
-    next_set_num = SetEntry.objects.filter(workout=w, exercise=ex).count() + 1
+    # Calculate set number based on exercise name (custom or linked)
+    if use_custom:
+        next_set_num = SetEntry.objects.filter(workout=w, custom_exercise_name=custom_exercise_name).count() + 1
+    else:
+        next_set_num = SetEntry.objects.filter(workout=w, exercise=ex).count() + 1
+
     max_position = w.sets.count()
 
     SetEntry.objects.create(
         workout=w,
         exercise=ex,
+        custom_exercise_name=custom_exercise_name if use_custom else "",
+        custom_equipment=custom_equipment if use_custom else "",
         set_number=next_set_num,
         weight_lb=weight_lb_i,
         reps=reps_i,
+        duration_seconds=duration_seconds,
         quality=quality,
         position=max_position,
     )
 
     # Return partial template with updated sets list
-    sets = w.sets.select_related("exercise").all()
+    sets = w.sets.select_related("exercise").order_by("position", "created_at")
     return render(request, "partials/sets_list.html", {"sets": sets, "workout": w})
 
 
@@ -245,7 +271,8 @@ def generate_workout_analysis(current_workout, user):
     from django.db.models import Max, Sum
 
     current_sets = current_workout.sets.select_related("exercise").all()
-    exercises_in_workout = set(s.exercise for s in current_sets)
+    # Only analyze linked exercises (not custom exercise names)
+    exercises_in_workout = set(s.exercise for s in current_sets if s.exercise is not None)
 
     for exercise in exercises_in_workout:
         exercise_sets = [s for s in current_sets if s.exercise == exercise]
@@ -317,6 +344,8 @@ def generate_workout_analysis(current_workout, user):
             )
 
         for exercise in exercises_in_workout:
+            if exercise is None:
+                continue
             current_ex_sets = [s for s in current_sets if s.exercise == exercise]
             last_ex_sets = last_workout.sets.filter(exercise=exercise)
 
@@ -342,6 +371,8 @@ def generate_workout_analysis(current_workout, user):
         )
 
     for exercise in exercises_in_workout:
+        if exercise is None:
+            continue
         exercise_sets_ordered = sorted(
             [s for s in current_sets if s.exercise == exercise],
             key=lambda x: x.set_number,
@@ -451,7 +482,7 @@ def delete_set(request, set_id: int):
 
     # Check if this is an HTMX request
     if request.headers.get('HX-Request'):
-        sets = workout.sets.select_related("exercise").all()
+        sets = workout.sets.select_related("exercise").order_by("position", "created_at")
         return render(request, "partials/sets_list.html", {"sets": sets, "workout": workout})
 
     return redirect("workout_detail", workout_id=workout.id)
@@ -465,7 +496,17 @@ def move_set(request, set_id: int):
     workout = s.workout
     direction = request.POST.get("direction", "up")
 
-    sets_list = list(workout.sets.all())
+    # Get all sets ordered by position, then created_at as fallback
+    sets_list = list(workout.sets.order_by("position", "created_at"))
+
+    # Ensure all sets have unique positions (fix for legacy data with position=0)
+    for i, set_entry in enumerate(sets_list):
+        if set_entry.position != i:
+            set_entry.position = i
+            set_entry.save(update_fields=["position"])
+
+    # Re-fetch to get updated positions
+    sets_list = list(workout.sets.order_by("position"))
     current_index = next((i for i, x in enumerate(sets_list) if x.id == s.id), None)
 
     if current_index is None:
@@ -474,16 +515,16 @@ def move_set(request, set_id: int):
     if direction == "up" and current_index > 0:
         other_set = sets_list[current_index - 1]
         s.position, other_set.position = other_set.position, s.position
-        s.save()
-        other_set.save()
+        s.save(update_fields=["position"])
+        other_set.save(update_fields=["position"])
     elif direction == "down" and current_index < len(sets_list) - 1:
         other_set = sets_list[current_index + 1]
         s.position, other_set.position = other_set.position, s.position
-        s.save()
-        other_set.save()
+        s.save(update_fields=["position"])
+        other_set.save(update_fields=["position"])
 
     if request.headers.get('HX-Request'):
-        sets = workout.sets.select_related("exercise").all()
+        sets = workout.sets.select_related("exercise").order_by("position")
         return render(request, "partials/sets_list.html", {"sets": sets, "workout": workout})
 
     return redirect("workout_detail", workout_id=workout.id)

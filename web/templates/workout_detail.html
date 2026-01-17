@@ -56,12 +56,33 @@
       <form hx-post="{% url 'add_set' workout.id %}" hx-target="#sets-container" hx-swap="innerHTML" class="space-y-3">
         {% csrf_token %}
 
-        <select name="exercise_id" class="w-full bg-slate-800 rounded-xl p-3 mt-1" required>
-          <option value="" selected disabled>Select an exercise...</option>
+        <!-- Manual exercise entry (available for all workout types) -->
+        <div class="bg-slate-800/50 rounded-xl p-3 space-y-2">
+          <div class="text-slate-400 text-xs font-semibold uppercase tracking-wide">Add Custom Exercise</div>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="block">
+              <span class="text-slate-300 text-sm">Exercise Name</span>
+              <input name="custom_exercise_name" type="text" placeholder="e.g., Running, Planks..."
+                     class="w-full bg-slate-700 rounded-xl p-3 mt-1" maxlength="120" />
+            </label>
+            <label class="block">
+              <span class="text-slate-300 text-sm">Equipment (optional)</span>
+              <input name="custom_equipment" type="text" placeholder="e.g., Treadmill, Mat..."
+                     class="w-full bg-slate-700 rounded-xl p-3 mt-1" maxlength="80" />
+            </label>
+          </div>
+        </div>
+
+        {% if not is_custom %}
+        <!-- Standard workout: also show exercise dropdown -->
+        <div class="text-center text-slate-500 text-sm">— or select from list —</div>
+        <select name="exercise_id" class="w-full bg-slate-800 rounded-xl p-3">
+          <option value="" selected>Select an exercise...</option>
           {% for ex in exercises %}
           <option value="{{ ex.id }}">{{ ex.name }} | {{ ex.equipment }}</option>
           {% endfor %}
         </select>
+        {% endif %}
 
         <div class="grid grid-cols-2 gap-3">
           <label class="block">
@@ -70,10 +91,17 @@
           </label>
 
           <label class="block">
-            <span class="text-slate-300 text-sm">Reps</span>
+            <span class="text-slate-300 text-sm">Reps (0 for timed)</span>
             <input name="reps" type="number" min="0" class="w-full bg-slate-800 rounded-xl p-3 mt-1" required />
           </label>
         </div>
+
+        <!-- Duration for cardio/timed exercises -->
+        <label class="block">
+          <span class="text-slate-300 text-sm">Duration (minutes, optional for cardio)</span>
+          <input name="duration_minutes" type="number" min="0" placeholder="0"
+                 class="w-full bg-slate-800 rounded-xl p-3 mt-1" />
+        </label>
 
         <label class="block">
           <span class="text-slate-300 text-sm">Quality</span>

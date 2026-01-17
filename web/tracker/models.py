@@ -4,12 +4,12 @@ from django.db import models
 
 class Workout(models.Model):
     DAY_CHOICES = [
+        ("Custom Workout", "Custom Workout"),
         ("Back & Biceps", "Back & Biceps"),
         ("Chest & Triceps", "Chest & Triceps"),
         ("Legs", "Legs"),
         ("Core", "Core"),
         ("Shoulders & Traps", "Shoulders & Traps"),
-        ("Combination", "Combination"),
     ]
 
     MOOD_CHOICES = [
@@ -82,10 +82,13 @@ class SetEntry(models.Model):
     ]
 
     workout = models.ForeignKey(Workout, on_delete=models.CASCADE, related_name="sets")
-    exercise = models.ForeignKey(Exercise, on_delete=models.PROTECT)
+    exercise = models.ForeignKey(Exercise, on_delete=models.PROTECT, null=True, blank=True)
+    custom_exercise_name = models.CharField(max_length=120, blank=True, default="")
+    custom_equipment = models.CharField(max_length=80, blank=True, default="")
     set_number = models.PositiveIntegerField()
     weight_lb = models.PositiveIntegerField()  # 0 = bodyweight
-    reps = models.PositiveIntegerField()
+    reps = models.PositiveIntegerField(default=0)  # 0 for cardio/timed exercises
+    duration_seconds = models.PositiveIntegerField(default=0)  # For cardio: time in seconds
     quality = models.CharField(max_length=10, choices=QUALITY_CHOICES)
     position = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -93,5 +96,17 @@ class SetEntry(models.Model):
     class Meta:
         ordering = ["position", "created_at"]
 
+    @property
+    def exercise_name(self):
+        """Return custom exercise name or linked exercise name"""
+        if self.custom_exercise_name:
+            return self.custom_exercise_name
+        return self.exercise.name if self.exercise else "Unknown"
+
     def __str__(self) -> str:
-        return f"{self.exercise.name}: {self.weight_lb}x{self.reps} ({self.quality})"
+        name = self.exercise_name
+        if self.duration_seconds > 0:
+            mins = self.duration_seconds // 60
+            secs = self.duration_seconds % 60
+            return f"{name}: {mins}m {secs}s ({self.quality})"
+        return f"{name}: {self.weight_lb}x{self.reps} ({self.quality})"
