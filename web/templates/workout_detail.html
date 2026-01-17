@@ -4,8 +4,13 @@
   <div class="bg-slate-900 rounded-2xl p-6 shadow mb-6">
     <div class="flex items-start justify-between">
       <div>
-        <h1 class="text-2xl font-semibold">{{ workout.day }} — {{ workout.mood }}</h1>
+        <h1 class="text-2xl font-semibold">
+          {% if workout.name %}{{ workout.name }}{% else %}{{ workout.day }}{% endif %} — {{ workout.mood }}
+        </h1>
         <div class="text-slate-400 text-sm">{{ workout.started_at|date:"M j, Y  h:i A" }}</div>
+        {% if workout.name %}
+        <div class="text-slate-500 text-xs mt-1">{{ workout.day }}</div>
+        {% endif %}
       </div>
 
       <a href="/workouts/{{ workout.id }}/end/" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold">
@@ -14,44 +19,53 @@
     </div>
   </div>
 
-  <!-- Rest Timer -->
+  <!-- Workout Timer with Stopwatch/Countdown modes and localStorage persistence -->
   <div class="bg-slate-900 rounded-2xl p-6 shadow mb-6">
-    <h2 class="text-lg font-semibold mb-4">Rest Timer</h2>
-
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold">Rest Timer</h2>
       <div class="flex gap-2">
-        <button onclick="startTimer(2)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold">2 min</button>
-        <button onclick="startTimer(3)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold">3 min</button>
-        <button onclick="startTimer(4)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold">4 min</button>
-        <button onclick="startTimer(5)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold">5 min</button>
+        <button id="mode-stopwatch" onclick="setTimerMode('stopwatch')" class="px-3 py-1 rounded-lg text-sm font-semibold bg-indigo-600">Stopwatch</button>
+        <button id="mode-countdown" onclick="setTimerMode('countdown')" class="px-3 py-1 rounded-lg text-sm font-semibold bg-slate-700">Countdown</button>
       </div>
-
-      <button onclick="stopTimer()" class="px-4 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 font-semibold">Stop</button>
     </div>
 
-    <div id="timer-display" class="text-5xl font-bold text-center mt-4 text-slate-400">--:--</div>
+    <!-- Countdown duration selector -->
+    <div id="countdown-options" class="hidden mb-4">
+      <div class="flex gap-2 flex-wrap">
+        <button onclick="setCountdownDuration(60)" class="countdown-btn px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-semibold" data-duration="60">1 min</button>
+        <button onclick="setCountdownDuration(120)" class="countdown-btn px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-semibold" data-duration="120">2 min</button>
+        <button onclick="setCountdownDuration(180)" class="countdown-btn px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-semibold" data-duration="180">3 min</button>
+        <button onclick="setCountdownDuration(240)" class="countdown-btn px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-semibold" data-duration="240">4 min</button>
+      </div>
+    </div>
+
+    <div id="timer-display" class="text-5xl font-bold text-center my-4 text-slate-400 font-mono">00:00</div>
+
+    <div class="flex justify-center gap-3">
+      <button id="btn-start" onclick="startTimer()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold">Start</button>
+      <button id="btn-pause" onclick="pauseTimer()" class="hidden px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 font-semibold">Pause</button>
+      <button id="btn-resume" onclick="resumeTimer()" class="hidden px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold">Resume</button>
+      <button id="btn-reset" onclick="resetTimer()" class="px-5 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 font-semibold">Reset</button>
+    </div>
   </div>
 
   <div class="grid md:grid-cols-2 gap-6">
     <div class="bg-slate-900 rounded-2xl p-6 shadow">
       <h2 class="text-lg font-semibold mb-4">Add Set</h2>
 
-      <form method="post" class="space-y-3">
+      <form hx-post="{% url 'add_set' workout.id %}" hx-target="#sets-container" hx-swap="innerHTML" class="space-y-3">
         {% csrf_token %}
 
-        <!-- Exercise dropdown (FIXED) -->
-       <select name="exercise_id" class="w-full bg-slate-800 rounded-xl p-3 mt-1" required>
-        <option value="" selected disabled>Select an exercise...</option>
+        <select name="exercise_id" class="w-full bg-slate-800 rounded-xl p-3 mt-1" required>
+          <option value="" selected disabled>Select an exercise...</option>
           {% for ex in exercises %}
-        <option value="{{ ex.id }}">{{ ex.name }} | {{ ex.equipment }}</option>
-        {% endfor %}
-      </select>
-
+          <option value="{{ ex.id }}">{{ ex.name }} | {{ ex.equipment }}</option>
+          {% endfor %}
+        </select>
 
         <div class="grid grid-cols-2 gap-3">
           <label class="block">
             <span class="text-slate-300 text-sm">Weight (0 = bodyweight)</span>
-            <!-- 6) remove cap: remove max -->
             <input name="weight_lb" type="number" min="0" class="w-full bg-slate-800 rounded-xl p-3 mt-1" required />
           </label>
 
@@ -79,40 +93,12 @@
     <div class="bg-slate-900 rounded-2xl p-6 shadow">
       <h2 class="text-lg font-semibold mb-4">Logged Sets</h2>
 
-      <div class="space-y-2">
-        {% for s in sets %}
-          <div class="bg-slate-800 rounded-xl p-3 flex items-start justify-between gap-3">
-            <div>
-              <div class="font-semibold">{{ s.exercise.name }} | {{ s.exercise.equipment }}</div>
-              <div class="text-slate-300 text-sm">
-                Set {{ s.set_number }} — {{ s.weight_lb }} lb x {{ s.reps }} — {{ s.quality|capfirst }}
-              </div>
-            </div>
-
-            <!-- 1) edit/delete controls (MOVED INSIDE LOOP) -->
-            <div class="flex gap-2">
-              <a href="{% url 'edit_set' s.id %}"
-                 class="px-3 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-sm font-semibold">
-                Edit
-              </a>
-
-              <form method="post" action="{% url 'delete_set' s.id %}">
-                {% csrf_token %}
-                <button type="submit"
-                        class="px-3 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-sm font-semibold">
-                  Delete
-                </button>
-              </form>
-            </div>
-          </div>
-        {% empty %}
-          <div class="text-slate-400">No sets yet.</div>
-        {% endfor %}
+      <div id="sets-container" class="space-y-2">
+        {% include "partials/sets_list.html" %}
       </div>
     </div>
   </div>
 
-  <!-- 3) Back to dashboard should look like a button -->
   <div class="mt-6 flex justify-end">
     <a href="{% url 'dashboard' %}" class="inline-block px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold">
       Back to dashboard
@@ -120,56 +106,224 @@
   </div>
 
   <script>
-    let timerInterval = null;
-    let remainingSeconds = 0;
+    // Timer state management with localStorage persistence
+    const STORAGE_KEY = 'workout_timer_{{ workout.id }}';
     const display = document.getElementById('timer-display');
 
-    function startTimer(minutes) {
-      stopTimer(); // Clear any existing timer
-      remainingSeconds = minutes * 60;
-      updateDisplay();
+    let timerState = {
+      mode: 'stopwatch',
+      running: false,
+      paused: false,
+      startTime: null,
+      elapsed: 0,
+      countdownDuration: 120,
+      pausedAt: null
+    };
 
-      timerInterval = setInterval(() => {
-        remainingSeconds--;
+    let timerInterval = null;
+    let audioContext = null;
 
-        if (remainingSeconds <= 0) {
-          stopTimer();
-          playAlarm();
-          display.classList.add('text-emerald-400');
-          display.textContent = '00:00';
-          setTimeout(() => {
-            display.classList.remove('text-emerald-400');
-            display.classList.add('text-slate-400');
-            display.textContent = '--:--';
-          }, 3000);
-        } else {
-          updateDisplay();
-        }
-      }, 1000);
-
-      // Highlight the display when timer is active
-      display.classList.remove('text-slate-400');
-      display.classList.add('text-indigo-400');
+    // Initialize audio context on first user interaction
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
     }
 
-    function stopTimer() {
-      if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
+    // Load state from localStorage
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        timerState = { ...timerState, ...parsed };
+
+        // If timer was running, calculate elapsed time
+        if (timerState.running && timerState.startTime) {
+          if (!timerState.paused) {
+            // Timer was running, resume it
+            startTimerInterval();
+          }
+        }
+
+        updateUI();
       }
-      display.classList.remove('text-indigo-400');
-      display.classList.add('text-slate-400');
+    }
+
+    // Save state to localStorage
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(timerState));
+    }
+
+    function setTimerMode(mode) {
+      resetTimer();
+      timerState.mode = mode;
+      saveState();
+      updateUI();
+    }
+
+    function setCountdownDuration(seconds) {
+      timerState.countdownDuration = seconds;
+      timerState.elapsed = 0;
+      saveState();
+      updateDisplay();
+      updateUI();
+
+      // Highlight selected button
+      document.querySelectorAll('.countdown-btn').forEach(btn => {
+        if (parseInt(btn.dataset.duration) === seconds) {
+          btn.classList.remove('bg-slate-800');
+          btn.classList.add('bg-indigo-600');
+        } else {
+          btn.classList.remove('bg-indigo-600');
+          btn.classList.add('bg-slate-800');
+        }
+      });
+    }
+
+    function startTimer() {
+      initAudio();
+      timerState.running = true;
+      timerState.paused = false;
+      timerState.startTime = Date.now() - (timerState.elapsed * 1000);
+      saveState();
+      startTimerInterval();
+      updateUI();
+    }
+
+    function startTimerInterval() {
+      if (timerInterval) clearInterval(timerInterval);
+
+      timerInterval = setInterval(() => {
+        if (timerState.running && !timerState.paused) {
+          timerState.elapsed = Math.floor((Date.now() - timerState.startTime) / 1000);
+
+          if (timerState.mode === 'countdown') {
+            const remaining = timerState.countdownDuration - timerState.elapsed;
+            if (remaining <= 0) {
+              playAlarm();
+              resetTimer();
+              display.classList.add('text-emerald-400');
+              display.textContent = '00:00';
+              setTimeout(() => {
+                display.classList.remove('text-emerald-400');
+                updateDisplay();
+              }, 3000);
+              return;
+            }
+          }
+
+          updateDisplay();
+          saveState();
+        }
+      }, 100);
+    }
+
+    function pauseTimer() {
+      timerState.paused = true;
+      timerState.pausedAt = Date.now();
+      saveState();
+      updateUI();
+    }
+
+    function resumeTimer() {
+      if (timerState.pausedAt) {
+        const pauseDuration = Date.now() - timerState.pausedAt;
+        timerState.startTime += pauseDuration;
+      }
+      timerState.paused = false;
+      timerState.pausedAt = null;
+      saveState();
+      startTimerInterval();
+      updateUI();
+    }
+
+    function resetTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerState.running = false;
+      timerState.paused = false;
+      timerState.elapsed = 0;
+      timerState.startTime = null;
+      timerState.pausedAt = null;
+      saveState();
+      updateDisplay();
+      updateUI();
     }
 
     function updateDisplay() {
-      const mins = Math.floor(remainingSeconds / 60);
-      const secs = remainingSeconds % 60;
+      let seconds;
+      if (timerState.mode === 'countdown') {
+        seconds = Math.max(0, timerState.countdownDuration - timerState.elapsed);
+      } else {
+        seconds = timerState.elapsed;
+      }
+
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
       display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+      // Color based on state
+      display.classList.remove('text-slate-400', 'text-indigo-400', 'text-amber-400');
+      if (timerState.running && !timerState.paused) {
+        display.classList.add('text-indigo-400');
+      } else if (timerState.paused) {
+        display.classList.add('text-amber-400');
+      } else {
+        display.classList.add('text-slate-400');
+      }
+    }
+
+    function updateUI() {
+      // Mode buttons
+      document.getElementById('mode-stopwatch').className = timerState.mode === 'stopwatch'
+        ? 'px-3 py-1 rounded-lg text-sm font-semibold bg-indigo-600'
+        : 'px-3 py-1 rounded-lg text-sm font-semibold bg-slate-700';
+      document.getElementById('mode-countdown').className = timerState.mode === 'countdown'
+        ? 'px-3 py-1 rounded-lg text-sm font-semibold bg-indigo-600'
+        : 'px-3 py-1 rounded-lg text-sm font-semibold bg-slate-700';
+
+      // Show/hide countdown options
+      document.getElementById('countdown-options').classList.toggle('hidden', timerState.mode !== 'countdown');
+
+      // Control buttons
+      const btnStart = document.getElementById('btn-start');
+      const btnPause = document.getElementById('btn-pause');
+      const btnResume = document.getElementById('btn-resume');
+
+      if (timerState.running && !timerState.paused) {
+        btnStart.classList.add('hidden');
+        btnPause.classList.remove('hidden');
+        btnResume.classList.add('hidden');
+      } else if (timerState.paused) {
+        btnStart.classList.add('hidden');
+        btnPause.classList.add('hidden');
+        btnResume.classList.remove('hidden');
+      } else {
+        btnStart.classList.remove('hidden');
+        btnPause.classList.add('hidden');
+        btnResume.classList.add('hidden');
+      }
+
+      // Highlight selected countdown duration
+      document.querySelectorAll('.countdown-btn').forEach(btn => {
+        if (parseInt(btn.dataset.duration) === timerState.countdownDuration) {
+          btn.classList.remove('bg-slate-800');
+          btn.classList.add('bg-indigo-600');
+        } else {
+          btn.classList.remove('bg-indigo-600');
+          btn.classList.add('bg-slate-800');
+        }
+      });
+
+      updateDisplay();
     }
 
     function playAlarm() {
-      // Create an audio context and play a beep sound
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      if (!audioContext) return;
+
+      // Try to use vibration API
+      if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200, 100, 200]);
+      }
 
       // Play 3 beeps
       for (let i = 0; i < 3; i++) {
@@ -180,7 +334,7 @@
           oscillator.connect(gainNode);
           gainNode.connect(audioContext.destination);
 
-          oscillator.frequency.value = 800; // Frequency in Hz
+          oscillator.frequency.value = 800;
           oscillator.type = 'sine';
 
           gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
@@ -191,6 +345,9 @@
         }, i * 400);
       }
     }
+
+    // Initialize on page load
+    loadState();
   </script>
 
 {% endblock %}

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}How the App Works{% endblock %}
+{% block content %}
+
+<div class="bg-slate-900 rounded-2xl p-8 shadow mb-6">
+  <h1 class="text-3xl font-bold mb-6 text-indigo-400">How Workout Tracker Works</h1>
+
+  <div class="space-y-6 text-slate-300">
+    <p class="text-lg">
+      Welcome to your comprehensive workout tracking companion! This app is designed to help you log, analyze, and optimize your fitness journey with data-driven insights.
+    </p>
+
+    <!-- What Makes This App Special -->
+    <div class="bg-slate-800 rounded-xl p-6">
+      <h2 class="text-2xl font-semibold mb-4 text-emerald-400">Key Features</h2>
+      <div class="space-y-4">
+        <div>
+          <h3 class="text-xl font-semibold text-indigo-300 mb-2">Intelligent Workout Analysis</h3>
+          <p>After every workout, the app provides you with comprehensive feedback including:</p>
+          <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+            <li><strong class="text-emerald-400">Personal Records (PRs)</strong> - Instantly see when you've set new records for max weight, max reps, or highest volume for any exercise</li>
+            <li><strong class="text-blue-400">Improvement Tracking</strong> - Compare your current workout to previous sessions and see exactly where you've improved</li>
+            <li><strong class="text-yellow-400">Areas to Improve</strong> - Get specific recommendations on exercises that need more volume or intensity</li>
+            <li><strong class="text-purple-400">Performance Streaks</strong> - Track consistency with quality workout streaks</li>
+            <li><strong class="text-pink-400">Context-Aware Motivation</strong> - Receive personalized encouragement based on your energy level and performance</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-xl font-semibold text-indigo-300 mb-2">Advanced Rest Timer</h3>
+          <p>Stay on track with the integrated timer featuring:</p>
+          <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+            <li><strong>Stopwatch mode</strong> - Track how long you've been resting</li>
+            <li><strong>Countdown mode</strong> - Set 1-4 minute rest intervals</li>
+            <li><strong>Persistence</strong> - Timer keeps running even when you add sets</li>
+            <li><strong>Audio alerts</strong> - Beep when countdown finishes</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-xl font-semibold text-indigo-300 mb-2">Complete Exercise Library</h3>
+          <p>Access a curated library of exercises organized by muscle groups, with options for different equipment and variations.</p>
+        </div>
+
+        <div>
+          <h3 class="text-xl font-semibold text-indigo-300 mb-2">HIIT Timer</h3>
+          <p>Configure custom interval training sessions with adjustable work/rest periods and audio cues at each transition.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- How to Use -->
+    <div class="bg-slate-800 rounded-xl p-6">
+      <h2 class="text-2xl font-semibold mb-4 text-emerald-400">Getting Started</h2>
+      <ol class="list-decimal list-inside space-y-3">
+        <li><strong>Start a Workout</strong> - Click "Start Workout", give it a name, select your workout day and energy level</li>
+        <li><strong>Log Your Sets</strong> - Select an exercise, enter weight and reps, rate the quality of each set</li>
+        <li><strong>Use the Timer</strong> - Track rest periods between sets to maintain optimal intensity</li>
+        <li><strong>End and Review</strong> - When done, end your workout to see your analysis and any new PRs</li>
+        <li><strong>Track Progress</strong> - Check the calendar to see your workout consistency over time</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<div class="flex justify-between">
+  <a href="{% url 'about_training' %}" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold">
+    Training Suggestions
+  </a>
+  <a href="{% url 'dashboard' %}" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold">
+    Back to Dashboard
+  </a>
+</div>
+
+{% endblock %}

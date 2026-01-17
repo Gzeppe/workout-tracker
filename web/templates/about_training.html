@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Training Suggestions{% endblock %}
+{% block content %}
+
+<div class="bg-slate-900 rounded-2xl p-8 shadow mb-6">
+  <h1 class="text-3xl font-bold mb-6 text-indigo-400">Training Suggestions</h1>
+
+  <div class="space-y-6 text-slate-300">
+
+    <!-- Recommended Workout Split -->
+    <div class="bg-gradient-to-r from-indigo-900/40 to-purple-900/40 border border-indigo-700 rounded-xl p-6">
+      <h2 class="text-2xl font-semibold mb-4 text-indigo-300">Recommended Training Split</h2>
+      <p class="mb-4">For optimal results, we suggest following a structured body split routine:</p>
+
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div class="bg-slate-800/50 rounded-lg p-4">
+          <h4 class="font-semibold text-emerald-400 mb-2">Day 1: Upper Body</h4>
+          <p class="text-sm">Focus on chest, back, shoulders, and arms</p>
+          <p class="text-xs text-slate-400 mt-1">Examples: Chest & Triceps, Back & Biceps, Shoulders & Traps</p>
+        </div>
+
+        <div class="bg-slate-800/50 rounded-lg p-4">
+          <h4 class="font-semibold text-blue-400 mb-2">Day 2: Lower Body</h4>
+          <p class="text-sm">Target legs and glutes</p>
+          <p class="text-xs text-slate-400 mt-1">Example: Legs day</p>
+        </div>
+
+        <div class="bg-slate-800/50 rounded-lg p-4">
+          <h4 class="font-semibold text-yellow-400 mb-2">Day 3: Core</h4>
+          <p class="text-sm">Strengthen your foundation with abs and core work</p>
+          <p class="text-xs text-slate-400 mt-1">Example: Core day</p>
+        </div>
+
+        <div class="bg-slate-800/50 rounded-lg p-4">
+          <h4 class="font-semibold text-purple-400 mb-2">Day 4: Upper Body</h4>
+          <p class="text-sm">Return to upper body with different exercises</p>
+          <p class="text-xs text-slate-400 mt-1">Rotate through different muscle groups</p>
+        </div>
+      </div>
+
+      <div class="bg-indigo-900/30 rounded-lg p-4 border border-indigo-700/50">
+        <p class="text-sm">
+          <strong>Pro Tip:</strong> This alternating split allows adequate recovery time for each muscle group while maintaining workout frequency. Use the "Combination" day option when you want to mix exercises from multiple categories!
+        </p>
+      </div>
+    </div>
+
+    <!-- Hypertrophy Training Tips -->
+    <div class="bg-slate-800 rounded-xl p-6">
+      <h2 class="text-2xl font-semibold mb-4 text-emerald-400">Maximize Your Gains</h2>
+      <div class="space-y-3">
+        <div class="flex items-start gap-3">
+          <span class="text-2xl">1.</span>
+          <div>
+            <h4 class="font-semibold">Use the Built-in Timer</h4>
+            <p class="text-sm text-slate-400">Rest periods of 2-5 minutes between sets are ideal for hypertrophy (muscle growth) and strength building. The app's timer helps you stay consistent.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <span class="text-2xl">2.</span>
+          <div>
+            <h4 class="font-semibold">Track Quality & Volume</h4>
+            <p class="text-sm text-slate-400">Rate each set's quality to get personalized insights. The app analyzes your volume and quality to identify trends and opportunities for improvement.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <span class="text-2xl">3.</span>
+          <div>
+            <h4 class="font-semibold">Celebrate PRs</h4>
+            <p class="text-sm text-slate-400">Every personal record is automatically detected and highlighted in your workout summary. Track your progress over time!</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <span class="text-2xl">4.</span>
+          <div>
+            <h4 class="font-semibold">Progressive Overload</h4>
+            <p class="text-sm text-slate-400">The app's analysis helps you identify when to increase weight or reps, following the principle of progressive overload for continuous gains.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <span class="text-2xl">5.</span>
+          <div>
+            <h4 class="font-semibold">Listen to Your Body</h4>
+            <p class="text-sm text-slate-400">Log your energy level honestly. The app provides different feedback based on whether you're feeling exhausted or energetic - both are valid training days!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rest Recommendations -->
+    <div class="bg-slate-800 rounded-xl p-6">
+      <h2 class="text-2xl font-semibold mb-4 text-emerald-400">Rest Period Guidelines</h2>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="bg-slate-700/50 rounded-lg p-4 text-center">
+          <div class="text-3xl font-bold text-indigo-400 mb-2">1-2 min</div>
+          <div class="font-semibold">Endurance</div>
+          <div class="text-xs text-slate-400">Lighter weights, higher reps</div>
+        </div>
+        <div class="bg-slate-700/50 rounded-lg p-4 text-center">
+          <div class="text-3xl font-bold text-emerald-400 mb-2">2-3 min</div>
+          <div class="font-semibold">Hypertrophy</div>
+          <div class="text-xs text-slate-400">Moderate weights, 8-12 reps</div>
+        </div>
+        <div class="bg-slate-700/50 rounded-lg p-4 text-center">
+          <div class="text-3xl font-bold text-amber-400 mb-2">3-5 min</div>
+          <div class="font-semibold">Strength</div>
+          <div class="text-xs text-slate-400">Heavy weights, lower reps</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="bg-gradient-to-r from-emerald-900/40 to-blue-900/40 border border-emerald-700 rounded-xl p-6 text-center">
+      <h2 class="text-2xl font-semibold mb-3 text-emerald-300">Ready to Transform Your Training?</h2>
+      <p class="mb-4">Start tracking your workouts today and unlock data-driven insights that will take your fitness to the next level.</p>
+      <a href="{% url 'start_workout' %}" class="inline-block px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold text-lg">
+        Start Your Workout
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="flex justify-between">
+  <a href="{% url 'about_how_it_works' %}" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold">
+    How the App Works
+  </a>
+  <a href="{% url 'dashboard' %}" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold">
+    Back to Dashboard
+  </a>
+</div>
+
+{% endblock %}

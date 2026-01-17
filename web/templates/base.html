@@ -5,33 +5,68 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
     <title>{% block title %}Workout Tracker{% endblock %}</title>
   </head>
   <body class="bg-slate-950 text-slate-100 min-h-screen">
     <div class="max-w-5xl mx-auto p-6">
       <header class="mb-6">
-        <!-- Navigation -->
-        <div class="flex justify-end gap-3 mb-4">
-          <a href="{% url 'about' %}" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold">
-            About
-          </a>
-          {% if user.is_authenticated %}
-          <form method="post" action="{% url 'logout' %}" style="display: inline;">
-            {% csrf_token %}
-            <button type="submit" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold">
-              Logout
-            </button>
-          </form>
-          {% endif %}
+        <!-- Top Bar with Menu -->
+        <div class="flex justify-end mb-4 relative">
+          <button id="menu-toggle" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+            Menu
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div id="menu-dropdown" class="hidden absolute right-0 top-12 w-56 bg-slate-800 rounded-xl shadow-lg border border-slate-700 z-50">
+            <div class="p-2">
+              <!-- About Section -->
+              <div class="px-3 py-2 text-xs uppercase text-slate-500 font-semibold">About</div>
+              <a href="{% url 'about_how_it_works' %}" class="block px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-200">
+                How the App Works
+              </a>
+              <a href="{% url 'about_training' %}" class="block px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-200">
+                Training Suggestions
+              </a>
+
+              {% if user.is_authenticated %}
+              <div class="border-t border-slate-700 my-2"></div>
+              <!-- Account Section -->
+              <div class="px-3 py-2 text-xs uppercase text-slate-500 font-semibold">Account</div>
+              <a href="{% url 'account' %}" class="block px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-200">
+                My Account
+              </a>
+              <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-200">
+                  Logout
+                </button>
+              </form>
+              {% endif %}
+            </div>
+          </div>
         </div>
 
-        <!-- Centered Logo -->
+        <!-- Centered Logo (2.5x bigger: h-32 * 2.5 = h-80) -->
         <div class="text-center mb-6">
           <a href="/">
-            <img src="{% static 'images/logo.png' %}" alt="Workout Tracker" class="h-32 mx-auto">
+            <img src="{% static 'images/logo.png' %}" alt="Workout Tracker" class="h-80 max-h-[40vh] mx-auto object-contain">
           </a>
         </div>
+
+        <script>
+          document.getElementById('menu-toggle').addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.getElementById('menu-dropdown').classList.toggle('hidden');
+          });
+          document.addEventListener('click', function() {
+            document.getElementById('menu-dropdown').classList.add('hidden');
+          });
+        </script>
       </header>
 
       {% if user.is_authenticated %}
@@ -46,10 +81,6 @@
       <!-- Footer -->
       <div class="text-center mt-8 py-4 text-slate-500 text-sm">
         <a href="{% url 'privacy' %}" class="hover:text-slate-300">Privacy Policy</a>
-        {% if user.is_authenticated %}
-        <span class="mx-2">|</span>
-        <a href="{% url 'delete_account' %}" class="hover:text-rose-400">Delete Account</a>
-        {% endif %}
         <span class="mx-2">|</span>
         Built by <span class="text-slate-300 font-semibold">Gtech LLC</span>
       </div>

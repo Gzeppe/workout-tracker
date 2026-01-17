@@ -136,11 +136,12 @@ def dashboard(request):
 @login_required
 def start_workout(request):
     if request.method == "POST":
+        name = request.POST.get("name", "").strip()
         day = request.POST.get("day")
         mood = request.POST.get("mood")
 
         if day in DAYS and mood in MOODS:
-            w = Workout.objects.create(user=request.user, day=day, mood=mood)
+            w = Workout.objects.create(user=request.user, name=name, day=day, mood=mood)
             return redirect("workout_detail", workout_id=w.id)
 
     return render(request, "start_workout.html", {"days": DAYS, "moods": MOODS})
@@ -151,47 +152,58 @@ def workout_detail(request, workout_id: int):
     w = get_object_or_404(Workout, id=workout_id, user=request.user)
     # Show all exercises for Combination day, otherwise filter by day
     if w.day == "Combination":
-        exercises = Exercise.objects.all()  # ordered by model Meta sort_order
+        exercises = Exercise.objects.all()
     else:
-        exercises = Exercise.objects.filter(day=w.day)  # ordered by model Meta sort_order
+        exercises = Exercise.objects.filter(day=w.day)
     sets = w.sets.select_related("exercise").all()
-
-    if request.method == "POST":
-        exercise_id = (request.POST.get("exercise_id") or "").strip()
-        weight_lb = (request.POST.get("weight_lb") or "").strip()
-        reps = (request.POST.get("reps") or "").strip()
-        quality = (request.POST.get("quality") or "").strip()
-
-        if not exercise_id.isdigit():
-            return HttpResponseBadRequest("Invalid exercise")
-        if not weight_lb.isdigit():
-            return HttpResponseBadRequest("Invalid weight")
-        if not reps.isdigit():
-            return HttpResponseBadRequest("Invalid reps")
-        if quality not in QUALITIES:
-            return HttpResponseBadRequest("Invalid quality")
-
-        ex = get_object_or_404(Exercise, id=int(exercise_id))
-        weight_lb_i = int(weight_lb)  # no cap
-        reps_i = int(reps)
-
-        next_set_num = SetEntry.objects.filter(workout=w, exercise=ex).count() + 1
-
-        SetEntry.objects.create(
-            workout=w,
-            exercise=ex,
-            set_number=next_set_num,
-            weight_lb=weight_lb_i,
-            reps=reps_i,
-            quality=quality,
-        )
-        return redirect("workout_detail", workout_id=w.id)
 
     return render(
         request,
         "workout_detail.html",
         {"workout": w, "exercises": exercises, "sets": sets, "qualities": QUALITIES},
     )
+
+
+@login_required
+@require_http_methods(["POST"])
+def add_set(request, workout_id: int):
+    """HTMX endpoint for adding a set without full page reload"""
+    w = get_object_or_404(Workout, id=workout_id, user=request.user)
+
+    exercise_id = (request.POST.get("exercise_id") or "").strip()
+    weight_lb = (request.POST.get("weight_lb") or "").strip()
+    reps = (request.POST.get("reps") or "").strip()
+    quality = (request.POST.get("quality") or "").strip()
+
+    if not exercise_id.isdigit():
+        return HttpResponseBadRequest("Invalid exercise")
+    if not weight_lb.isdigit():
+        return HttpResponseBadRequest("Invalid weight")
+    if not reps.isdigit():
+        return HttpResponseBadRequest("Invalid reps")
+    if quality not in QUALITIES:
+        return HttpResponseBadRequest("Invalid quality")
+
+    ex = get_object_or_404(Exercise, id=int(exercise_id))
+    weight_lb_i = int(weight_lb)
+    reps_i = int(reps)
+
+    next_set_num = SetEntry.objects.filter(workout=w, exercise=ex).count() + 1
+    max_position = w.sets.count()
+
+    SetEntry.objects.create(
+        workout=w,
+        exercise=ex,
+        set_number=next_set_num,
+        weight_lb=weight_lb_i,
+        reps=reps_i,
+        quality=quality,
+        position=max_position,
+    )
+
+    # Return partial template with updated sets list
+    sets = w.sets.select_related("exercise").all()
+    return render(request, "partials/sets_list.html", {"sets": sets, "workout": w})
 
 
 @login_required
@@ -230,24 +242,19 @@ def generate_workout_analysis(current_workout, user):
         "motivation": "",
     }
 
-    # Get all sets from current workout grouped by exercise
-    from django.db.models import Max, Sum, Count, Q
+    from django.db.models import Max, Sum
 
     current_sets = current_workout.sets.select_related("exercise").all()
-
-    # Calculate PRs for each exercise in this workout
     exercises_in_workout = set(s.exercise for s in current_sets)
 
     for exercise in exercises_in_workout:
         exercise_sets = [s for s in current_sets if s.exercise == exercise]
 
-        # Get historical data for this exercise
         all_time_sets = SetEntry.objects.filter(
             workout__user=user, exercise=exercise, workout__ended_at__isnull=False
         ).exclude(workout=current_workout)
 
         if exercise_sets:
-            # Max weight PR
             current_max_weight = max(s.weight_lb for s in exercise_sets)
             historical_max = (
                 all_time_sets.aggregate(Max("weight_lb"))["weight_lb__max"] or 0
@@ -255,22 +262,19 @@ def generate_workout_analysis(current_workout, user):
 
             if current_max_weight > historical_max:
                 analysis["prs"].append(
-                    f"🏆 New max weight PR for {exercise.name}: {current_max_weight} lb!"
+                    f"New max weight PR for {exercise.name}: {current_max_weight} lb!"
                 )
 
-            # Max reps PR (at any weight)
             current_max_reps = max(s.reps for s in exercise_sets)
             historical_max_reps = all_time_sets.aggregate(Max("reps"))["reps__max"] or 0
 
             if current_max_reps > historical_max_reps:
                 analysis["prs"].append(
-                    f"🏆 New max reps PR for {exercise.name}: {current_max_reps} reps!"
+                    f"New max reps PR for {exercise.name}: {current_max_reps} reps!"
                 )
 
-            # Total volume PR for this exercise in a single workout
             current_volume = sum(s.weight_lb * s.reps for s in exercise_sets)
 
-            # Get previous workout volumes for this exercise (manually calculate per workout)
             previous_workouts_for_exercise = (
                 all_time_sets.values_list("workout_id", flat=True).distinct()
             )
@@ -285,38 +289,33 @@ def generate_workout_analysis(current_workout, user):
                 max_previous_volume = max(previous_volumes)
                 if current_volume > max_previous_volume:
                     analysis["prs"].append(
-                        f"🏆 New volume PR for {exercise.name}: {current_volume} total volume!"
+                        f"New volume PR for {exercise.name}: {current_volume} total volume!"
                     )
 
-    # Compare to previous workout
     previous_workouts = (
         Workout.objects.filter(user=user, ended_at__isnull=False)
         .exclude(id=current_workout.id)
         .order_by("-ended_at")[:5]
     )
 
-    # Get current workout stats for comparison
     total_sets = current_workout.sets.count()
     good_great = current_workout.sets.filter(quality__in=["good", "great"]).count()
 
     if previous_workouts:
         last_workout = previous_workouts[0]
 
-        # Compare total sets
         last_total_sets = last_workout.sets.count()
         if total_sets > last_total_sets:
             analysis["improvements"].append(
-                f"📈 Increased total sets from {last_total_sets} to {total_sets}"
+                f"Increased total sets from {last_total_sets} to {total_sets}"
             )
 
-        # Compare good/great quality sets
         last_good = last_workout.sets.filter(quality__in=["good", "great"]).count()
         if good_great > last_good:
             analysis["improvements"].append(
-                f"📈 Improved quality sets from {last_good} to {good_great}"
+                f"Improved quality sets from {last_good} to {good_great}"
             )
 
-        # Check for exercises where weight increased
         for exercise in exercises_in_workout:
             current_ex_sets = [s for s in current_sets if s.exercise == exercise]
             last_ex_sets = last_workout.sets.filter(exercise=exercise)
@@ -332,18 +331,16 @@ def generate_workout_analysis(current_workout, user):
 
                 if current_avg > last_avg:
                     analysis["improvements"].append(
-                        f"💪 Increased average weight for {exercise.name}"
+                        f"Increased average weight for {exercise.name}"
                     )
 
-    # Areas to improve
     low_quality_sets = current_workout.sets.filter(quality__in=["bad", "ok"])
     if low_quality_sets.exists():
         low_q_count = low_quality_sets.count()
         analysis["areas_to_improve"].append(
-            f"⚠️ {low_q_count} sets rated as 'bad' or 'ok' - focus on form and recovery"
+            f"{low_q_count} sets rated as 'bad' or 'ok' - focus on form and recovery"
         )
 
-    # Check for exercises with declining reps
     for exercise in exercises_in_workout:
         exercise_sets_ordered = sorted(
             [s for s in current_sets if s.exercise == exercise],
@@ -352,12 +349,11 @@ def generate_workout_analysis(current_workout, user):
         if len(exercise_sets_ordered) >= 3:
             if (
                 exercise_sets_ordered[-1].reps < exercise_sets_ordered[0].reps * 0.6
-            ):  # 40% drop
+            ):
                 analysis["areas_to_improve"].append(
-                    f"⚠️ {exercise.name}: Significant rep drop across sets - consider reducing weight or longer rest"
+                    f"{exercise.name}: Significant rep drop across sets - consider reducing weight or longer rest"
                 )
 
-    # Check quality streaks
     recent_workouts = list(previous_workouts[:5])
     if recent_workouts:
         streak_count = 0
@@ -366,52 +362,50 @@ def generate_workout_analysis(current_workout, user):
                 workout.sets.filter(quality__in=["good", "great"]).count()
                 / max(workout.sets.count(), 1)
             )
-            if good_pct >= 0.7:  # 70% good/great
+            if good_pct >= 0.7:
                 streak_count += 1
             else:
                 break
 
         if streak_count >= 3:
             analysis["streaks"].append(
-                f"🔥 {streak_count} workout streak with 70%+ quality sets!"
+                f"{streak_count} workout streak with 70%+ quality sets!"
             )
 
-    # Motivational message based on mood and performance
     mood = current_workout.mood
     quality_pct = good_great / max(total_sets, 1)
 
     if mood in ["Exhausted", "Low Energy"] and quality_pct >= 0.6:
         analysis["motivation"] = (
-            "💪 Amazing work pushing through despite low energy! Your dedication is impressive. "
+            "Amazing work pushing through despite low energy! Your dedication is impressive. "
             "Make sure to prioritize rest and recovery - you've earned it!"
         )
     elif mood in ["Exhausted", "Low Energy"]:
         analysis["motivation"] = (
-            "🌟 Great job showing up even when energy was low! Remember, consistency matters more than perfection. "
+            "Great job showing up even when energy was low! Remember, consistency matters more than perfection. "
             "Rest well and come back stronger!"
         )
     elif quality_pct >= 0.8 and total_sets >= 10:
         analysis["motivation"] = (
-            "🎉 Outstanding performance! You absolutely crushed this workout! "
+            "Outstanding performance! You absolutely crushed this workout! "
             "This is the kind of effort that builds champions. Keep this momentum going!"
         )
     elif quality_pct >= 0.7:
         analysis["motivation"] = (
-            "👏 Solid workout! You're making consistent progress. "
+            "Solid workout! You're making consistent progress. "
             "Keep focusing on quality over quantity and the results will follow!"
         )
     elif analysis["prs"]:
         analysis["motivation"] = (
-            "🏆 New personal records! Your hard work is paying off. "
+            "New personal records! Your hard work is paying off. "
             "Celebrate these wins and keep pushing your limits!"
         )
     else:
         analysis["motivation"] = (
-            "✨ Every workout is progress! You showed up and put in the work. "
+            "Every workout is progress! You showed up and put in the work. "
             "Keep building on this foundation and trust the process!"
         )
 
-    # Check recent mood trend for additional encouragement
     recent_moods = [w.mood for w in recent_workouts[:3]]
     if recent_moods.count("Exhausted") >= 2 or recent_moods.count("Low Energy") >= 2:
         analysis["motivation"] += (
@@ -438,7 +432,7 @@ def edit_set(request, set_id: int):
         if quality not in QUALITIES:
             return HttpResponseBadRequest("Invalid quality")
 
-        s.weight_lb = int(weight_lb)  # no cap
+        s.weight_lb = int(weight_lb)
         s.reps = int(reps)
         s.quality = quality
         s.save()
@@ -452,9 +446,47 @@ def edit_set(request, set_id: int):
 @require_http_methods(["POST"])
 def delete_set(request, set_id: int):
     s = get_object_or_404(SetEntry, id=set_id, workout__user=request.user)
-    workout_id = s.workout.id
+    workout = s.workout
     s.delete()
-    return redirect("workout_detail", workout_id=workout_id)
+
+    # Check if this is an HTMX request
+    if request.headers.get('HX-Request'):
+        sets = workout.sets.select_related("exercise").all()
+        return render(request, "partials/sets_list.html", {"sets": sets, "workout": workout})
+
+    return redirect("workout_detail", workout_id=workout.id)
+
+
+@login_required
+@require_http_methods(["POST"])
+def move_set(request, set_id: int):
+    """Move a set up or down in the order"""
+    s = get_object_or_404(SetEntry, id=set_id, workout__user=request.user)
+    workout = s.workout
+    direction = request.POST.get("direction", "up")
+
+    sets_list = list(workout.sets.all())
+    current_index = next((i for i, x in enumerate(sets_list) if x.id == s.id), None)
+
+    if current_index is None:
+        return HttpResponseBadRequest("Set not found")
+
+    if direction == "up" and current_index > 0:
+        other_set = sets_list[current_index - 1]
+        s.position, other_set.position = other_set.position, s.position
+        s.save()
+        other_set.save()
+    elif direction == "down" and current_index < len(sets_list) - 1:
+        other_set = sets_list[current_index + 1]
+        s.position, other_set.position = other_set.position, s.position
+        s.save()
+        other_set.save()
+
+    if request.headers.get('HX-Request'):
+        sets = workout.sets.select_related("exercise").all()
+        return render(request, "partials/sets_list.html", {"sets": sets, "workout": workout})
+
+    return redirect("workout_detail", workout_id=workout.id)
 
 
 @login_required
@@ -463,7 +495,7 @@ def delete_workout(request, workout_id: int):
     w = get_object_or_404(Workout, id=workout_id, user=request.user)
 
     if request.method == "POST":
-        w.delete()  # cascades => deletes SetEntry rows
+        w.delete()
         return redirect("dashboard")
 
     return render(
@@ -473,14 +505,30 @@ def delete_workout(request, workout_id: int):
     )
 
 
+def about_how_it_works(request):
+    """About page - How the app works"""
+    return render(request, "about_how_it_works.html")
+
+
+def about_training(request):
+    """About page - Training suggestions"""
+    return render(request, "about_training.html")
+
+
 def about(request):
-    """About page explaining the app and workout recommendations"""
-    return render(request, "about.html")
+    """Redirect to how it works page for backwards compatibility"""
+    return redirect("about_how_it_works")
 
 
 def privacy(request):
     """Privacy policy and disclaimer page"""
     return render(request, "privacy.html")
+
+
+@login_required
+def account(request):
+    """Account settings page"""
+    return render(request, "account.html")
 
 
 @login_required
@@ -500,7 +548,6 @@ def delete_account(request):
             errors.append("Incorrect password.")
 
         if not errors:
-            # Delete the user (CASCADE will delete all workouts and sets)
             request.user.delete()
             return redirect("login")
 

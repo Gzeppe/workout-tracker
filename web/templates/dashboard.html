@@ -21,8 +21,8 @@
     <div class="bg-slate-800 rounded-xl p-4 flex items-center justify-between gap-4">
       <a class="flex-1 hover:text-indigo-400" href="/workouts/{{ w.id }}/">
         <div>
-          <div class="font-semibold">{{ w.day }} — {{ w.mood }}</div>
-          <div class="text-slate-400 text-sm">{{ w.started_at|date:"M j, Y  h:i A" }}</div>
+          <div class="font-semibold">{% if w.name %}{{ w.name }}{% else %}{{ w.day }}{% endif %} — {{ w.mood }}</div>
+          <div class="text-slate-400 text-sm">{{ w.started_at|date:"M j, Y  h:i A" }}{% if w.name %} ({{ w.day }}){% endif %}</div>
         </div>
       </a>
       <a href="{% url 'delete_workout' w.id %}"
@@ -46,8 +46,8 @@
         <div class="bg-slate-900 rounded-xl p-4 flex items-center justify-between gap-4">
           <a class="flex-1 hover:text-indigo-400" href="/workouts/{{ w.id }}/">
             <div>
-              <div class="font-semibold">{{ w.day }} — {{ w.mood }}</div>
-              <div class="text-slate-400 text-sm">{{ w.started_at|date:"M j, Y  h:i A" }}</div>
+              <div class="font-semibold">{% if w.name %}{{ w.name }}{% else %}{{ w.day }}{% endif %} — {{ w.mood }}</div>
+              <div class="text-slate-400 text-sm">{{ w.started_at|date:"M j, Y  h:i A" }}{% if w.name %} ({{ w.day }}){% endif %}</div>
             </div>
           </a>
           <a href="{% url 'delete_workout' w.id %}"
@@ -117,5 +117,218 @@
       ✅ indicates days you logged at least one workout.
     </p>
   </div>
+
+  <!-- HIIT Timer Section -->
+  <div class="bg-slate-900 rounded-2xl p-6 shadow mt-6">
+    <h2 class="text-lg font-semibold mb-4">HIIT Timer</h2>
+
+    <div id="hiit-setup">
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-slate-300 text-sm mb-1">Number of Intervals</label>
+          <input type="number" id="hiit-intervals" value="8" min="1" max="30"
+                 class="w-full bg-slate-800 rounded-xl p-3">
+        </div>
+        <div>
+          <label class="block text-slate-300 text-sm mb-1">Work Duration (seconds)</label>
+          <input type="number" id="hiit-work" value="30" min="5" max="300"
+                 class="w-full bg-slate-800 rounded-xl p-3">
+        </div>
+        <div>
+          <label class="block text-slate-300 text-sm mb-1">Rest Duration (seconds)</label>
+          <input type="number" id="hiit-rest" value="15" min="5" max="300"
+                 class="w-full bg-slate-800 rounded-xl p-3">
+        </div>
+        <div class="flex items-end">
+          <button onclick="startHIIT()" class="w-full px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold">
+            Start HIIT
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="hiit-active" class="hidden">
+      <div class="text-center mb-4">
+        <div id="hiit-phase" class="text-2xl font-bold text-emerald-400 mb-2">WORK</div>
+        <div id="hiit-display" class="text-6xl font-bold font-mono text-indigo-400">00:30</div>
+        <div id="hiit-interval-info" class="text-slate-400 mt-2">Interval 1 of 8</div>
+      </div>
+
+      <div class="flex justify-center gap-3">
+        <button id="hiit-pause" onclick="pauseHIIT()" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 font-semibold">Pause</button>
+        <button id="hiit-resume" onclick="resumeHIIT()" class="hidden px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold">Resume</button>
+        <button onclick="stopHIIT()" class="px-5 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 font-semibold">Stop</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let hiitState = {
+      running: false,
+      paused: false,
+      intervals: 8,
+      workDuration: 30,
+      restDuration: 15,
+      currentInterval: 1,
+      isWorkPhase: true,
+      remaining: 30
+    };
+    let hiitInterval = null;
+    let hiitAudioContext = null;
+
+    function initHIITAudio() {
+      if (!hiitAudioContext) {
+        hiitAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function startHIIT() {
+      initHIITAudio();
+
+      hiitState.intervals = parseInt(document.getElementById('hiit-intervals').value) || 8;
+      hiitState.workDuration = parseInt(document.getElementById('hiit-work').value) || 30;
+      hiitState.restDuration = parseInt(document.getElementById('hiit-rest').value) || 15;
+      hiitState.currentInterval = 1;
+      hiitState.isWorkPhase = true;
+      hiitState.remaining = hiitState.workDuration;
+      hiitState.running = true;
+      hiitState.paused = false;
+
+      document.getElementById('hiit-setup').classList.add('hidden');
+      document.getElementById('hiit-active').classList.remove('hidden');
+
+      updateHIITDisplay();
+      runHIIT();
+    }
+
+    function runHIIT() {
+      if (hiitInterval) clearInterval(hiitInterval);
+
+      hiitInterval = setInterval(() => {
+        if (!hiitState.running || hiitState.paused) return;
+
+        hiitState.remaining--;
+
+        if (hiitState.remaining <= 0) {
+          playHIITBeep();
+
+          if (hiitState.isWorkPhase) {
+            // Switch to rest
+            hiitState.isWorkPhase = false;
+            hiitState.remaining = hiitState.restDuration;
+          } else {
+            // Switch to work, next interval
+            hiitState.currentInterval++;
+            if (hiitState.currentInterval > hiitState.intervals) {
+              // Done!
+              playHIITComplete();
+              stopHIIT();
+              return;
+            }
+            hiitState.isWorkPhase = true;
+            hiitState.remaining = hiitState.workDuration;
+          }
+        }
+
+        updateHIITDisplay();
+      }, 1000);
+    }
+
+    function pauseHIIT() {
+      hiitState.paused = true;
+      document.getElementById('hiit-pause').classList.add('hidden');
+      document.getElementById('hiit-resume').classList.remove('hidden');
+    }
+
+    function resumeHIIT() {
+      hiitState.paused = false;
+      document.getElementById('hiit-pause').classList.remove('hidden');
+      document.getElementById('hiit-resume').classList.add('hidden');
+    }
+
+    function stopHIIT() {
+      hiitState.running = false;
+      if (hiitInterval) clearInterval(hiitInterval);
+
+      document.getElementById('hiit-setup').classList.remove('hidden');
+      document.getElementById('hiit-active').classList.add('hidden');
+      document.getElementById('hiit-pause').classList.remove('hidden');
+      document.getElementById('hiit-resume').classList.add('hidden');
+    }
+
+    function updateHIITDisplay() {
+      const mins = Math.floor(hiitState.remaining / 60);
+      const secs = hiitState.remaining % 60;
+      document.getElementById('hiit-display').textContent =
+        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+      const phaseEl = document.getElementById('hiit-phase');
+      const displayEl = document.getElementById('hiit-display');
+
+      if (hiitState.isWorkPhase) {
+        phaseEl.textContent = 'WORK';
+        phaseEl.className = 'text-2xl font-bold text-emerald-400 mb-2';
+        displayEl.className = 'text-6xl font-bold font-mono text-emerald-400';
+      } else {
+        phaseEl.textContent = 'REST';
+        phaseEl.className = 'text-2xl font-bold text-blue-400 mb-2';
+        displayEl.className = 'text-6xl font-bold font-mono text-blue-400';
+      }
+
+      document.getElementById('hiit-interval-info').textContent =
+        `Interval ${hiitState.currentInterval} of ${hiitState.intervals}`;
+    }
+
+    function playHIITBeep() {
+      if (!hiitAudioContext) return;
+
+      if (navigator.vibrate) {
+        navigator.vibrate(200);
+      }
+
+      const oscillator = hiitAudioContext.createOscillator();
+      const gainNode = hiitAudioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(hiitAudioContext.destination);
+
+      oscillator.frequency.value = 600;
+      oscillator.type = 'sine';
+
+      gainNode.gain.setValueAtTime(0.3, hiitAudioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, hiitAudioContext.currentTime + 0.2);
+
+      oscillator.start(hiitAudioContext.currentTime);
+      oscillator.stop(hiitAudioContext.currentTime + 0.2);
+    }
+
+    function playHIITComplete() {
+      if (!hiitAudioContext) return;
+
+      if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200, 100, 200, 100, 400]);
+      }
+
+      // Play victory sound - ascending tones
+      [400, 500, 600, 800].forEach((freq, i) => {
+        setTimeout(() => {
+          const oscillator = hiitAudioContext.createOscillator();
+          const gainNode = hiitAudioContext.createGain();
+
+          oscillator.connect(gainNode);
+          gainNode.connect(hiitAudioContext.destination);
+
+          oscillator.frequency.value = freq;
+          oscillator.type = 'sine';
+
+          gainNode.gain.setValueAtTime(0.3, hiitAudioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, hiitAudioContext.currentTime + 0.3);
+
+          oscillator.start(hiitAudioContext.currentTime);
+          oscillator.stop(hiitAudioContext.currentTime + 0.3);
+        }, i * 150);
+      });
+    }
+  </script>
 
 {% endblock %}
