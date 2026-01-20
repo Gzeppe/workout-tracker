@@ -7,7 +7,9 @@
       "Bash(git push:*)",
       "Read(//c/Users/Swag/computer_science/**)",
       "Bash(python manage.py makemigrations:*)",
-      "Bash(python manage.py migrate:*)"
+      "Bash(python manage.py migrate:*)",
+      "Bash(python -c:*)",
+      "Bash(python manage.py:*)"
     ]
   }
 }

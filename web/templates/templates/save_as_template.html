@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Save as Template - Workout Tracker{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <!-- Header -->
+  <div class="mb-6">
+    <a href="{% url 'workout_detail' workout.id %}" class="text-slate-400 hover:text-slate-200 text-sm">&larr; Back to Workout</a>
+    <h1 class="text-2xl font-bold text-slate-100 mt-2">Save Workout as Template</h1>
+    <p class="text-slate-400 mt-1">Create a reusable template from this workout</p>
+  </div>
+
+  <!-- Workout Summary -->
+  <div class="bg-slate-900 rounded-2xl p-5 border border-slate-700 mb-6">
+    <div class="flex items-center gap-3 mb-3">
+      <span class="px-3 py-1 rounded-lg text-sm font-semibold uppercase
+        {% if workout.workout_type == 'weightlifting' %}bg-purple-500/20 text-purple-400
+        {% elif workout.workout_type == 'cardio' %}bg-cyan-500/20 text-cyan-400
+        {% else %}bg-orange-500/20 text-orange-400{% endif %}">
+        {{ workout.get_workout_type_display }}
+      </span>
+      {% if workout.day %}
+      <span class="text-slate-400">{{ workout.day }}</span>
+      {% endif %}
+    </div>
+    <h3 class="text-lg font-semibold text-slate-100">{{ workout.name|default:"Untitled Workout" }}</h3>
+    <p class="text-slate-400 text-sm mt-1">{{ workout.started_at|date:"F j, Y" }}</p>
+
+    {% if workout.workout_type == 'weightlifting' %}
+    <div class="mt-4 pt-4 border-t border-slate-800">
+      <div class="text-sm text-slate-400 mb-2">Exercises in this workout:</div>
+      <div class="flex flex-wrap gap-2">
+        {% for set in workout.sets.all %}
+        {% if forloop.first or set.exercise != prev_exercise or set.custom_exercise_name != prev_custom %}
+        <span class="px-2 py-1 bg-slate-800 rounded-lg text-sm text-slate-300">
+          {% if set.exercise %}{{ set.exercise.name }}{% else %}{{ set.custom_exercise_name }}{% endif %}
+        </span>
+        {% endif %}
+        {% with set.exercise as prev_exercise %}{% endwith %}
+        {% with set.custom_exercise_name as prev_custom %}{% endwith %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- Template Name -->
+    <div>
+      <label class="block text-slate-300 font-semibold mb-2">Template Name *</label>
+      <input type="text" name="name" required
+             placeholder="e.g., My {{ workout.get_workout_type_display }} Routine"
+             value="{% if workout.name %}{{ workout.name }} Template{% endif %}"
+             class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-100 placeholder-slate-500">
+    </div>
+
+    <!-- Description -->
+    <div>
+      <label class="block text-slate-300 font-semibold mb-2">Description (optional)</label>
+      <textarea name="description" rows="3"
+                placeholder="Notes about this template..."
+                class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-indigo-500 text-slate-100 placeholder-slate-500"></textarea>
+    </div>
+
+    <!-- What will be saved -->
+    <div class="bg-slate-800/50 rounded-xl p-4 text-sm">
+      <div class="font-semibold text-slate-300 mb-2">What will be saved:</div>
+      <ul class="text-slate-400 space-y-1">
+        <li>• Workout type: <span class="text-slate-200">{{ workout.get_workout_type_display }}</span></li>
+        {% if workout.day %}
+        <li>• Day: <span class="text-slate-200">{{ workout.day }}</span></li>
+        {% endif %}
+        {% if workout.workout_type == 'weightlifting' %}
+        <li>• All exercises with target sets, reps, and weights</li>
+        {% elif workout.workout_type == 'cardio' %}
+        {% if workout.cardio_type %}
+        <li>• Cardio type: <span class="text-slate-200">{{ workout.get_cardio_type_display }}</span></li>
+        {% endif %}
+        {% if workout.target_duration_minutes %}
+        <li>• Target duration: <span class="text-slate-200">{{ workout.target_duration_minutes }} min</span></li>
+        {% endif %}
+        {% if workout.target_distance_miles %}
+        <li>• Target distance: <span class="text-slate-200">{{ workout.target_distance_miles }} mi</span></li>
+        {% endif %}
+        {% endif %}
+      </ul>
+    </div>
+
+    <!-- Submit -->
+    <div class="flex gap-3">
+      <button type="submit"
+              class="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 font-semibold shadow-lg shadow-indigo-500/25 transition-all">
+        Save as Template
+      </button>
+      <a href="{% url 'workout_detail' workout.id %}"
+         class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold transition-colors">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

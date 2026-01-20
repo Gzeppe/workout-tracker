@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% block title %}{{ workout.display_name }} - Workout Tracker{% endblock %}
+{% block content %}
+  <div class="bg-slate-900 rounded-2xl p-6 shadow mb-6 border border-cyan-500/20">
+    <div class="flex items-start justify-between">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="px-2 py-1 rounded-lg bg-cyan-500/20 text-cyan-400 text-xs font-semibold uppercase">Cardio</span>
+        </div>
+        <h1 class="text-2xl font-semibold text-slate-100">
+          {{ workout.display_name }} — {{ workout.mood }}
+        </h1>
+        <div class="text-slate-400 text-sm">{{ workout.started_at|date:"M j, Y  h:i A" }}</div>
+        {% if workout.cardio_equipment %}
+        <div class="text-slate-500 text-xs mt-1">{{ workout.cardio_equipment }}</div>
+        {% endif %}
+      </div>
+
+      <a href="{% url 'end_workout' workout.id %}" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 font-semibold shadow-lg shadow-emerald-500/25">
+        End Workout
+      </a>
+    </div>
+
+    {% if workout.target_duration_minutes or workout.target_distance_miles %}
+    <div class="flex gap-4 mt-4 pt-4 border-t border-slate-800">
+      {% if workout.target_duration_minutes %}
+      <div class="text-sm">
+        <span class="text-slate-400">Target:</span>
+        <span class="text-cyan-400 font-semibold">{{ workout.target_duration_minutes }} min</span>
+      </div>
+      {% endif %}
+      {% if workout.target_distance_miles %}
+      <div class="text-sm">
+        <span class="text-slate-400">Distance:</span>
+        <span class="text-cyan-400 font-semibold">{{ workout.target_distance_miles }} mi</span>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Running Timer -->
+  <div class="bg-slate-900 rounded-2xl p-6 shadow mb-6">
+    <h2 class="text-lg font-semibold mb-4 text-slate-200">Session Timer</h2>
+    <div id="timer-display" class="text-6xl font-bold text-center my-4 text-cyan-400 font-mono">00:00</div>
+    <div class="flex justify-center gap-3">
+      <button id="btn-start" onclick="startTimer()" class="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 font-semibold">Start</button>
+      <button id="btn-pause" onclick="pauseTimer()" class="hidden px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 font-semibold">Pause</button>
+      <button id="btn-resume" onclick="resumeTimer()" class="hidden px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 font-semibold">Resume</button>
+      <button id="btn-reset" onclick="resetTimer()" class="px-5 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 font-semibold">Reset</button>
+    </div>
+  </div>
+
+  <!-- Running Totals -->
+  <div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-slate-900 rounded-2xl p-4 text-center">
+      <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Total Time</div>
+      <div class="text-2xl font-bold text-cyan-400" id="total-time">
+        {% with hours=total_duration|divisibleby:3600 mins=total_duration|divisibleby:60 %}
+        {{ total_duration|floatformat:0 }}s
+        {% endwith %}
+      </div>
+    </div>
+    <div class="bg-slate-900 rounded-2xl p-4 text-center">
+      <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Total Distance</div>
+      <div class="text-2xl font-bold text-cyan-400">{{ total_distance|floatformat:2 }} mi</div>
+    </div>
+    <div class="bg-slate-900 rounded-2xl p-4 text-center">
+      <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Avg Speed</div>
+      <div class="text-2xl font-bold text-cyan-400">{{ avg_speed|floatformat:1 }} mph</div>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="bg-slate-900 rounded-2xl p-6 shadow">
+      <h2 class="text-lg font-semibold mb-4 text-slate-200">Log Interval</h2>
+
+      <form hx-post="{% url 'add_cardio_entry' workout.id %}" hx-target="#entries-container" hx-swap="innerHTML" class="space-y-3">
+        {% csrf_token %}
+
+        <div class="grid grid-cols-2 gap-3">
+          <label class="block">
+            <span class="text-slate-300 text-sm">Duration (min)</span>
+            <input name="duration_minutes" type="number" min="0" step="1" placeholder="5"
+                   class="w-full bg-slate-800 rounded-xl p-3 mt-1 border border-slate-700" required />
+          </label>
+          <label class="block">
+            <span class="text-slate-300 text-sm">Distance (miles)</span>
+            <input name="distance" type="number" min="0" step="0.01" placeholder="0.5"
+                   class="w-full bg-slate-800 rounded-xl p-3 mt-1 border border-slate-700" />
+          </label>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <label class="block">
+            <span class="text-slate-300 text-sm">Speed (mph)</span>
+            <input name="speed" type="number" min="0" step="0.1" placeholder="6.0"
+                   class="w-full bg-slate-800 rounded-xl p-3 mt-1 border border-slate-700" />
+          </label>
+          <label class="block">
+            <span class="text-slate-300 text-sm">Incline (%)</span>
+            <input name="incline" type="number" min="0" step="0.5" placeholder="1.0"
+                   class="w-full bg-slate-800 rounded-xl p-3 mt-1 border border-slate-700" />
+          </label>
+        </div>
+
+        <label class="block">
+          <span class="text-slate-300 text-sm">Effort</span>
+          <select name="quality" class="w-full bg-slate-800 rounded-xl p-3 mt-1 border border-slate-700" required>
+            {% for q in qualities %}
+            <option value="{{ q }}" {% if q == "good" %}selected{% endif %}>{{ q|capfirst }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <button class="w-full px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 font-semibold shadow-lg shadow-cyan-500/25">
+          Add Interval
+        </button>
+      </form>
+    </div>
+
+    <div class="bg-slate-900 rounded-2xl p-6 shadow">
+      <h2 class="text-lg font-semibold mb-4 text-slate-200">Logged Intervals</h2>
+      <div id="entries-container" class="space-y-2">
+        {% include "partials/cardio_entries.html" %}
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 flex justify-end">
+    <a href="{% url 'dashboard' %}" class="inline-block px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold">
+      Back to dashboard
+    </a>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'cardio_timer_{{ workout.id }}';
+    const display = document.getElementById('timer-display');
+
+    let timerState = { running: false, paused: false, startTime: null, elapsed: 0, pausedAt: null };
+    let timerInterval = null;
+
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        timerState = { ...timerState, ...JSON.parse(saved) };
+        if (timerState.running && timerState.startTime && !timerState.paused) {
+          startTimerInterval();
+        }
+        updateUI();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(timerState));
+    }
+
+    function startTimer() {
+      timerState.running = true;
+      timerState.paused = false;
+      timerState.startTime = Date.now() - (timerState.elapsed * 1000);
+      saveState();
+      startTimerInterval();
+      updateUI();
+    }
+
+    function startTimerInterval() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (timerState.running && !timerState.paused) {
+          timerState.elapsed = Math.floor((Date.now() - timerState.startTime) / 1000);
+          updateDisplay();
+          saveState();
+        }
+      }, 100);
+    }
+
+    function pauseTimer() {
+      timerState.paused = true;
+      timerState.pausedAt = Date.now();
+      saveState();
+      updateUI();
+    }
+
+    function resumeTimer() {
+      if (timerState.pausedAt) {
+        timerState.startTime += Date.now() - timerState.pausedAt;
+      }
+      timerState.paused = false;
+      timerState.pausedAt = null;
+      saveState();
+      startTimerInterval();
+      updateUI();
+    }
+
+    function resetTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerState = { running: false, paused: false, startTime: null, elapsed: 0, pausedAt: null };
+      saveState();
+      updateDisplay();
+      updateUI();
+    }
+
+    function updateDisplay() {
+      const mins = Math.floor(timerState.elapsed / 60);
+      const secs = timerState.elapsed % 60;
+      display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+      display.classList.remove('text-slate-400', 'text-cyan-400', 'text-amber-400');
+      if (timerState.running && !timerState.paused) {
+        display.classList.add('text-cyan-400');
+      } else if (timerState.paused) {
+        display.classList.add('text-amber-400');
+      } else {
+        display.classList.add('text-slate-400');
+      }
+    }
+
+    function updateUI() {
+      const btnStart = document.getElementById('btn-start');
+      const btnPause = document.getElementById('btn-pause');
+      const btnResume = document.getElementById('btn-resume');
+
+      if (timerState.running && !timerState.paused) {
+        btnStart.classList.add('hidden');
+        btnPause.classList.remove('hidden');
+        btnResume.classList.add('hidden');
+      } else if (timerState.paused) {
+        btnStart.classList.add('hidden');
+        btnPause.classList.add('hidden');
+        btnResume.classList.remove('hidden');
+      } else {
+        btnStart.classList.remove('hidden');
+        btnPause.classList.add('hidden');
+        btnResume.classList.add('hidden');
+      }
+      updateDisplay();
+    }
+
+    loadState();
+  </script>
+{% endblock %}

@@ -14,12 +14,25 @@ from django.views.decorators.http import require_http_methods
 from django_ratelimit.decorators import ratelimit
 from django_ratelimit.exceptions import Ratelimited
 
-from .models import Workout, Exercise, SetEntry
+from datetime import timedelta
+from decimal import Decimal, InvalidOperation
+
+from .models import (
+    Workout,
+    Exercise,
+    SetEntry,
+    ScheduledWorkout,
+    WorkoutTemplate,
+    TemplateExercise,
+    HIITSession,
+)
 
 
 DAYS = ["Custom Workout", "Back & Biceps", "Chest & Triceps", "Legs", "Core", "Shoulders & Traps"]
 MOODS = ["Exhausted", "Low Energy", "Normal", "Energetic"]
 QUALITIES = ["bad", "ok", "good", "great"]
+WORKOUT_TYPES = ["weightlifting", "cardio", "hiit"]
+CARDIO_TYPES = ["running", "cycling", "swimming", "rowing", "elliptical", "stair_climber", "jump_rope", "walking", "other"]
 
 
 def ratelimited_error(request, exception):
@@ -88,68 +101,243 @@ def register(request):
 
 @login_required
 def dashboard(request):
-    recent_qs = Workout.objects.filter(user=request.user).order_by("-started_at")
-
-    top3 = list(recent_qs[:3])
-    rest = list(recent_qs[3:50])  # keep it reasonable for UI
-
+    """New menu-based dashboard with quick stats"""
+    user = request.user
     today = timezone.localdate()
-    year = int(request.GET.get("year", today.year))
-    month = int(request.GET.get("month", today.month))
 
-    cal = calendar.Calendar(firstweekday=6)  # Sunday start
-    weeks = cal.monthdatescalendar(year, month)
+    # Quick stats
+    week_start = today - timedelta(days=today.weekday())
+    this_week_count = Workout.objects.filter(
+        user=user,
+        ended_at__isnull=False,
+        started_at__date__gte=week_start,
+    ).count()
 
-    start = weeks[0][0]
-    end = weeks[-1][-1]
+    # Calculate workout streak
+    streak = calculate_workout_streak(user)
 
-    workout_days = set(
-        Workout.objects.filter(
-            user=request.user,
-            started_at__date__gte=start,
-            started_at__date__lte=end,
-        ).values_list("started_at__date", flat=True)
-    )
+    # Recent PRs (last 30 days)
+    recent_prs = count_recent_prs(user)
 
-    prev_year, prev_month = (year - 1, 12) if month == 1 else (year, month - 1)
-    next_year, next_month = (year + 1, 1) if month == 12 else (year, month + 1)
+    # Upcoming scheduled workouts (next 7 days)
+    upcoming_scheduled = ScheduledWorkout.objects.filter(
+        user=user,
+        scheduled_date__gte=today,
+        scheduled_date__lte=today + timedelta(days=7),
+        completed=False,
+    )[:3]
+
+    # User's templates for quick start
+    templates = WorkoutTemplate.objects.filter(user=user)[:6]
 
     return render(
         request,
         "dashboard.html",
         {
-            "top3": top3,
-            "rest": rest,
-            "weeks": weeks,
-            "workout_days": workout_days,
-            "year": year,
-            "month": month,
-            "month_name": calendar.month_name[month],
-            "prev_year": prev_year,
-            "prev_month": prev_month,
-            "next_year": next_year,
-            "next_month": next_month,
+            "this_week_count": this_week_count,
+            "streak": streak,
+            "recent_prs": recent_prs,
+            "upcoming_scheduled": upcoming_scheduled,
+            "templates": templates,
         },
+    )
+
+
+def calculate_workout_streak(user):
+    """Calculate consecutive days with completed workouts"""
+    today = timezone.localdate()
+    streak = 0
+    current_date = today
+
+    while True:
+        has_workout = Workout.objects.filter(
+            user=user,
+            ended_at__isnull=False,
+            started_at__date=current_date,
+        ).exists()
+
+        if has_workout:
+            streak += 1
+            current_date -= timedelta(days=1)
+        else:
+            # Allow one day gap (rest day)
+            if current_date == today:
+                current_date -= timedelta(days=1)
+                continue
+            break
+
+    return streak
+
+
+def count_recent_prs(user):
+    """Count PRs achieved in the last 30 days (simplified)"""
+    # This is a simplified count - just count workouts with good performance
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    recent_workouts = Workout.objects.filter(
+        user=user,
+        ended_at__isnull=False,
+        ended_at__gte=thirty_days_ago,
+    )
+
+    # Count workouts where most sets were "good" or "great"
+    pr_count = 0
+    for workout in recent_workouts:
+        total_sets = workout.sets.count()
+        if total_sets > 0:
+            good_sets = workout.sets.filter(quality__in=["good", "great"]).count()
+            if good_sets / total_sets >= 0.8:
+                pr_count += 1
+
+    return pr_count
+
+
+@login_required
+def select_workout_type(request):
+    """Workout type selection page"""
+    templates = WorkoutTemplate.objects.filter(user=request.user)[:6]
+    return render(request, "workout/select_type.html", {"templates": templates})
+
+
+@login_required
+def start_weightlifting(request):
+    """Start a weightlifting workout"""
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        day = request.POST.get("day")
+        mood = request.POST.get("mood")
+        template_id = request.POST.get("template_id", "").strip()
+
+        if day in DAYS and mood in MOODS:
+            template = None
+            if template_id and template_id.isdigit():
+                template = WorkoutTemplate.objects.filter(
+                    id=int(template_id), user=request.user
+                ).first()
+
+            w = Workout.objects.create(
+                user=request.user,
+                workout_type="weightlifting",
+                name=name,
+                day=day,
+                mood=mood,
+                template=template,
+            )
+            return redirect("workout_detail", workout_id=w.id)
+
+    templates = WorkoutTemplate.objects.filter(
+        user=request.user, workout_type="weightlifting"
+    )
+    return render(
+        request,
+        "workout/start_weightlifting.html",
+        {"days": DAYS, "moods": MOODS, "templates": templates},
+    )
+
+
+@login_required
+def start_cardio(request):
+    """Start a cardio workout"""
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        cardio_type = request.POST.get("cardio_type", "").strip()
+        equipment = request.POST.get("equipment", "").strip()
+        target_duration = request.POST.get("target_duration", "0").strip()
+        target_distance = request.POST.get("target_distance", "0").strip()
+        mood = request.POST.get("mood")
+
+        if cardio_type in CARDIO_TYPES and mood in MOODS:
+            try:
+                target_duration_int = int(target_duration) if target_duration else 0
+                target_distance_dec = Decimal(target_distance) if target_distance else Decimal("0")
+            except (ValueError, InvalidOperation):
+                target_duration_int = 0
+                target_distance_dec = Decimal("0")
+
+            w = Workout.objects.create(
+                user=request.user,
+                workout_type="cardio",
+                name=name,
+                mood=mood,
+                cardio_type=cardio_type,
+                cardio_equipment=equipment,
+                target_duration_minutes=target_duration_int,
+                target_distance_miles=target_distance_dec,
+            )
+            return redirect("cardio_workout_detail", workout_id=w.id)
+
+    cardio_type_choices = Workout.CARDIO_TYPE_CHOICES
+    return render(
+        request,
+        "workout/start_cardio.html",
+        {"cardio_types": cardio_type_choices, "moods": MOODS},
+    )
+
+
+@login_required
+def start_hiit(request):
+    """Start a HIIT workout"""
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        mood = request.POST.get("mood")
+        intervals = request.POST.get("intervals", "8").strip()
+        work_duration = request.POST.get("work_duration", "30").strip()
+        rest_duration = request.POST.get("rest_duration", "15").strip()
+
+        if mood in MOODS:
+            try:
+                intervals_int = int(intervals) if intervals else 8
+                work_int = int(work_duration) if work_duration else 30
+                rest_int = int(rest_duration) if rest_duration else 15
+            except ValueError:
+                intervals_int, work_int, rest_int = 8, 30, 15
+
+            w = Workout.objects.create(
+                user=request.user,
+                workout_type="hiit",
+                name=name or "HIIT Session",
+                mood=mood,
+            )
+
+            HIITSession.objects.create(
+                workout=w,
+                total_intervals=intervals_int,
+                work_duration=work_int,
+                rest_duration=rest_int,
+            )
+
+            return redirect("hiit_workout_detail", workout_id=w.id)
+
+    return render(
+        request,
+        "workout/start_hiit.html",
+        {"moods": MOODS},
     )
 
 
 @login_required
 def start_workout(request):
-    if request.method == "POST":
-        name = request.POST.get("name", "").strip()
-        day = request.POST.get("day")
-        mood = request.POST.get("mood")
-
-        if day in DAYS and mood in MOODS:
-            w = Workout.objects.create(user=request.user, name=name, day=day, mood=mood)
-            return redirect("workout_detail", workout_id=w.id)
-
-    return render(request, "start_workout.html", {"days": DAYS, "moods": MOODS})
+    """Legacy redirect to workout type selection"""
+    return redirect("select_workout_type")
 
 
 @login_required
 def workout_detail(request, workout_id: int):
+    """Route to appropriate workout detail view based on type"""
     w = get_object_or_404(Workout, id=workout_id, user=request.user)
+
+    if w.workout_type == "cardio":
+        return cardio_workout_detail(request, workout_id)
+    elif w.workout_type == "hiit":
+        return hiit_workout_detail(request, workout_id)
+    else:
+        return weightlifting_workout_detail(request, workout_id)
+
+
+@login_required
+def weightlifting_workout_detail(request, workout_id: int):
+    """Weightlifting workout detail page"""
+    w = get_object_or_404(Workout, id=workout_id, user=request.user)
+
     # Custom Workout: no exercise dropdown, user types exercise name
     # Other days: filter exercises by day
     is_custom = w.day == "Custom Workout"
@@ -161,8 +349,64 @@ def workout_detail(request, workout_id: int):
 
     return render(
         request,
-        "workout_detail.html",
+        "workout/detail_weightlifting.html",
         {"workout": w, "exercises": exercises, "sets": sets, "qualities": QUALITIES, "is_custom": is_custom},
+    )
+
+
+@login_required
+def cardio_workout_detail(request, workout_id: int):
+    """Cardio workout detail page"""
+    w = get_object_or_404(Workout, id=workout_id, user=request.user)
+
+    # Get logged cardio intervals/entries
+    entries = w.sets.order_by("position", "created_at")
+
+    # Calculate totals
+    total_duration = sum(e.duration_seconds for e in entries)
+    total_distance = sum(e.distance_miles for e in entries)
+    avg_speed = (
+        sum(e.speed_mph for e in entries) / len(entries)
+        if entries
+        else Decimal("0")
+    )
+
+    return render(
+        request,
+        "workout/detail_cardio.html",
+        {
+            "workout": w,
+            "entries": entries,
+            "qualities": QUALITIES,
+            "total_duration": total_duration,
+            "total_distance": total_distance,
+            "avg_speed": avg_speed,
+        },
+    )
+
+
+@login_required
+def hiit_workout_detail(request, workout_id: int):
+    """HIIT workout detail page with interval timer"""
+    w = get_object_or_404(Workout, id=workout_id, user=request.user)
+
+    # Get or create HIIT session
+    hiit_session, created = HIITSession.objects.get_or_create(
+        workout=w,
+        defaults={
+            "total_intervals": 8,
+            "work_duration": 30,
+            "rest_duration": 15,
+        },
+    )
+
+    return render(
+        request,
+        "workout/detail_hiit.html",
+        {
+            "workout": w,
+            "hiit_session": hiit_session,
+        },
     )
 
 
@@ -233,6 +477,95 @@ def add_set(request, workout_id: int):
 
 
 @login_required
+@require_http_methods(["POST"])
+def add_cardio_entry(request, workout_id: int):
+    """HTMX endpoint for adding a cardio interval/entry"""
+    w = get_object_or_404(Workout, id=workout_id, user=request.user)
+
+    duration_minutes = request.POST.get("duration_minutes", "0").strip()
+    distance = request.POST.get("distance", "0").strip()
+    speed = request.POST.get("speed", "0").strip()
+    incline = request.POST.get("incline", "0").strip()
+    quality = request.POST.get("quality", "good").strip()
+
+    try:
+        duration_seconds = int(duration_minutes) * 60 if duration_minutes else 0
+        distance_dec = Decimal(distance) if distance else Decimal("0")
+        speed_dec = Decimal(speed) if speed else Decimal("0")
+        incline_dec = Decimal(incline) if incline else Decimal("0")
+    except (ValueError, InvalidOperation):
+        return HttpResponseBadRequest("Invalid input values")
+
+    if quality not in QUALITIES:
+        quality = "good"
+
+    max_position = w.sets.count()
+    set_number = max_position + 1
+
+    SetEntry.objects.create(
+        workout=w,
+        custom_exercise_name=w.get_cardio_type_display() if w.cardio_type else "Cardio",
+        set_number=set_number,
+        weight_lb=0,
+        reps=0,
+        duration_seconds=duration_seconds,
+        distance_miles=distance_dec,
+        speed_mph=speed_dec,
+        incline_percent=incline_dec,
+        quality=quality,
+        position=max_position,
+    )
+
+    # Return updated entries list
+    entries = w.sets.order_by("position", "created_at")
+    total_duration = sum(e.duration_seconds for e in entries)
+    total_distance = sum(e.distance_miles for e in entries)
+    avg_speed = (
+        sum(e.speed_mph for e in entries) / len(entries)
+        if entries
+        else Decimal("0")
+    )
+
+    return render(
+        request,
+        "partials/cardio_entries.html",
+        {
+            "entries": entries,
+            "workout": w,
+            "total_duration": total_duration,
+            "total_distance": total_distance,
+            "avg_speed": avg_speed,
+        },
+    )
+
+
+@login_required
+@require_http_methods(["POST"])
+def update_hiit_session(request, workout_id: int):
+    """Update HIIT session progress"""
+    w = get_object_or_404(Workout, id=workout_id, user=request.user)
+    hiit_session = get_object_or_404(HIITSession, workout=w)
+
+    intervals_completed = request.POST.get("intervals_completed", "0").strip()
+    total_work_time = request.POST.get("total_work_time", "0").strip()
+    total_rest_time = request.POST.get("total_rest_time", "0").strip()
+
+    try:
+        hiit_session.intervals_completed = int(intervals_completed)
+        hiit_session.total_work_time = int(total_work_time)
+        hiit_session.total_rest_time = int(total_rest_time)
+        hiit_session.save()
+    except ValueError:
+        pass
+
+    return render(
+        request,
+        "partials/hiit_progress.html",
+        {"hiit_session": hiit_session, "workout": w},
+    )
+
+
+@login_required
 def end_workout(request, workout_id: int):
     w = get_object_or_404(Workout, id=workout_id, user=request.user)
 
@@ -243,17 +576,55 @@ def end_workout(request, workout_id: int):
     total_sets = w.sets.count()
     good_great = w.sets.filter(quality__in=["good", "great"]).count()
 
-    # Analysis section
-    analysis = generate_workout_analysis(w, request.user)
+    # Type-specific data
+    cardio_stats = None
+    hiit_stats = None
+
+    if w.workout_type == "cardio":
+        entries = w.sets.all()
+        cardio_stats = {
+            "total_duration": sum(e.duration_seconds for e in entries),
+            "total_distance": sum(e.distance_miles for e in entries),
+            "avg_speed": (
+                sum(e.speed_mph for e in entries) / len(entries)
+                if entries
+                else Decimal("0")
+            ),
+            "avg_incline": (
+                sum(e.incline_percent for e in entries) / len(entries)
+                if entries
+                else Decimal("0")
+            ),
+        }
+    elif w.workout_type == "hiit":
+        try:
+            hiit_session = w.hiit_session
+            hiit_stats = {
+                "intervals_completed": hiit_session.intervals_completed,
+                "total_intervals": hiit_session.total_intervals,
+                "total_work_time": hiit_session.total_work_time,
+                "total_rest_time": hiit_session.total_rest_time,
+                "work_duration": hiit_session.work_duration,
+                "rest_duration": hiit_session.rest_duration,
+            }
+        except HIITSession.DoesNotExist:
+            pass
+
+    # Analysis section (for weightlifting)
+    analysis = None
+    if w.workout_type == "weightlifting":
+        analysis = generate_workout_analysis(w, request.user)
 
     return render(
         request,
-        "summary.html",
+        "workout/summary.html",
         {
             "workout": w,
             "total_sets": total_sets,
             "good_great": good_great,
             "analysis": analysis,
+            "cardio_stats": cardio_stats,
+            "hiit_stats": hiit_stats,
         },
     )
 
@@ -595,3 +966,432 @@ def delete_account(request):
         return render(request, "delete_account.html", {"errors": errors})
 
     return render(request, "delete_account.html")
+
+
+# =============================================================================
+# CALENDAR & SCHEDULING VIEWS
+# =============================================================================
+
+
+@login_required
+def calendar_view(request):
+    """Full calendar view with workout history and scheduling"""
+    today = timezone.localdate()
+    year = int(request.GET.get("year", today.year))
+    month = int(request.GET.get("month", today.month))
+
+    cal = calendar.Calendar(firstweekday=6)  # Sunday start
+    weeks = cal.monthdatescalendar(year, month)
+
+    start = weeks[0][0]
+    end = weeks[-1][-1]
+
+    # Get completed workouts in date range
+    workouts = Workout.objects.filter(
+        user=request.user,
+        started_at__date__gte=start,
+        started_at__date__lte=end,
+    ).select_related("template")
+
+    # Build dict of date -> workouts
+    workout_by_date = {}
+    for w in workouts:
+        date = w.started_at.date()
+        if date not in workout_by_date:
+            workout_by_date[date] = []
+        workout_by_date[date].append(w)
+
+    # Get scheduled workouts in date range
+    scheduled = ScheduledWorkout.objects.filter(
+        user=request.user,
+        scheduled_date__gte=start,
+        scheduled_date__lte=end,
+    ).select_related("template")
+
+    scheduled_by_date = {}
+    for s in scheduled:
+        if s.scheduled_date not in scheduled_by_date:
+            scheduled_by_date[s.scheduled_date] = []
+        scheduled_by_date[s.scheduled_date].append(s)
+
+    prev_year, prev_month = (year - 1, 12) if month == 1 else (year, month - 1)
+    next_year, next_month = (year + 1, 1) if month == 12 else (year, month + 1)
+
+    return render(
+        request,
+        "calendar/calendar.html",
+        {
+            "weeks": weeks,
+            "workout_by_date": workout_by_date,
+            "scheduled_by_date": scheduled_by_date,
+            "year": year,
+            "month": month,
+            "month_name": calendar.month_name[month],
+            "prev_year": prev_year,
+            "prev_month": prev_month,
+            "next_year": next_year,
+            "next_month": next_month,
+            "today": today,
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def schedule_workout(request):
+    """Schedule a future workout"""
+    if request.method == "POST":
+        scheduled_date = request.POST.get("scheduled_date", "").strip()
+        workout_type = request.POST.get("workout_type", "").strip()
+        day = request.POST.get("day", "").strip()
+        cardio_type = request.POST.get("cardio_type", "").strip()
+        template_id = request.POST.get("template_id", "").strip()
+        notes = request.POST.get("notes", "").strip()
+
+        if scheduled_date and workout_type in WORKOUT_TYPES:
+            from datetime import datetime
+
+            try:
+                date_obj = datetime.strptime(scheduled_date, "%Y-%m-%d").date()
+            except ValueError:
+                return HttpResponseBadRequest("Invalid date")
+
+            template = None
+            if template_id and template_id.isdigit():
+                template = WorkoutTemplate.objects.filter(
+                    id=int(template_id), user=request.user
+                ).first()
+
+            ScheduledWorkout.objects.create(
+                user=request.user,
+                scheduled_date=date_obj,
+                workout_type=workout_type,
+                day=day if workout_type == "weightlifting" else "",
+                cardio_type=cardio_type if workout_type == "cardio" else "",
+                template=template,
+                notes=notes,
+            )
+
+            return redirect("calendar_view")
+
+    # GET request - show form
+    date_param = request.GET.get("date", "")
+    templates = WorkoutTemplate.objects.filter(user=request.user)
+
+    return render(
+        request,
+        "calendar/schedule_form.html",
+        {
+            "date": date_param,
+            "days": DAYS,
+            "cardio_types": Workout.CARDIO_TYPE_CHOICES,
+            "templates": templates,
+        },
+    )
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_scheduled(request, scheduled_id: int):
+    """Delete a scheduled workout"""
+    scheduled = get_object_or_404(ScheduledWorkout, id=scheduled_id, user=request.user)
+    scheduled.delete()
+
+    if request.headers.get("HX-Request"):
+        return render(request, "partials/empty.html")
+
+    return redirect("calendar_view")
+
+
+@login_required
+def start_from_scheduled(request, scheduled_id: int):
+    """Start a workout from a scheduled entry"""
+    scheduled = get_object_or_404(ScheduledWorkout, id=scheduled_id, user=request.user)
+
+    # Create the workout based on scheduled type
+    if scheduled.workout_type == "weightlifting":
+        return redirect(
+            f"/start/weightlifting/?day={scheduled.day}&template_id={scheduled.template_id or ''}"
+        )
+    elif scheduled.workout_type == "cardio":
+        return redirect(
+            f"/start/cardio/?cardio_type={scheduled.cardio_type}&template_id={scheduled.template_id or ''}"
+        )
+    elif scheduled.workout_type == "hiit":
+        return redirect("/start/hiit/")
+
+    return redirect("select_workout_type")
+
+
+# =============================================================================
+# TEMPLATE VIEWS
+# =============================================================================
+
+
+@login_required
+def template_list(request):
+    """List all user's workout templates"""
+    templates = WorkoutTemplate.objects.filter(user=request.user)
+
+    # Filter by type if specified
+    workout_type = request.GET.get("type", "")
+    if workout_type in WORKOUT_TYPES:
+        templates = templates.filter(workout_type=workout_type)
+
+    return render(
+        request,
+        "templates/list.html",
+        {"templates": templates, "filter_type": workout_type},
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def create_template(request):
+    """Create a new workout template"""
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        workout_type = request.POST.get("workout_type", "").strip()
+        day = request.POST.get("day", "").strip()
+        description = request.POST.get("description", "").strip()
+        cardio_type = request.POST.get("cardio_type", "").strip()
+        target_duration = request.POST.get("target_duration", "0").strip()
+        target_distance = request.POST.get("target_distance", "0").strip()
+        hiit_intervals = request.POST.get("hiit_intervals", "8").strip()
+        hiit_work = request.POST.get("hiit_work", "30").strip()
+        hiit_rest = request.POST.get("hiit_rest", "15").strip()
+
+        if name and workout_type in WORKOUT_TYPES:
+            try:
+                target_duration_int = int(target_duration) if target_duration else 0
+                target_distance_dec = Decimal(target_distance) if target_distance else Decimal("0")
+                hiit_intervals_int = int(hiit_intervals) if hiit_intervals else 8
+                hiit_work_int = int(hiit_work) if hiit_work else 30
+                hiit_rest_int = int(hiit_rest) if hiit_rest else 15
+            except (ValueError, InvalidOperation):
+                target_duration_int = 0
+                target_distance_dec = Decimal("0")
+                hiit_intervals_int = 8
+                hiit_work_int = 30
+                hiit_rest_int = 15
+
+            template = WorkoutTemplate.objects.create(
+                user=request.user,
+                name=name,
+                workout_type=workout_type,
+                day=day if workout_type == "weightlifting" else "",
+                description=description,
+                cardio_type=cardio_type if workout_type == "cardio" else "",
+                target_duration_minutes=target_duration_int,
+                target_distance_miles=target_distance_dec,
+                hiit_intervals=hiit_intervals_int,
+                hiit_work_seconds=hiit_work_int,
+                hiit_rest_seconds=hiit_rest_int,
+            )
+
+            return redirect("template_detail", template_id=template.id)
+
+    return render(
+        request,
+        "templates/create.html",
+        {
+            "days": DAYS,
+            "cardio_types": Workout.CARDIO_TYPE_CHOICES,
+        },
+    )
+
+
+@login_required
+def template_detail(request, template_id: int):
+    """View a workout template"""
+    template = get_object_or_404(WorkoutTemplate, id=template_id, user=request.user)
+    exercises = template.exercises.all()
+
+    return render(
+        request,
+        "templates/detail.html",
+        {"template": template, "exercises": exercises},
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def edit_template(request, template_id: int):
+    """Edit a workout template"""
+    template = get_object_or_404(WorkoutTemplate, id=template_id, user=request.user)
+
+    if request.method == "POST":
+        template.name = request.POST.get("name", "").strip() or template.name
+        template.description = request.POST.get("description", "").strip()
+        template.save()
+        return redirect("template_detail", template_id=template.id)
+
+    return render(
+        request,
+        "templates/edit.html",
+        {"template": template},
+    )
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_template(request, template_id: int):
+    """Delete a workout template"""
+    template = get_object_or_404(WorkoutTemplate, id=template_id, user=request.user)
+    template.delete()
+    return redirect("template_list")
+
+
+@login_required
+def use_template(request, template_id: int):
+    """Start a workout using a template"""
+    template = get_object_or_404(WorkoutTemplate, id=template_id, user=request.user)
+
+    if template.workout_type == "weightlifting":
+        return redirect(f"/start/weightlifting/?template_id={template.id}")
+    elif template.workout_type == "cardio":
+        return redirect(f"/start/cardio/?template_id={template.id}")
+    elif template.workout_type == "hiit":
+        return redirect(f"/start/hiit/?template_id={template.id}")
+
+    return redirect("select_workout_type")
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def save_as_template(request, workout_id: int):
+    """Save a completed workout as a template"""
+    workout = get_object_or_404(Workout, id=workout_id, user=request.user)
+
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        description = request.POST.get("description", "").strip()
+
+        if name:
+            template = WorkoutTemplate.objects.create(
+                user=request.user,
+                name=name,
+                workout_type=workout.workout_type,
+                day=workout.day,
+                description=description,
+                cardio_type=workout.cardio_type,
+                target_duration_minutes=workout.target_duration_minutes,
+                target_distance_miles=workout.target_distance_miles,
+            )
+
+            # Copy exercises from workout sets (for weightlifting)
+            if workout.workout_type == "weightlifting":
+                seen_exercises = set()
+                position = 0
+                for set_entry in workout.sets.order_by("position"):
+                    exercise_key = (
+                        set_entry.exercise_id,
+                        set_entry.custom_exercise_name,
+                    )
+                    if exercise_key not in seen_exercises:
+                        seen_exercises.add(exercise_key)
+                        TemplateExercise.objects.create(
+                            template=template,
+                            exercise=set_entry.exercise,
+                            custom_exercise_name=set_entry.custom_exercise_name,
+                            custom_equipment=set_entry.custom_equipment,
+                            target_sets=1,
+                            target_reps=set_entry.reps,
+                            target_weight=set_entry.weight_lb,
+                            position=position,
+                        )
+                        position += 1
+
+            return redirect("template_detail", template_id=template.id)
+
+    return render(
+        request,
+        "templates/save_as_template.html",
+        {"workout": workout},
+    )
+
+
+# =============================================================================
+# HISTORY VIEW
+# =============================================================================
+
+
+@login_required
+def workout_history(request):
+    """Workout history with list and stats views"""
+    workout_type_filter = request.GET.get("type", "")
+    view_mode = request.GET.get("view", "list")
+
+    workouts = Workout.objects.filter(
+        user=request.user, ended_at__isnull=False
+    ).order_by("-ended_at")
+
+    if workout_type_filter in WORKOUT_TYPES:
+        workouts = workouts.filter(workout_type=workout_type_filter)
+
+    # Stats for the stats view
+    stats = None
+    if view_mode == "stats":
+        from django.db.models import Count
+        from django.db.models.functions import TruncWeek
+
+        # Workouts per week (last 8 weeks)
+        eight_weeks_ago = timezone.now() - timedelta(weeks=8)
+        weekly_workouts = (
+            Workout.objects.filter(
+                user=request.user,
+                ended_at__isnull=False,
+                ended_at__gte=eight_weeks_ago,
+            )
+            .annotate(week=TruncWeek("ended_at"))
+            .values("week")
+            .annotate(count=Count("id"))
+            .order_by("week")
+        )
+
+        # Workout type distribution
+        type_distribution = (
+            Workout.objects.filter(user=request.user, ended_at__isnull=False)
+            .values("workout_type")
+            .annotate(count=Count("id"))
+        )
+
+        # Total stats
+        total_workouts = Workout.objects.filter(
+            user=request.user, ended_at__isnull=False
+        ).count()
+        total_sets = SetEntry.objects.filter(workout__user=request.user).count()
+
+        stats = {
+            "weekly_workouts": list(weekly_workouts),
+            "type_distribution": list(type_distribution),
+            "total_workouts": total_workouts,
+            "total_sets": total_sets,
+            "streak": calculate_workout_streak(request.user),
+        }
+
+    return render(
+        request,
+        "history/workout_history.html",
+        {
+            "workouts": workouts[:50],
+            "filter_type": workout_type_filter,
+            "view_mode": view_mode,
+            "stats": stats,
+        },
+    )
+
+
+# =============================================================================
+# NEW ABOUT PAGES
+# =============================================================================
+
+
+def about_cardio(request):
+    """Cardio training guide"""
+    return render(request, "about/about_cardio.html")
+
+
+def about_hiit(request):
+    """HIIT training guide"""
+    return render(request, "about/about_hiit.html")

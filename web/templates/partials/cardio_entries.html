@@ -1,0 +1,42 @@
+{% if entries %}
+  {% for entry in entries %}
+  <div class="bg-slate-800 rounded-xl p-3 flex items-center justify-between">
+    <div class="flex-1">
+      <div class="flex items-center gap-3">
+        <span class="text-cyan-400 font-bold">#{{ forloop.counter }}</span>
+        <span class="text-slate-200">
+          {% if entry.duration_seconds %}
+            {{ entry.duration_seconds|floatformat:0 }}s
+          {% endif %}
+          {% if entry.distance_miles %}
+            &middot; {{ entry.distance_miles|floatformat:2 }} mi
+          {% endif %}
+        </span>
+      </div>
+      <div class="text-slate-400 text-sm mt-1">
+        {% if entry.speed_mph %}Speed: {{ entry.speed_mph|floatformat:1 }} mph{% endif %}
+        {% if entry.incline_percent %} &middot; Incline: {{ entry.incline_percent|floatformat:1 }}%{% endif %}
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="px-2 py-1 rounded-lg text-xs font-semibold
+        {% if entry.quality == 'great' %}bg-emerald-600
+        {% elif entry.quality == 'good' %}bg-cyan-600
+        {% elif entry.quality == 'ok' %}bg-amber-600
+        {% else %}bg-rose-600{% endif %}">
+        {{ entry.quality|capfirst }}
+      </span>
+      <form hx-post="{% url 'delete_set' entry.id %}" hx-target="#entries-container" hx-swap="innerHTML" class="inline">
+        {% csrf_token %}
+        <button type="submit" class="p-1 rounded-lg bg-slate-700 hover:bg-rose-600 text-slate-300 hover:text-white transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="text-slate-500 text-center py-4">No intervals logged yet</div>
+{% endif %}

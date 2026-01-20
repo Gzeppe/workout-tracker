@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Start HIIT - Workout Tracker{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <!-- HIIT Explanation Card -->
+  <div class="bg-slate-900 rounded-2xl p-6 shadow border border-orange-500/20 mb-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
+        <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-semibold text-slate-100">HIIT Training</h1>
+    </div>
+
+    <!-- What is HIIT -->
+    <div class="bg-slate-800/50 rounded-xl p-4 mb-6">
+      <h3 class="font-semibold text-orange-400 mb-2">What is HIIT?</h3>
+      <p class="text-slate-300 text-sm mb-3">
+        High-Intensity Interval Training (HIIT) alternates between intense bursts of activity and fixed periods of rest or lower-intensity activity.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+        <div class="flex items-start gap-2">
+          <span class="text-orange-400">&#10003;</span>
+          <span class="text-slate-400">Burns more calories in less time</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="text-orange-400">&#10003;</span>
+          <span class="text-slate-400">Boosts metabolism for hours after</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="text-orange-400">&#10003;</span>
+          <span class="text-slate-400">Improves cardiovascular fitness</span>
+        </div>
+      </div>
+    </div>
+
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+
+      <!-- Preset Protocols -->
+      <div>
+        <div class="font-semibold mb-3 text-slate-300">Quick Presets</div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <button type="button" onclick="setPreset(8, 20, 10)" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-orange-500/20 hover:border-orange-500/50 border border-slate-700 text-sm transition-colors">
+            Tabata<br><span class="text-slate-400 text-xs">20/10 x 8</span>
+          </button>
+          <button type="button" onclick="setPreset(10, 30, 30)" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-orange-500/20 hover:border-orange-500/50 border border-slate-700 text-sm transition-colors">
+            30/30<br><span class="text-slate-400 text-xs">30/30 x 10</span>
+          </button>
+          <button type="button" onclick="setPreset(8, 40, 20)" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-orange-500/20 hover:border-orange-500/50 border border-slate-700 text-sm transition-colors">
+            40/20<br><span class="text-slate-400 text-xs">40/20 x 8</span>
+          </button>
+          <button type="button" onclick="setPreset(6, 45, 15)" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-orange-500/20 hover:border-orange-500/50 border border-slate-700 text-sm transition-colors">
+            45/15<br><span class="text-slate-400 text-xs">45/15 x 6</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Custom Configuration -->
+      <div class="grid grid-cols-3 gap-4">
+        <div>
+          <label class="block">
+            <span class="font-semibold mb-2 block text-slate-300 text-sm">Intervals</span>
+            <input type="number" name="intervals" id="intervals" min="1" max="30" value="8"
+                   class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-orange-500 focus:outline-none text-center"
+                   onchange="updateTotalTime()" />
+          </label>
+        </div>
+        <div>
+          <label class="block">
+            <span class="font-semibold mb-2 block text-slate-300 text-sm">Work (sec)</span>
+            <input type="number" name="work_duration" id="work_duration" min="5" max="300" value="30"
+                   class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-orange-500 focus:outline-none text-center"
+                   onchange="updateTotalTime()" />
+          </label>
+        </div>
+        <div>
+          <label class="block">
+            <span class="font-semibold mb-2 block text-slate-300 text-sm">Rest (sec)</span>
+            <input type="number" name="rest_duration" id="rest_duration" min="5" max="300" value="15"
+                   class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-orange-500 focus:outline-none text-center"
+                   onchange="updateTotalTime()" />
+          </label>
+        </div>
+      </div>
+
+      <!-- Total Time Display -->
+      <div class="text-center py-3 bg-slate-800/50 rounded-xl">
+        <span class="text-slate-400 text-sm">Total Session Time:</span>
+        <span id="total-time" class="text-2xl font-bold text-orange-400 ml-2">6:00</span>
+      </div>
+
+      <div>
+        <label class="block">
+          <span class="font-semibold mb-2 block text-slate-300">Custom Name (Optional)</span>
+          <input type="text" name="name" placeholder="e.g., Morning HIIT"
+                 class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-orange-500 focus:outline-none" />
+        </label>
+      </div>
+
+      <div>
+        <div class="font-semibold mb-2 text-slate-300">Energy Level</div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          {% for m in moods %}
+            <label class="bg-slate-800 hover:bg-slate-700 rounded-xl p-3 cursor-pointer flex items-center gap-2 border border-slate-700 transition-colors">
+              <input type="radio" name="mood" value="{{ m }}" class="text-orange-500" required />
+              <span class="text-slate-200">{{ m }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-4">
+        <button type="submit"
+                class="flex-1 px-5 py-3 rounded-xl bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 font-semibold shadow-lg shadow-orange-500/25 transition-all duration-200">
+          Start HIIT Session
+        </button>
+        <a href="{% url 'select_workout_type' %}"
+           class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold transition-colors">
+          Back
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function setPreset(intervals, work, rest) {
+  document.getElementById('intervals').value = intervals;
+  document.getElementById('work_duration').value = work;
+  document.getElementById('rest_duration').value = rest;
+  updateTotalTime();
+}
+
+function updateTotalTime() {
+  const intervals = parseInt(document.getElementById('intervals').value) || 0;
+  const work = parseInt(document.getElementById('work_duration').value) || 0;
+  const rest = parseInt(document.getElementById('rest_duration').value) || 0;
+  const totalSeconds = intervals * (work + rest);
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  document.getElementById('total-time').textContent = mins + ':' + secs.toString().padStart(2, '0');
+}
+</script>
+{% endblock %}

@@ -1,334 +1,131 @@
 {% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard - Workout Tracker{% endblock %}
 {% block content %}
+<div class="max-w-4xl mx-auto">
+  <!-- Main Menu Cards -->
+  <div class="grid md:grid-cols-3 gap-6 mb-8">
+    <!-- Start Workout -->
+    <a href="{% url 'select_workout_type' %}"
+       class="group bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 border border-slate-700 hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300">
+      <div class="text-indigo-400 mb-4 flex justify-center">
+        <svg class="w-16 h-16 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/>
+        </svg>
+      </div>
+      <h2 class="text-xl font-bold text-center mb-2 text-slate-100 group-hover:text-indigo-400 transition-colors">Start Workout</h2>
+      <p class="text-slate-400 text-sm text-center">Choose weightlifting, cardio, or HIIT</p>
+    </a>
 
-  <div class="bg-slate-900 rounded-2xl p-6 shadow mb-6">
-    <div class="flex items-start justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-semibold mb-2">Dashboard</h1>
-        <p class="text-slate-300 mt-3">Workout Logs:</p>
-      </div>   
+    <!-- Previous Workouts -->
+    <a href="{% url 'workout_history' %}"
+       class="group bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 border border-slate-700 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300">
+      <div class="text-emerald-400 mb-4 flex justify-center">
+        <svg class="w-16 h-16 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+      </div>
+      <h2 class="text-xl font-bold text-center mb-2 text-slate-100 group-hover:text-emerald-400 transition-colors">Previous Workouts</h2>
+      <p class="text-slate-400 text-sm text-center">View history and stats</p>
+    </a>
 
-      <!-- Start workout button -->
-      <a href="{% url 'start_workout' %}"
-         class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold">
-        Start Workout
-      </a>
+    <!-- Calendar -->
+    <a href="{% url 'calendar_view' %}"
+       class="group bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 border border-slate-700 hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-300">
+      <div class="text-cyan-400 mb-4 flex justify-center">
+        <svg class="w-16 h-16 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+      </div>
+      <h2 class="text-xl font-bold text-center mb-2 text-slate-100 group-hover:text-cyan-400 transition-colors">Calendar</h2>
+      <p class="text-slate-400 text-sm text-center">Plan and schedule workouts</p>
+    </a>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6 mb-8 border border-slate-700">
+    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Quick Stats</h3>
+    <div class="grid grid-cols-3 gap-4">
+      <div class="text-center">
+        <div class="text-3xl font-bold text-indigo-400">{{ this_week_count }}</div>
+        <div class="text-slate-400 text-sm">This Week</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-emerald-400">{{ streak }}</div>
+        <div class="text-slate-400 text-sm">Day Streak</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-orange-400">{{ recent_prs }}</div>
+        <div class="text-slate-400 text-sm">Strong Workouts</div>
+      </div>
     </div>
+  </div>
 
-<div class="space-y-2 mt-4">
-  {% for w in top3 %}
-    <div class="bg-slate-800 rounded-xl p-4 flex items-center justify-between gap-4">
-      <a class="flex-1 hover:text-indigo-400" href="/workouts/{{ w.id }}/">
-        <div>
-          <div class="font-semibold">{% if w.name %}{{ w.name }}{% else %}{{ w.day }}{% endif %} — {{ w.mood }}</div>
-          <div class="text-slate-400 text-sm">{{ w.started_at|date:"M j, Y  h:i A" }}{% if w.name %} ({{ w.day }}){% endif %}</div>
-        </div>
-      </a>
-      <a href="{% url 'delete_workout' w.id %}"
-         class="px-3 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-sm font-semibold whitespace-nowrap">
-        Delete
-      </a>
+  <!-- Upcoming Scheduled -->
+  {% if upcoming_scheduled %}
+  <div class="bg-slate-900 rounded-2xl p-6 mb-8 border border-slate-700">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-slate-200">Upcoming Workouts</h3>
+      <a href="{% url 'calendar_view' %}" class="text-cyan-400 hover:text-cyan-300 text-sm">View Calendar &rarr;</a>
     </div>
-  {% empty %}
-    <div class="text-slate-400">No workouts yet.</div>
-  {% endfor %}
-</div>
-
-{% if rest %}
-  <details class="mt-4 bg-slate-800 rounded-xl p-4">
-    <summary class="cursor-pointer font-semibold text-slate-200">
-      Show older workouts ({{ rest|length }})
-    </summary>
-
-    <div class="mt-3 space-y-2">
-      {% for w in rest %}
-        <div class="bg-slate-900 rounded-xl p-4 flex items-center justify-between gap-4">
-          <a class="flex-1 hover:text-indigo-400" href="/workouts/{{ w.id }}/">
-            <div>
-              <div class="font-semibold">{% if w.name %}{{ w.name }}{% else %}{{ w.day }}{% endif %} — {{ w.mood }}</div>
-              <div class="text-slate-400 text-sm">{{ w.started_at|date:"M j, Y  h:i A" }}{% if w.name %} ({{ w.day }}){% endif %}</div>
-            </div>
-          </a>
-          <a href="{% url 'delete_workout' w.id %}"
-             class="px-3 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-sm font-semibold whitespace-nowrap">
-            Delete
-          </a>
+    <div class="space-y-3">
+      {% for scheduled in upcoming_scheduled %}
+      <div class="flex items-center justify-between bg-slate-800 rounded-xl p-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center
+            {% if scheduled.workout_type == 'weightlifting' %}bg-purple-500/20 text-purple-400
+            {% elif scheduled.workout_type == 'cardio' %}bg-cyan-500/20 text-cyan-400
+            {% else %}bg-orange-500/20 text-orange-400{% endif %}">
+            {% if scheduled.workout_type == 'weightlifting' %}
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h2v12H4zM18 6h2v12h-2zM6 11h12v2H6z"/>
+            </svg>
+            {% elif scheduled.workout_type == 'cardio' %}
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            {% else %}
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            {% endif %}
+          </div>
+          <div>
+            <div class="font-semibold text-slate-200">{{ scheduled.display_name }}</div>
+            <div class="text-slate-400 text-sm">{{ scheduled.scheduled_date|date:"l, M j" }}</div>
+          </div>
         </div>
+        <a href="{% url 'start_from_scheduled' scheduled.id %}"
+           class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-sm transition-colors">
+          Start
+        </a>
+      </div>
       {% endfor %}
     </div>
-  </details>
-{% endif %}
-
   </div>
+  {% endif %}
 
-  <!-- Calendar card -->
-  <div class="bg-slate-900 rounded-2xl p-6 shadow">
-    <div class="flex items-center justify-between gap-4 mb-4">
-      <h2 class="text-lg font-semibold">{{ month_name }} {{ year }}</h2>
-
-      <div class="flex gap-2">
-        <a class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold"
-           href="?year={{ prev_year }}&month={{ prev_month }}">← Prev</a>
-
-        <a class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold"
-           href="?year={{ next_year }}&month={{ next_month }}">Next →</a>
-      </div>
+  <!-- Quick Start Templates -->
+  {% if templates %}
+  <div class="bg-slate-900 rounded-2xl p-6 border border-slate-700">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-slate-200">Quick Start Templates</h3>
+      <a href="{% url 'template_list' %}" class="text-indigo-400 hover:text-indigo-300 text-sm">View All &rarr;</a>
     </div>
-
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead class="text-slate-300">
-          <tr>
-            <th class="text-left p-2">Sun</th>
-            <th class="text-left p-2">Mon</th>
-            <th class="text-left p-2">Tue</th>
-            <th class="text-left p-2">Wed</th>
-            <th class="text-left p-2">Thu</th>
-            <th class="text-left p-2">Fri</th>
-            <th class="text-left p-2">Sat</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for week in weeks %}
-            <tr>
-              {% for d in week %}
-                {% if d in workout_days %}
-                  <td class="p-2">
-                    <div class="bg-emerald-700/40 border border-emerald-600 rounded-xl px-2 py-2 font-semibold">
-                      ✅ {{ d.day }}
-                    </div>
-                  </td>
-                {% else %}
-                  <td class="p-2">
-                    <div class="bg-slate-800 rounded-xl px-2 py-2 text-slate-300/80">
-                      {{ d.day }}
-                    </div>
-                  </td>
-                {% endif %}
-              {% endfor %}
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <p class="text-slate-400 text-xs mt-3">
-      ✅ indicates days you logged at least one workout.
-    </p>
-  </div>
-
-  <!-- HIIT Timer Section -->
-  <div class="bg-slate-900 rounded-2xl p-6 shadow mt-6">
-    <h2 class="text-lg font-semibold mb-4">HIIT Timer</h2>
-
-    <div id="hiit-setup">
-      <div class="grid md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label class="block text-slate-300 text-sm mb-1">Number of Intervals</label>
-          <input type="number" id="hiit-intervals" value="8" min="1" max="30"
-                 class="w-full bg-slate-800 rounded-xl p-3">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+      {% for template in templates %}
+      <a href="{% url 'use_template' template.id %}"
+         class="bg-slate-800 hover:bg-slate-700 rounded-xl p-4 transition-colors text-center">
+        <div class="font-semibold text-slate-200 mb-1">{{ template.name }}</div>
+        <div class="text-xs
+          {% if template.workout_type == 'weightlifting' %}text-purple-400
+          {% elif template.workout_type == 'cardio' %}text-cyan-400
+          {% else %}text-orange-400{% endif %}">
+          {{ template.get_workout_type_display }}
         </div>
-        <div>
-          <label class="block text-slate-300 text-sm mb-1">Work Duration (seconds)</label>
-          <input type="number" id="hiit-work" value="30" min="5" max="300"
-                 class="w-full bg-slate-800 rounded-xl p-3">
-        </div>
-        <div>
-          <label class="block text-slate-300 text-sm mb-1">Rest Duration (seconds)</label>
-          <input type="number" id="hiit-rest" value="15" min="5" max="300"
-                 class="w-full bg-slate-800 rounded-xl p-3">
-        </div>
-        <div class="flex items-end">
-          <button onclick="startHIIT()" class="w-full px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold">
-            Start HIIT
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div id="hiit-active" class="hidden">
-      <div class="text-center mb-4">
-        <div id="hiit-phase" class="text-2xl font-bold text-emerald-400 mb-2">WORK</div>
-        <div id="hiit-display" class="text-6xl font-bold font-mono text-indigo-400">00:30</div>
-        <div id="hiit-interval-info" class="text-slate-400 mt-2">Interval 1 of 8</div>
-      </div>
-
-      <div class="flex justify-center gap-3">
-        <button id="hiit-pause" onclick="pauseHIIT()" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 font-semibold">Pause</button>
-        <button id="hiit-resume" onclick="resumeHIIT()" class="hidden px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold">Resume</button>
-        <button onclick="stopHIIT()" class="px-5 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 font-semibold">Stop</button>
-      </div>
+      </a>
+      {% endfor %}
     </div>
   </div>
-
-  <script>
-    let hiitState = {
-      running: false,
-      paused: false,
-      intervals: 8,
-      workDuration: 30,
-      restDuration: 15,
-      currentInterval: 1,
-      isWorkPhase: true,
-      remaining: 30
-    };
-    let hiitInterval = null;
-    let hiitAudioContext = null;
-
-    function initHIITAudio() {
-      if (!hiitAudioContext) {
-        hiitAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-      }
-    }
-
-    function startHIIT() {
-      initHIITAudio();
-
-      hiitState.intervals = parseInt(document.getElementById('hiit-intervals').value) || 8;
-      hiitState.workDuration = parseInt(document.getElementById('hiit-work').value) || 30;
-      hiitState.restDuration = parseInt(document.getElementById('hiit-rest').value) || 15;
-      hiitState.currentInterval = 1;
-      hiitState.isWorkPhase = true;
-      hiitState.remaining = hiitState.workDuration;
-      hiitState.running = true;
-      hiitState.paused = false;
-
-      document.getElementById('hiit-setup').classList.add('hidden');
-      document.getElementById('hiit-active').classList.remove('hidden');
-
-      updateHIITDisplay();
-      runHIIT();
-    }
-
-    function runHIIT() {
-      if (hiitInterval) clearInterval(hiitInterval);
-
-      hiitInterval = setInterval(() => {
-        if (!hiitState.running || hiitState.paused) return;
-
-        hiitState.remaining--;
-
-        if (hiitState.remaining <= 0) {
-          playHIITBeep();
-
-          if (hiitState.isWorkPhase) {
-            // Switch to rest
-            hiitState.isWorkPhase = false;
-            hiitState.remaining = hiitState.restDuration;
-          } else {
-            // Switch to work, next interval
-            hiitState.currentInterval++;
-            if (hiitState.currentInterval > hiitState.intervals) {
-              // Done!
-              playHIITComplete();
-              stopHIIT();
-              return;
-            }
-            hiitState.isWorkPhase = true;
-            hiitState.remaining = hiitState.workDuration;
-          }
-        }
-
-        updateHIITDisplay();
-      }, 1000);
-    }
-
-    function pauseHIIT() {
-      hiitState.paused = true;
-      document.getElementById('hiit-pause').classList.add('hidden');
-      document.getElementById('hiit-resume').classList.remove('hidden');
-    }
-
-    function resumeHIIT() {
-      hiitState.paused = false;
-      document.getElementById('hiit-pause').classList.remove('hidden');
-      document.getElementById('hiit-resume').classList.add('hidden');
-    }
-
-    function stopHIIT() {
-      hiitState.running = false;
-      if (hiitInterval) clearInterval(hiitInterval);
-
-      document.getElementById('hiit-setup').classList.remove('hidden');
-      document.getElementById('hiit-active').classList.add('hidden');
-      document.getElementById('hiit-pause').classList.remove('hidden');
-      document.getElementById('hiit-resume').classList.add('hidden');
-    }
-
-    function updateHIITDisplay() {
-      const mins = Math.floor(hiitState.remaining / 60);
-      const secs = hiitState.remaining % 60;
-      document.getElementById('hiit-display').textContent =
-        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-
-      const phaseEl = document.getElementById('hiit-phase');
-      const displayEl = document.getElementById('hiit-display');
-
-      if (hiitState.isWorkPhase) {
-        phaseEl.textContent = 'WORK';
-        phaseEl.className = 'text-2xl font-bold text-emerald-400 mb-2';
-        displayEl.className = 'text-6xl font-bold font-mono text-emerald-400';
-      } else {
-        phaseEl.textContent = 'REST';
-        phaseEl.className = 'text-2xl font-bold text-blue-400 mb-2';
-        displayEl.className = 'text-6xl font-bold font-mono text-blue-400';
-      }
-
-      document.getElementById('hiit-interval-info').textContent =
-        `Interval ${hiitState.currentInterval} of ${hiitState.intervals}`;
-    }
-
-    function playHIITBeep() {
-      if (!hiitAudioContext) return;
-
-      if (navigator.vibrate) {
-        navigator.vibrate(200);
-      }
-
-      const oscillator = hiitAudioContext.createOscillator();
-      const gainNode = hiitAudioContext.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(hiitAudioContext.destination);
-
-      oscillator.frequency.value = 600;
-      oscillator.type = 'sine';
-
-      gainNode.gain.setValueAtTime(0.3, hiitAudioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, hiitAudioContext.currentTime + 0.2);
-
-      oscillator.start(hiitAudioContext.currentTime);
-      oscillator.stop(hiitAudioContext.currentTime + 0.2);
-    }
-
-    function playHIITComplete() {
-      if (!hiitAudioContext) return;
-
-      if (navigator.vibrate) {
-        navigator.vibrate([200, 100, 200, 100, 200, 100, 400]);
-      }
-
-      // Play victory sound - ascending tones
-      [400, 500, 600, 800].forEach((freq, i) => {
-        setTimeout(() => {
-          const oscillator = hiitAudioContext.createOscillator();
-          const gainNode = hiitAudioContext.createGain();
-
-          oscillator.connect(gainNode);
-          gainNode.connect(hiitAudioContext.destination);
-
-          oscillator.frequency.value = freq;
-          oscillator.type = 'sine';
-
-          gainNode.gain.setValueAtTime(0.3, hiitAudioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, hiitAudioContext.currentTime + 0.3);
-
-          oscillator.start(hiitAudioContext.currentTime);
-          oscillator.stop(hiitAudioContext.currentTime + 0.3);
-        }, i * 150);
-      });
-    }
-  </script>
-
+  {% endif %}
+</div>
 {% endblock %}

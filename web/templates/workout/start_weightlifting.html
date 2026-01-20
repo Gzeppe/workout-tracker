@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Start Weightlifting - Workout Tracker{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="bg-slate-900 rounded-2xl p-6 shadow border border-purple-500/20">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+        <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h2v12H4zM18 6h2v12h-2zM6 11h12v2H6zM2 9h2v6H2zM20 9h2v6h-2z"/>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-semibold text-slate-100">Start Weightlifting</h1>
+    </div>
+
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+
+      <!-- Optional Template Selection -->
+      {% if templates %}
+      <div>
+        <label class="block">
+          <span class="font-semibold mb-2 block text-slate-300">Use Template (Optional)</span>
+          <select name="template_id" class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-purple-500 focus:outline-none">
+            <option value="">-- Start Fresh --</option>
+            {% for t in templates %}
+              <option value="{{ t.id }}">{{ t.name }}{% if t.day %} ({{ t.day }}){% endif %}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+      {% endif %}
+
+      <div>
+        <label class="block">
+          <span class="font-semibold mb-2 block text-slate-300">Workout Day</span>
+          <select name="day" class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-purple-500 focus:outline-none" required>
+            <option value="" selected disabled>Select muscle group...</option>
+            {% for d in days %}
+              <option value="{{ d }}">{{ d }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+
+      <div>
+        <label class="block">
+          <span class="font-semibold mb-2 block text-slate-300">Custom Name (Optional)</span>
+          <input type="text" name="name" placeholder="e.g., Morning Push Day"
+                 class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-purple-500 focus:outline-none" />
+        </label>
+      </div>
+
+      <div>
+        <div class="font-semibold mb-2 text-slate-300">Energy Level</div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          {% for m in moods %}
+            <label class="bg-slate-800 hover:bg-slate-700 rounded-xl p-3 cursor-pointer flex items-center gap-2 border border-slate-700 transition-colors">
+              <input type="radio" name="mood" value="{{ m }}" class="text-purple-500" required />
+              <span class="text-slate-200">{{ m }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-4">
+        <button type="submit"
+                class="flex-1 px-5 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 font-semibold shadow-lg shadow-purple-500/25 transition-all duration-200">
+          Start Workout
+        </button>
+        <a href="{% url 'select_workout_type' %}"
+           class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold transition-colors">
+          Back
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

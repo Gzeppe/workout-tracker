@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+{% block title %}HIIT Session - Workout Tracker{% endblock %}
+{% block content %}
+  <div class="bg-slate-900 rounded-2xl p-6 shadow mb-6 border border-orange-500/20">
+    <div class="flex items-start justify-between">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="px-2 py-1 rounded-lg bg-orange-500/20 text-orange-400 text-xs font-semibold uppercase">HIIT</span>
+        </div>
+        <h1 class="text-2xl font-semibold text-slate-100">
+          {{ workout.display_name }} — {{ workout.mood }}
+        </h1>
+        <div class="text-slate-400 text-sm">{{ workout.started_at|date:"M j, Y  h:i A" }}</div>
+      </div>
+
+      <a href="{% url 'end_workout' workout.id %}" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 font-semibold shadow-lg shadow-emerald-500/25">
+        End Workout
+      </a>
+    </div>
+  </div>
+
+  <!-- HIIT Timer -->
+  <div class="bg-slate-900 rounded-2xl p-8 shadow mb-6">
+    <!-- Phase Indicator -->
+    <div id="phase-indicator" class="text-center mb-6">
+      <div id="phase-label" class="text-3xl font-bold text-slate-400 uppercase tracking-wider">Ready</div>
+    </div>
+
+    <!-- Main Timer Display -->
+    <div id="timer-display" class="text-8xl font-bold text-center my-6 font-mono text-slate-400">
+      {{ hiit_session.work_duration }}
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="w-full bg-slate-800 rounded-full h-3 mb-6">
+      <div id="progress-bar" class="h-3 rounded-full bg-orange-500 transition-all duration-300" style="width: 0%"></div>
+    </div>
+
+    <!-- Interval Counter -->
+    <div class="text-center mb-6">
+      <span class="text-slate-400">Interval</span>
+      <span id="interval-counter" class="text-2xl font-bold text-orange-400 ml-2">0 / {{ hiit_session.total_intervals }}</span>
+    </div>
+
+    <!-- Session Info -->
+    <div class="grid grid-cols-3 gap-4 mb-6 text-center text-sm">
+      <div class="bg-slate-800/50 rounded-xl p-3">
+        <div class="text-slate-400">Work</div>
+        <div class="text-emerald-400 font-bold text-lg">{{ hiit_session.work_duration }}s</div>
+      </div>
+      <div class="bg-slate-800/50 rounded-xl p-3">
+        <div class="text-slate-400">Rest</div>
+        <div class="text-blue-400 font-bold text-lg">{{ hiit_session.rest_duration }}s</div>
+      </div>
+      <div class="bg-slate-800/50 rounded-xl p-3">
+        <div class="text-slate-400">Total</div>
+        <div class="text-orange-400 font-bold text-lg">{{ hiit_session.planned_duration_display }}</div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex justify-center gap-3">
+      <button id="btn-start" onclick="startHIIT()" class="px-8 py-3 rounded-xl bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 font-semibold text-lg shadow-lg shadow-orange-500/25">
+        Start
+      </button>
+      <button id="btn-pause" onclick="pauseHIIT()" class="hidden px-8 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 font-semibold text-lg">
+        Pause
+      </button>
+      <button id="btn-resume" onclick="resumeHIIT()" class="hidden px-8 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 font-semibold text-lg">
+        Resume
+      </button>
+      <button id="btn-skip" onclick="skipInterval()" class="hidden px-6 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold">
+        Skip
+      </button>
+      <button id="btn-stop" onclick="stopHIIT()" class="px-6 py-3 rounded-xl bg-rose-700 hover:bg-rose-600 font-semibold">
+        Stop
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-6 flex justify-end">
+    <a href="{% url 'dashboard' %}" class="inline-block px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold">
+      Back to dashboard
+    </a>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'hiit_timer_{{ workout.id }}';
+    const display = document.getElementById('timer-display');
+    const phaseLabel = document.getElementById('phase-label');
+    const progressBar = document.getElementById('progress-bar');
+    const intervalCounter = document.getElementById('interval-counter');
+
+    const config = {
+      workDuration: {{ hiit_session.work_duration }},
+      restDuration: {{ hiit_session.rest_duration }},
+      totalIntervals: {{ hiit_session.total_intervals }}
+    };
+
+    let state = {
+      running: false,
+      paused: false,
+      phase: 'ready', // ready, work, rest, complete
+      currentInterval: 0,
+      timeRemaining: config.workDuration,
+      totalWorkTime: 0,
+      totalRestTime: 0
+    };
+
+    let timerInterval = null;
+    let audioContext = null;
+
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        state = { ...state, ...JSON.parse(saved) };
+        updateUI();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function startHIIT() {
+      initAudio();
+      state.running = true;
+      state.paused = false;
+      if (state.phase === 'ready' || state.phase === 'complete') {
+        state.phase = 'work';
+        state.currentInterval = 1;
+        state.timeRemaining = config.workDuration;
+        state.totalWorkTime = 0;
+        state.totalRestTime = 0;
+      }
+      saveState();
+      startTimerInterval();
+      updateUI();
+    }
+
+    function startTimerInterval() {
+      if (timerInterval) clearInterval(timerInterval);
+
+      timerInterval = setInterval(() => {
+        if (!state.running || state.paused) return;
+
+        state.timeRemaining--;
+
+        // Track time
+        if (state.phase === 'work') {
+          state.totalWorkTime++;
+        } else if (state.phase === 'rest') {
+          state.totalRestTime++;
+        }
+
+        if (state.timeRemaining <= 0) {
+          playBeep();
+          transitionPhase();
+        }
+
+        updateUI();
+        saveState();
+      }, 1000);
+    }
+
+    function transitionPhase() {
+      if (state.phase === 'work') {
+        if (state.currentInterval >= config.totalIntervals) {
+          // Complete!
+          state.phase = 'complete';
+          state.running = false;
+          playVictory();
+          saveProgress();
+        } else {
+          // Switch to rest
+          state.phase = 'rest';
+          state.timeRemaining = config.restDuration;
+        }
+      } else if (state.phase === 'rest') {
+        // Switch to work
+        state.phase = 'work';
+        state.currentInterval++;
+        state.timeRemaining = config.workDuration;
+      }
+    }
+
+    function pauseHIIT() {
+      state.paused = true;
+      saveState();
+      updateUI();
+    }
+
+    function resumeHIIT() {
+      state.paused = false;
+      saveState();
+      startTimerInterval();
+      updateUI();
+    }
+
+    function skipInterval() {
+      state.timeRemaining = 0;
+      transitionPhase();
+      updateUI();
+      saveState();
+    }
+
+    function stopHIIT() {
+      if (timerInterval) clearInterval(timerInterval);
+      saveProgress();
+      state = {
+        running: false,
+        paused: false,
+        phase: 'ready',
+        currentInterval: 0,
+        timeRemaining: config.workDuration,
+        totalWorkTime: 0,
+        totalRestTime: 0
+      };
+      saveState();
+      updateUI();
+    }
+
+    function saveProgress() {
+      // Save to server via HTMX
+      fetch('{% url "update_hiit_session" workout.id %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: `intervals_completed=${state.currentInterval}&total_work_time=${state.totalWorkTime}&total_rest_time=${state.totalRestTime}`
+      });
+    }
+
+    function updateUI() {
+      // Timer display
+      display.textContent = state.timeRemaining;
+
+      // Phase label and colors
+      display.classList.remove('text-slate-400', 'text-emerald-400', 'text-blue-400', 'text-orange-400', 'text-amber-400');
+      phaseLabel.classList.remove('text-slate-400', 'text-emerald-400', 'text-blue-400', 'text-orange-400');
+
+      if (state.phase === 'work') {
+        phaseLabel.textContent = 'WORK';
+        phaseLabel.classList.add('text-emerald-400');
+        display.classList.add('text-emerald-400');
+        progressBar.classList.remove('bg-blue-500', 'bg-orange-500');
+        progressBar.classList.add('bg-emerald-500');
+      } else if (state.phase === 'rest') {
+        phaseLabel.textContent = 'REST';
+        phaseLabel.classList.add('text-blue-400');
+        display.classList.add('text-blue-400');
+        progressBar.classList.remove('bg-emerald-500', 'bg-orange-500');
+        progressBar.classList.add('bg-blue-500');
+      } else if (state.phase === 'complete') {
+        phaseLabel.textContent = 'COMPLETE!';
+        phaseLabel.classList.add('text-orange-400');
+        display.classList.add('text-orange-400');
+        display.textContent = '0';
+      } else {
+        phaseLabel.textContent = 'Ready';
+        phaseLabel.classList.add('text-slate-400');
+        display.classList.add('text-slate-400');
+      }
+
+      if (state.paused) {
+        display.classList.remove('text-emerald-400', 'text-blue-400');
+        display.classList.add('text-amber-400');
+      }
+
+      // Progress bar
+      let progress = 0;
+      if (state.phase === 'work') {
+        progress = ((config.workDuration - state.timeRemaining) / config.workDuration) * 100;
+      } else if (state.phase === 'rest') {
+        progress = ((config.restDuration - state.timeRemaining) / config.restDuration) * 100;
+      } else if (state.phase === 'complete') {
+        progress = 100;
+      }
+      progressBar.style.width = progress + '%';
+
+      // Interval counter
+      intervalCounter.textContent = `${state.currentInterval} / ${config.totalIntervals}`;
+
+      // Buttons
+      const btnStart = document.getElementById('btn-start');
+      const btnPause = document.getElementById('btn-pause');
+      const btnResume = document.getElementById('btn-resume');
+      const btnSkip = document.getElementById('btn-skip');
+
+      if (state.running && !state.paused) {
+        btnStart.classList.add('hidden');
+        btnPause.classList.remove('hidden');
+        btnResume.classList.add('hidden');
+        btnSkip.classList.remove('hidden');
+      } else if (state.paused) {
+        btnStart.classList.add('hidden');
+        btnPause.classList.add('hidden');
+        btnResume.classList.remove('hidden');
+        btnSkip.classList.remove('hidden');
+      } else {
+        btnStart.classList.remove('hidden');
+        btnPause.classList.add('hidden');
+        btnResume.classList.add('hidden');
+        btnSkip.classList.add('hidden');
+      }
+    }
+
+    function playBeep() {
+      if (!audioContext) return;
+      if (navigator.vibrate) navigator.vibrate(200);
+
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      oscillator.frequency.value = state.phase === 'work' ? 880 : 660;
+      oscillator.type = 'sine';
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.2);
+    }
+
+    function playVictory() {
+      if (!audioContext) return;
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+
+      const notes = [523, 659, 784, 1047];
+      notes.forEach((freq, i) => {
+        setTimeout(() => {
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.connect(gain);
+          gain.connect(audioContext.destination);
+          osc.frequency.value = freq;
+          osc.type = 'sine';
+          gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+          osc.start(audioContext.currentTime);
+          osc.stop(audioContext.currentTime + 0.3);
+        }, i * 150);
+      });
+    }
+
+    loadState();
+  </script>
+{% endblock %}
