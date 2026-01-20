@@ -986,9 +986,10 @@ def calendar_view(request):
     start = weeks[0][0]
     end = weeks[-1][-1]
 
-    # Get completed workouts in date range
+    # Get completed workouts in date range (only those that were ended)
     workouts = Workout.objects.filter(
         user=request.user,
+        ended_at__isnull=False,
         started_at__date__gte=start,
         started_at__date__lte=end,
     ).select_related("template")
