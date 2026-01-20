@@ -57,12 +57,7 @@
           </div>
         </div>
 
-        <!-- Centered Logo (2.5x bigger: h-32 * 2.5 = h-80) -->
-        <div class="text-center mb-6">
-          <a href="/">
-            <img src="{% static 'images/logo.png' %}" alt="Workout Tracker" class="h-80 max-h-[40vh] mx-auto object-contain">
-          </a>
-        </div>
+        {% block logo %}{% endblock %}
 
         <script>
           document.getElementById('menu-toggle').addEventListener('click', function(e) {

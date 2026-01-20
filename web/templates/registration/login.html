@@ -1,5 +1,13 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Login{% endblock %}
+{% block logo %}
+<div class="text-center mb-6">
+  <a href="/">
+    <img src="{% static 'images/logo.png' %}" alt="Workout Tracker" class="mx-auto">
+  </a>
+</div>
+{% endblock %}
 {% block content %}
   <!-- Marketing Blurb -->
   <div class="text-center max-w-md mx-auto mb-6">
