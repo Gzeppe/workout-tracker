@@ -23,8 +23,8 @@
          href="?year={{ next_year }}&month={{ next_month }}">Next &rarr;</a>
     </div>
 
-    <!-- Calendar Grid -->
-    <div class="overflow-x-auto">
+    <!-- Calendar Grid - Desktop -->
+    <div class="hidden md:block overflow-x-auto">
       <table class="w-full">
         <thead>
           <tr class="text-slate-400 text-sm">
@@ -82,6 +82,51 @@
           {% endfor %}
         </tbody>
       </table>
+    </div>
+
+    <!-- Calendar Grid - Mobile -->
+    <div class="md:hidden">
+      <div class="grid grid-cols-7 gap-1 mb-2">
+        <div class="text-slate-400 text-xs text-center font-semibold">S</div>
+        <div class="text-slate-400 text-xs text-center font-semibold">M</div>
+        <div class="text-slate-400 text-xs text-center font-semibold">T</div>
+        <div class="text-slate-400 text-xs text-center font-semibold">W</div>
+        <div class="text-slate-400 text-xs text-center font-semibold">T</div>
+        <div class="text-slate-400 text-xs text-center font-semibold">F</div>
+        <div class="text-slate-400 text-xs text-center font-semibold">S</div>
+      </div>
+      {% for week in weeks %}
+      <div class="grid grid-cols-7 gap-1 mb-1">
+        {% for d in week %}
+        <div class="aspect-square rounded-lg p-1 flex flex-col items-center justify-start {% if d == today %}bg-indigo-900/30 border border-indigo-500/50{% else %}bg-slate-800{% endif %}">
+          <div class="text-xs font-semibold {% if d == today %}text-indigo-400{% else %}text-slate-400{% endif %}">
+            {{ d.day }}
+          </div>
+          <!-- Workout indicators (dots) -->
+          <div class="flex flex-wrap justify-center gap-0.5 mt-1">
+            {% if d in workout_by_date %}
+              {% for w in workout_by_date|get_item:d %}
+              <div class="w-2 h-2 rounded-full
+                {% if w.workout_type == 'weightlifting' %}bg-purple-400
+                {% elif w.workout_type == 'cardio' %}bg-cyan-400
+                {% else %}bg-orange-400{% endif %}"></div>
+              {% endfor %}
+            {% endif %}
+            {% if d in scheduled_by_date %}
+              {% for s in scheduled_by_date|get_item:d %}
+              {% if not s.completed %}
+              <div class="w-2 h-2 rounded-full border
+                {% if s.workout_type == 'weightlifting' %}border-purple-400
+                {% elif s.workout_type == 'cardio' %}border-cyan-400
+                {% else %}border-orange-400{% endif %}"></div>
+              {% endif %}
+              {% endfor %}
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
     </div>
 
     <!-- Legend -->
