@@ -167,5 +167,13 @@
       Dashboard
     </a>
   </div>
+
+  <!-- Delete Workout -->
+  <div class="mt-6 pt-6 border-t border-slate-700 text-center">
+    <a href="{% url 'delete_workout' workout.id %}"
+       class="text-rose-400 hover:text-rose-300 text-sm transition-colors">
+      Delete this workout
+    </a>
+  </div>
 </div>
 {% endblock %}

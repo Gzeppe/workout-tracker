@@ -325,6 +325,10 @@ def workout_detail(request, workout_id: int):
     """Route to appropriate workout detail view based on type"""
     w = get_object_or_404(Workout, id=workout_id, user=request.user)
 
+    # If workout is already completed, show summary instead of active workout view
+    if w.ended_at:
+        return end_workout(request, workout_id)
+
     if w.workout_type == "cardio":
         return cardio_workout_detail(request, workout_id)
     elif w.workout_type == "hiit":
