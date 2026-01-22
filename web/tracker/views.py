@@ -222,6 +222,26 @@ def start_weightlifting(request):
                 mood=mood,
                 template=template,
             )
+
+            # Pre-populate exercise logs from template
+            if template:
+                position = 0
+                for template_exercise in template.exercises.order_by("position"):
+                    # Create sets based on target_sets from template
+                    for set_num in range(1, template_exercise.target_sets + 1):
+                        SetEntry.objects.create(
+                            workout=w,
+                            exercise=template_exercise.exercise,
+                            custom_exercise_name=template_exercise.custom_exercise_name,
+                            custom_equipment=template_exercise.custom_equipment,
+                            set_number=set_num,
+                            weight_lb=0,  # User must fill in
+                            reps=0,  # User must fill in
+                            quality="ok",  # Default quality, user can change
+                            position=position,
+                        )
+                        position += 1
+
             return redirect("workout_detail", workout_id=w.id)
 
     templates = WorkoutTemplate.objects.filter(

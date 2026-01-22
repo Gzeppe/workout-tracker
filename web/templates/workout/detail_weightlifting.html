@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block title %}{{ workout.display_name }} - Workout Tracker{% endblock %}
 {% block content %}
-  <div class="bg-slate-900 rounded-2xl p-6 shadow mb-6 border border-purple-500/20">
+  <div class="bg-slate-900 rounded-2xl p-6 shadow mb-6 border border-red-600/20">
     <div class="flex items-start justify-between">
       <div>
         <div class="flex items-center gap-2 mb-1">
-          <span class="px-2 py-1 rounded-lg bg-purple-500/20 text-purple-400 text-xs font-semibold uppercase">Weightlifting</span>
+          <span class="px-2 py-1 rounded-lg bg-red-600/20 text-red-500 text-xs font-semibold uppercase">Weightlifting</span>
         </div>
         <h1 class="text-2xl font-semibold text-slate-100">
           {{ workout.display_name }} — {{ workout.mood }}
@@ -16,7 +16,7 @@
         {% endif %}
       </div>
 
-      <a href="{% url 'end_workout' workout.id %}" class="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 font-semibold shadow-lg shadow-emerald-500/25 transition-all">
+      <a href="{% url 'end_workout' workout.id %}" class="px-6 py-3 rounded-xl bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-400 font-semibold shadow-lg shadow-red-600/25 transition-all">
         End Workout
       </a>
     </div>
@@ -27,7 +27,7 @@
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-lg font-semibold text-slate-200">Rest Timer</h2>
       <div class="flex gap-2">
-        <button id="mode-stopwatch" onclick="setTimerMode('stopwatch')" class="px-3 py-1 rounded-lg text-sm font-semibold bg-purple-600">Stopwatch</button>
+        <button id="mode-stopwatch" onclick="setTimerMode('stopwatch')" class="px-3 py-1 rounded-lg text-sm font-semibold bg-red-700">Stopwatch</button>
         <button id="mode-countdown" onclick="setTimerMode('countdown')" class="px-3 py-1 rounded-lg text-sm font-semibold bg-slate-700">Countdown</button>
       </div>
     </div>
@@ -44,9 +44,9 @@
     <div id="timer-display" class="text-5xl font-bold text-center my-4 text-slate-400 font-mono">00:00</div>
 
     <div class="flex justify-center gap-3">
-      <button id="btn-start" onclick="startTimer()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold">Start</button>
+      <button id="btn-start" onclick="startTimer()" class="px-5 py-2 rounded-xl bg-red-700 hover:bg-red-600 font-semibold">Start</button>
       <button id="btn-pause" onclick="pauseTimer()" class="hidden px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 font-semibold">Pause</button>
-      <button id="btn-resume" onclick="resumeTimer()" class="hidden px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold">Resume</button>
+      <button id="btn-resume" onclick="resumeTimer()" class="hidden px-5 py-2 rounded-xl bg-red-700 hover:bg-red-600 font-semibold">Resume</button>
       <button id="btn-reset" onclick="resetTimer()" class="px-5 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 font-semibold">Reset</button>
     </div>
   </div>
@@ -105,7 +105,7 @@
           </select>
         </label>
 
-        <button class="w-full px-5 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 font-semibold shadow-lg shadow-purple-500/25">
+        <button class="w-full px-5 py-3 rounded-xl bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 font-semibold shadow-lg shadow-red-600/25">
           Add Set
         </button>
       </form>
@@ -119,7 +119,7 @@
 
       <!-- End Workout Button (bottom of logged sets) -->
       <div class="mt-6 pt-6 border-t border-slate-700">
-        <a href="{% url 'end_workout' workout.id %}" class="block w-full text-center px-6 py-4 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 font-semibold text-lg shadow-lg shadow-emerald-500/25 transition-all">
+        <a href="{% url 'end_workout' workout.id %}" class="block w-full text-center px-6 py-4 rounded-xl bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-400 font-semibold text-lg shadow-lg shadow-red-600/25 transition-all">
           End Workout
         </a>
       </div>
@@ -206,10 +206,10 @@
             if (remaining <= 0) {
               playAlarm();
               resetTimer();
-              display.classList.add('text-emerald-400');
+              display.classList.add('text-red-400');
               display.textContent = '00:00';
               setTimeout(() => {
-                display.classList.remove('text-emerald-400');
+                display.classList.remove('text-red-400');
                 updateDisplay();
               }, 3000);
               return;
@@ -260,9 +260,9 @@
       const secs = seconds % 60;
       display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 
-      display.classList.remove('text-slate-400', 'text-purple-400', 'text-amber-400');
+      display.classList.remove('text-slate-400', 'text-red-500', 'text-amber-400');
       if (timerState.running && !timerState.paused) {
-        display.classList.add('text-purple-400');
+        display.classList.add('text-red-500');
       } else if (timerState.paused) {
         display.classList.add('text-amber-400');
       } else {
@@ -272,10 +272,10 @@
 
     function updateUI() {
       document.getElementById('mode-stopwatch').className = timerState.mode === 'stopwatch'
-        ? 'px-3 py-1 rounded-lg text-sm font-semibold bg-purple-600'
+        ? 'px-3 py-1 rounded-lg text-sm font-semibold bg-red-700'
         : 'px-3 py-1 rounded-lg text-sm font-semibold bg-slate-700';
       document.getElementById('mode-countdown').className = timerState.mode === 'countdown'
-        ? 'px-3 py-1 rounded-lg text-sm font-semibold bg-purple-600'
+        ? 'px-3 py-1 rounded-lg text-sm font-semibold bg-red-700'
         : 'px-3 py-1 rounded-lg text-sm font-semibold bg-slate-700';
 
       document.getElementById('countdown-options').classList.toggle('hidden', timerState.mode !== 'countdown');
@@ -299,7 +299,7 @@
       }
 
       document.querySelectorAll('.countdown-btn').forEach(btn => {
-        btn.classList.toggle('bg-purple-600', parseInt(btn.dataset.duration) === timerState.countdownDuration);
+        btn.classList.toggle('bg-red-700', parseInt(btn.dataset.duration) === timerState.countdownDuration);
         btn.classList.toggle('bg-slate-800', parseInt(btn.dataset.duration) !== timerState.countdownDuration);
       });
 

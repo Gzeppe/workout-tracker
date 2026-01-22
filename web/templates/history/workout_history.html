@@ -10,11 +10,11 @@
   <!-- View Tabs -->
   <div class="flex gap-2 mb-6">
     <a href="?view=list{% if filter_type %}&type={{ filter_type }}{% endif %}"
-       class="px-4 py-2 rounded-xl font-semibold transition-colors {% if view_mode == 'list' %}bg-indigo-600{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+       class="px-4 py-2 rounded-xl font-semibold transition-colors {% if view_mode == 'list' %}bg-red-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
       List View
     </a>
     <a href="?view=stats{% if filter_type %}&type={{ filter_type }}{% endif %}"
-       class="px-4 py-2 rounded-xl font-semibold transition-colors {% if view_mode == 'stats' %}bg-indigo-600{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+       class="px-4 py-2 rounded-xl font-semibold transition-colors {% if view_mode == 'stats' %}bg-red-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
       Stats View
     </a>
   </div>
@@ -24,19 +24,19 @@
     <div class="flex items-center gap-3">
       <span class="text-slate-400 text-sm">Filter:</span>
       <a href="?view={{ view_mode }}"
-         class="px-3 py-1 rounded-lg text-sm transition-colors {% if not filter_type %}bg-indigo-600{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+         class="px-3 py-1 rounded-lg text-sm transition-colors {% if not filter_type %}bg-red-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
         All
       </a>
       <a href="?view={{ view_mode }}&type=weightlifting"
-         class="px-3 py-1 rounded-lg text-sm transition-colors {% if filter_type == 'weightlifting' %}bg-purple-600{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+         class="px-3 py-1 rounded-lg text-sm transition-colors {% if filter_type == 'weightlifting' %}bg-red-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
         Weightlifting
       </a>
       <a href="?view={{ view_mode }}&type=cardio"
-         class="px-3 py-1 rounded-lg text-sm transition-colors {% if filter_type == 'cardio' %}bg-cyan-600{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+         class="px-3 py-1 rounded-lg text-sm transition-colors {% if filter_type == 'cardio' %}bg-red-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
         Cardio
       </a>
       <a href="?view={{ view_mode }}&type=hiit"
-         class="px-3 py-1 rounded-lg text-sm transition-colors {% if filter_type == 'hiit' %}bg-orange-600{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+         class="px-3 py-1 rounded-lg text-sm transition-colors {% if filter_type == 'hiit' %}bg-red-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
         HIIT
       </a>
     </div>
@@ -50,15 +50,15 @@
       <h3 class="text-lg font-semibold text-slate-200 mb-4">Overview</h3>
       <div class="grid grid-cols-2 gap-4">
         <div class="text-center p-4 bg-slate-800 rounded-xl">
-          <div class="text-3xl font-bold text-indigo-400">{{ stats.total_workouts }}</div>
+          <div class="text-3xl font-bold text-red-500">{{ stats.total_workouts }}</div>
           <div class="text-slate-400 text-sm">Total Workouts</div>
         </div>
         <div class="text-center p-4 bg-slate-800 rounded-xl">
-          <div class="text-3xl font-bold text-emerald-400">{{ stats.total_sets }}</div>
+          <div class="text-3xl font-bold text-red-400">{{ stats.total_sets }}</div>
           <div class="text-slate-400 text-sm">Total Sets</div>
         </div>
         <div class="text-center p-4 bg-slate-800 rounded-xl">
-          <div class="text-3xl font-bold text-orange-400">{{ stats.streak }}</div>
+          <div class="text-3xl font-bold text-red-500">{{ stats.streak }}</div>
           <div class="text-slate-400 text-sm">Current Streak</div>
         </div>
       </div>
@@ -71,16 +71,16 @@
         {% for item in stats.type_distribution %}
         <div class="flex items-center gap-3">
           <div class="w-24 text-sm
-            {% if item.workout_type == 'weightlifting' %}text-purple-400
-            {% elif item.workout_type == 'cardio' %}text-cyan-400
-            {% else %}text-orange-400{% endif %}">
+            {% if item.workout_type == 'weightlifting' %}text-red-500
+            {% elif item.workout_type == 'cardio' %}text-red-500
+            {% else %}text-red-500{% endif %}">
             {{ item.workout_type|capfirst }}
           </div>
           <div class="flex-1 bg-slate-800 rounded-full h-4 overflow-hidden">
             <div class="h-full rounded-full
-              {% if item.workout_type == 'weightlifting' %}bg-purple-500
-              {% elif item.workout_type == 'cardio' %}bg-cyan-500
-              {% else %}bg-orange-500{% endif %}"
+              {% if item.workout_type == 'weightlifting' %}bg-red-600
+              {% elif item.workout_type == 'cardio' %}bg-red-700
+              {% else %}bg-red-600{% endif %}"
                  style="width: {% widthratio item.count stats.total_workouts 100 %}%"></div>
           </div>
           <div class="text-slate-400 text-sm w-10 text-right">{{ item.count }}</div>
@@ -96,7 +96,7 @@
     <div class="flex items-end gap-2 h-32">
       {% for week in stats.weekly_workouts %}
       <div class="flex-1 flex flex-col items-center">
-        <div class="w-full bg-indigo-500 rounded-t" style="height: {% widthratio week.count 7 100 %}%;"></div>
+        <div class="w-full bg-red-600 rounded-t" style="height: {% widthratio week.count 7 100 %}%;"></div>
         <div class="text-xs text-slate-500 mt-2">{{ week.week|date:"M j" }}</div>
       </div>
       {% empty %}
@@ -115,9 +115,9 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl flex items-center justify-center
-            {% if w.workout_type == 'weightlifting' %}bg-purple-500/20 text-purple-400
-            {% elif w.workout_type == 'cardio' %}bg-cyan-500/20 text-cyan-400
-            {% else %}bg-orange-500/20 text-orange-400{% endif %}">
+            {% if w.workout_type == 'weightlifting' %}bg-red-600/20 text-red-500
+            {% elif w.workout_type == 'cardio' %}bg-red-700/20 text-red-500
+            {% else %}bg-red-600/20 text-red-500{% endif %}">
             {% if w.workout_type == 'weightlifting' %}
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h2v12H4zM18 6h2v12h-2zM6 11h12v2H6z"/>
@@ -144,7 +144,7 @@
     </a>
     {% empty %}
     <div class="text-slate-400 text-center py-8">
-      No workouts yet. <a href="{% url 'select_workout_type' %}" class="text-indigo-400 hover:text-indigo-300">Start your first workout!</a>
+      No workouts yet. <a href="{% url 'select_workout_type' %}" class="text-red-500 hover:text-red-400">Start your first workout!</a>
     </div>
     {% endfor %}
   </div>

@@ -15,9 +15,9 @@
     <div class="bg-slate-900 rounded-2xl p-5 border border-slate-700">
       <div class="flex items-center gap-3 mb-4">
         <span class="px-3 py-1 rounded-lg text-sm font-semibold uppercase
-          {% if template.workout_type == 'weightlifting' %}bg-purple-500/20 text-purple-400
-          {% elif template.workout_type == 'cardio' %}bg-cyan-500/20 text-cyan-400
-          {% else %}bg-orange-500/20 text-orange-400{% endif %}">
+          {% if template.workout_type == 'weightlifting' %}bg-red-600/20 text-red-500
+          {% elif template.workout_type == 'cardio' %}bg-red-700/20 text-red-500
+          {% else %}bg-red-600/20 text-red-500{% endif %}">
           {{ template.get_workout_type_display }}
         </span>
         {% if template.day %}
@@ -29,7 +29,7 @@
       <div class="mb-4">
         <label class="block text-slate-300 font-semibold mb-2">Template Name</label>
         <input type="text" name="name" value="{{ template.name }}" required
-               class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-100">
+               class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-red-600 focus:ring-1 focus:ring-red-600 text-slate-100">
       </div>
 
       <!-- Description -->
@@ -37,7 +37,7 @@
         <label class="block text-slate-300 font-semibold mb-2">Description</label>
         <textarea name="description" rows="3"
                   placeholder="Notes about this template..."
-                  class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-indigo-500 text-slate-100 placeholder-slate-500">{{ template.description }}</textarea>
+                  class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-red-600 text-slate-100 placeholder-slate-500">{{ template.description }}</textarea>
       </div>
     </div>
 
@@ -50,7 +50,7 @@
     <!-- Submit -->
     <div class="flex gap-3">
       <button type="submit"
-              class="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 font-semibold shadow-lg shadow-indigo-500/25 transition-all">
+              class="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 font-semibold shadow-lg shadow-red-600/25 transition-all">
         Save Changes
       </button>
       <a href="{% url 'template_detail' template.id %}"

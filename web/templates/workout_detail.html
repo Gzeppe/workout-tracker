@@ -13,7 +13,7 @@
         {% endif %}
       </div>
 
-      <a href="/workouts/{{ workout.id }}/end/" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold">
+      <a href="/workouts/{{ workout.id }}/end/" class="px-4 py-2 rounded-xl bg-red-700 hover:bg-red-600 font-semibold">
         End Workout
       </a>
     </div>
@@ -24,7 +24,7 @@
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-lg font-semibold">Rest Timer</h2>
       <div class="flex gap-2">
-        <button id="mode-stopwatch" onclick="setTimerMode('stopwatch')" class="px-3 py-1 rounded-lg text-sm font-semibold bg-indigo-600">Stopwatch</button>
+        <button id="mode-stopwatch" onclick="setTimerMode('stopwatch')" class="px-3 py-1 rounded-lg text-sm font-semibold bg-red-700">Stopwatch</button>
         <button id="mode-countdown" onclick="setTimerMode('countdown')" class="px-3 py-1 rounded-lg text-sm font-semibold bg-slate-700">Countdown</button>
       </div>
     </div>
@@ -42,9 +42,9 @@
     <div id="timer-display" class="text-5xl font-bold text-center my-4 text-slate-400 font-mono">00:00</div>
 
     <div class="flex justify-center gap-3">
-      <button id="btn-start" onclick="startTimer()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold">Start</button>
+      <button id="btn-start" onclick="startTimer()" class="px-5 py-2 rounded-xl bg-red-700 hover:bg-red-600 font-semibold">Start</button>
       <button id="btn-pause" onclick="pauseTimer()" class="hidden px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 font-semibold">Pause</button>
-      <button id="btn-resume" onclick="resumeTimer()" class="hidden px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold">Resume</button>
+      <button id="btn-resume" onclick="resumeTimer()" class="hidden px-5 py-2 rounded-xl bg-red-700 hover:bg-red-600 font-semibold">Resume</button>
       <button id="btn-reset" onclick="resetTimer()" class="px-5 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 font-semibold">Reset</button>
     </div>
   </div>
@@ -112,7 +112,7 @@
           </select>
         </label>
 
-        <button class="w-full px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold">
+        <button class="w-full px-5 py-3 rounded-xl bg-red-700 hover:bg-red-600 font-semibold">
           Add Set
         </button>
       </form>
@@ -200,9 +200,9 @@
       document.querySelectorAll('.countdown-btn').forEach(btn => {
         if (parseInt(btn.dataset.duration) === seconds) {
           btn.classList.remove('bg-slate-800');
-          btn.classList.add('bg-indigo-600');
+          btn.classList.add('bg-red-700');
         } else {
-          btn.classList.remove('bg-indigo-600');
+          btn.classList.remove('bg-red-700');
           btn.classList.add('bg-slate-800');
         }
       });
@@ -230,10 +230,10 @@
             if (remaining <= 0) {
               playAlarm();
               resetTimer();
-              display.classList.add('text-emerald-400');
+              display.classList.add('text-red-400');
               display.textContent = '00:00';
               setTimeout(() => {
-                display.classList.remove('text-emerald-400');
+                display.classList.remove('text-red-400');
                 updateDisplay();
               }, 3000);
               return;
@@ -290,9 +290,9 @@
       display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 
       // Color based on state
-      display.classList.remove('text-slate-400', 'text-indigo-400', 'text-amber-400');
+      display.classList.remove('text-slate-400', 'text-red-500', 'text-amber-400');
       if (timerState.running && !timerState.paused) {
-        display.classList.add('text-indigo-400');
+        display.classList.add('text-red-500');
       } else if (timerState.paused) {
         display.classList.add('text-amber-400');
       } else {
@@ -303,10 +303,10 @@
     function updateUI() {
       // Mode buttons
       document.getElementById('mode-stopwatch').className = timerState.mode === 'stopwatch'
-        ? 'px-3 py-1 rounded-lg text-sm font-semibold bg-indigo-600'
+        ? 'px-3 py-1 rounded-lg text-sm font-semibold bg-red-700'
         : 'px-3 py-1 rounded-lg text-sm font-semibold bg-slate-700';
       document.getElementById('mode-countdown').className = timerState.mode === 'countdown'
-        ? 'px-3 py-1 rounded-lg text-sm font-semibold bg-indigo-600'
+        ? 'px-3 py-1 rounded-lg text-sm font-semibold bg-red-700'
         : 'px-3 py-1 rounded-lg text-sm font-semibold bg-slate-700';
 
       // Show/hide countdown options
@@ -335,9 +335,9 @@
       document.querySelectorAll('.countdown-btn').forEach(btn => {
         if (parseInt(btn.dataset.duration) === timerState.countdownDuration) {
           btn.classList.remove('bg-slate-800');
-          btn.classList.add('bg-indigo-600');
+          btn.classList.add('bg-red-700');
         } else {
-          btn.classList.remove('bg-indigo-600');
+          btn.classList.remove('bg-red-700');
           btn.classList.add('bg-slate-800');
         }
       });

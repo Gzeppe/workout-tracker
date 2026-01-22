@@ -3,7 +3,7 @@
   <div class="bg-slate-800 rounded-xl p-3 flex items-center justify-between">
     <div class="flex-1">
       <div class="flex items-center gap-3">
-        <span class="text-cyan-400 font-bold">#{{ forloop.counter }}</span>
+        <span class="text-red-500 font-bold">#{{ forloop.counter }}</span>
         <span class="text-slate-200">
           {% if entry.duration_seconds %}
             {{ entry.duration_seconds|floatformat:0 }}s
@@ -20,8 +20,8 @@
     </div>
     <div class="flex items-center gap-2">
       <span class="px-2 py-1 rounded-lg text-xs font-semibold
-        {% if entry.quality == 'great' %}bg-emerald-600
-        {% elif entry.quality == 'good' %}bg-cyan-600
+        {% if entry.quality == 'great' %}bg-red-700
+        {% elif entry.quality == 'good' %}bg-red-700
         {% elif entry.quality == 'ok' %}bg-amber-600
         {% else %}bg-rose-600{% endif %}">
         {{ entry.quality|capfirst }}

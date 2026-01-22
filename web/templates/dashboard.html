@@ -14,37 +14,37 @@
   <div class="grid md:grid-cols-3 gap-6 mb-8">
     <!-- Start Workout -->
     <a href="{% url 'select_workout_type' %}"
-       class="group bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 border border-slate-700 hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300">
-      <div class="text-indigo-400 mb-4 flex justify-center">
+       class="group bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 border border-slate-700 hover:border-red-500/50 hover:shadow-lg hover:shadow-red-500/10 transition-all duration-300">
+      <div class="text-red-500 mb-4 flex justify-center">
         <svg class="w-16 h-16 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/>
         </svg>
       </div>
-      <h2 class="text-xl font-bold text-center mb-2 text-slate-100 group-hover:text-indigo-400 transition-colors">Start Workout</h2>
+      <h2 class="text-xl font-bold text-center mb-2 text-slate-100 group-hover:text-red-500 transition-colors">Start Workout</h2>
       <p class="text-slate-400 text-sm text-center">Choose weightlifting, cardio, or HIIT</p>
     </a>
 
     <!-- Previous Workouts -->
     <a href="{% url 'workout_history' %}"
-       class="group bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 border border-slate-700 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300">
-      <div class="text-emerald-400 mb-4 flex justify-center">
+       class="group bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 border border-slate-700 hover:border-red-600/50 hover:shadow-lg hover:shadow-red-600/10 transition-all duration-300">
+      <div class="text-red-400 mb-4 flex justify-center">
         <svg class="w-16 h-16 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
         </svg>
       </div>
-      <h2 class="text-xl font-bold text-center mb-2 text-slate-100 group-hover:text-emerald-400 transition-colors">Previous Workouts</h2>
+      <h2 class="text-xl font-bold text-center mb-2 text-slate-100 group-hover:text-red-400 transition-colors">Previous Workouts</h2>
       <p class="text-slate-400 text-sm text-center">View history and stats</p>
     </a>
 
     <!-- Calendar -->
     <a href="{% url 'calendar_view' %}"
-       class="group bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 border border-slate-700 hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-300">
-      <div class="text-cyan-400 mb-4 flex justify-center">
+       class="group bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 border border-slate-700 hover:border-red-700/50 hover:shadow-lg hover:shadow-red-700/10 transition-all duration-300">
+      <div class="text-red-400 mb-4 flex justify-center">
         <svg class="w-16 h-16 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
         </svg>
       </div>
-      <h2 class="text-xl font-bold text-center mb-2 text-slate-100 group-hover:text-cyan-400 transition-colors">Calendar</h2>
+      <h2 class="text-xl font-bold text-center mb-2 text-slate-100 group-hover:text-red-400 transition-colors">Calendar</h2>
       <p class="text-slate-400 text-sm text-center">Plan and schedule workouts</p>
     </a>
   </div>
@@ -54,15 +54,15 @@
     <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Quick Stats</h3>
     <div class="grid grid-cols-3 gap-4">
       <div class="text-center">
-        <div class="text-3xl font-bold text-indigo-400">{{ this_week_count }}</div>
+        <div class="text-3xl font-bold text-red-500">{{ this_week_count }}</div>
         <div class="text-slate-400 text-sm">This Week</div>
       </div>
       <div class="text-center">
-        <div class="text-3xl font-bold text-emerald-400">{{ streak }}</div>
+        <div class="text-3xl font-bold text-red-400">{{ streak }}</div>
         <div class="text-slate-400 text-sm">Day Streak</div>
       </div>
       <div class="text-center">
-        <div class="text-3xl font-bold text-orange-400">{{ recent_prs }}</div>
+        <div class="text-3xl font-bold text-red-500">{{ recent_prs }}</div>
         <div class="text-slate-400 text-sm">Strong Workouts</div>
       </div>
     </div>
@@ -73,16 +73,16 @@
   <div class="bg-slate-900 rounded-2xl p-6 mb-8 border border-slate-700">
     <div class="flex items-center justify-between mb-4">
       <h3 class="text-lg font-semibold text-slate-200">Upcoming Workouts</h3>
-      <a href="{% url 'calendar_view' %}" class="text-cyan-400 hover:text-cyan-300 text-sm">View Calendar &rarr;</a>
+      <a href="{% url 'calendar_view' %}" class="text-red-400 hover:text-red-300 text-sm">View Calendar &rarr;</a>
     </div>
     <div class="space-y-3">
       {% for scheduled in upcoming_scheduled %}
       <div class="flex items-center justify-between bg-slate-800 rounded-xl p-4">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl flex items-center justify-center
-            {% if scheduled.workout_type == 'weightlifting' %}bg-purple-500/20 text-purple-400
-            {% elif scheduled.workout_type == 'cardio' %}bg-cyan-500/20 text-cyan-400
-            {% else %}bg-orange-500/20 text-orange-400{% endif %}">
+            {% if scheduled.workout_type == 'weightlifting' %}bg-red-700/20 text-red-500
+            {% elif scheduled.workout_type == 'cardio' %}bg-red-700/20 text-red-400
+            {% else %}bg-red-600/20 text-red-500{% endif %}">
             {% if scheduled.workout_type == 'weightlifting' %}
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h2v12H4zM18 6h2v12h-2zM6 11h12v2H6z"/>
@@ -103,7 +103,7 @@
           </div>
         </div>
         <a href="{% url 'start_from_scheduled' scheduled.id %}"
-           class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-sm transition-colors">
+           class="px-4 py-2 rounded-xl bg-red-700 hover:bg-red-500 font-semibold text-sm transition-colors">
           Start
         </a>
       </div>
@@ -117,7 +117,7 @@
   <div class="bg-slate-900 rounded-2xl p-6 border border-slate-700">
     <div class="flex items-center justify-between mb-4">
       <h3 class="text-lg font-semibold text-slate-200">Quick Start Templates</h3>
-      <a href="{% url 'template_list' %}" class="text-indigo-400 hover:text-indigo-300 text-sm">View All &rarr;</a>
+      <a href="{% url 'template_list' %}" class="text-red-500 hover:text-red-400 text-sm">View All &rarr;</a>
     </div>
     <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
       {% for template in templates %}
@@ -125,9 +125,9 @@
          class="bg-slate-800 hover:bg-slate-700 rounded-xl p-4 transition-colors text-center">
         <div class="font-semibold text-slate-200 mb-1">{{ template.name }}</div>
         <div class="text-xs
-          {% if template.workout_type == 'weightlifting' %}text-purple-400
-          {% elif template.workout_type == 'cardio' %}text-cyan-400
-          {% else %}text-orange-400{% endif %}">
+          {% if template.workout_type == 'weightlifting' %}text-red-500
+          {% elif template.workout_type == 'cardio' %}text-red-400
+          {% else %}text-red-500{% endif %}">
           {{ template.get_workout_type_display }}
         </div>
       </a>

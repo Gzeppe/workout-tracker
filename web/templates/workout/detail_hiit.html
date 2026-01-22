@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block title %}HIIT Session - Workout Tracker{% endblock %}
 {% block content %}
-  <div class="bg-slate-900 rounded-2xl p-6 shadow mb-6 border border-orange-500/20">
+  <div class="bg-slate-900 rounded-2xl p-6 shadow mb-6 border border-red-600/20">
     <div class="flex items-start justify-between">
       <div>
         <div class="flex items-center gap-2 mb-1">
-          <span class="px-2 py-1 rounded-lg bg-orange-500/20 text-orange-400 text-xs font-semibold uppercase">HIIT</span>
+          <span class="px-2 py-1 rounded-lg bg-red-600/20 text-red-500 text-xs font-semibold uppercase">HIIT</span>
         </div>
         <h1 class="text-2xl font-semibold text-slate-100">
           {{ workout.display_name }} — {{ workout.mood }}
@@ -13,7 +13,7 @@
         <div class="text-slate-400 text-sm">{{ workout.started_at|date:"M j, Y  h:i A" }}</div>
       </div>
 
-      <a href="{% url 'end_workout' workout.id %}" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 font-semibold shadow-lg shadow-emerald-500/25">
+      <a href="{% url 'end_workout' workout.id %}" class="px-4 py-2 rounded-xl bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 font-semibold shadow-lg shadow-red-500/25">
         End Workout
       </a>
     </div>
@@ -33,13 +33,13 @@
 
     <!-- Progress Bar -->
     <div class="w-full bg-slate-800 rounded-full h-3 mb-6">
-      <div id="progress-bar" class="h-3 rounded-full bg-orange-500 transition-all duration-300" style="width: 0%"></div>
+      <div id="progress-bar" class="h-3 rounded-full bg-red-600 transition-all duration-300" style="width: 0%"></div>
     </div>
 
     <!-- Interval Counter -->
     <div class="text-center mb-6">
       <span class="text-slate-400">Interval</span>
-      <span id="interval-counter" class="text-2xl font-bold text-orange-400 ml-2">0 / {{ hiit_session.total_intervals }}</span>
+      <span id="interval-counter" class="text-2xl font-bold text-red-500 ml-2">0 / {{ hiit_session.total_intervals }}</span>
     </div>
 
     <!-- Session Info -->
@@ -54,19 +54,19 @@
       </div>
       <div class="bg-slate-800/50 rounded-xl p-3">
         <div class="text-slate-400">Total</div>
-        <div class="text-orange-400 font-bold text-lg">{{ hiit_session.planned_duration_display }}</div>
+        <div class="text-red-500 font-bold text-lg">{{ hiit_session.planned_duration_display }}</div>
       </div>
     </div>
 
     <!-- Controls -->
     <div class="flex justify-center gap-3">
-      <button id="btn-start" onclick="startHIIT()" class="px-8 py-3 rounded-xl bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 font-semibold text-lg shadow-lg shadow-orange-500/25">
+      <button id="btn-start" onclick="startHIIT()" class="px-8 py-3 rounded-xl bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 font-semibold text-lg shadow-lg shadow-red-600/25">
         Start
       </button>
       <button id="btn-pause" onclick="pauseHIIT()" class="hidden px-8 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 font-semibold text-lg">
         Pause
       </button>
-      <button id="btn-resume" onclick="resumeHIIT()" class="hidden px-8 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 font-semibold text-lg">
+      <button id="btn-resume" onclick="resumeHIIT()" class="hidden px-8 py-3 rounded-xl bg-red-700 hover:bg-red-600 font-semibold text-lg">
         Resume
       </button>
       <button id="btn-skip" onclick="skipInterval()" class="hidden px-6 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold">
@@ -243,25 +243,25 @@
       display.textContent = state.timeRemaining;
 
       // Phase label and colors
-      display.classList.remove('text-slate-400', 'text-emerald-400', 'text-blue-400', 'text-orange-400', 'text-amber-400');
-      phaseLabel.classList.remove('text-slate-400', 'text-emerald-400', 'text-blue-400', 'text-orange-400');
+      display.classList.remove('text-slate-400', 'text-emerald-400', 'text-blue-400', 'text-red-500', 'text-amber-400');
+      phaseLabel.classList.remove('text-slate-400', 'text-emerald-400', 'text-blue-400', 'text-red-500');
 
       if (state.phase === 'work') {
         phaseLabel.textContent = 'WORK';
         phaseLabel.classList.add('text-emerald-400');
         display.classList.add('text-emerald-400');
-        progressBar.classList.remove('bg-blue-500', 'bg-orange-500');
+        progressBar.classList.remove('bg-blue-500', 'bg-red-600');
         progressBar.classList.add('bg-emerald-500');
       } else if (state.phase === 'rest') {
         phaseLabel.textContent = 'REST';
         phaseLabel.classList.add('text-blue-400');
         display.classList.add('text-blue-400');
-        progressBar.classList.remove('bg-emerald-500', 'bg-orange-500');
+        progressBar.classList.remove('bg-emerald-500', 'bg-red-600');
         progressBar.classList.add('bg-blue-500');
       } else if (state.phase === 'complete') {
         phaseLabel.textContent = 'COMPLETE!';
-        phaseLabel.classList.add('text-orange-400');
-        display.classList.add('text-orange-400');
+        phaseLabel.classList.add('text-red-500');
+        display.classList.add('text-red-500');
         display.textContent = '0';
       } else {
         phaseLabel.textContent = 'Ready';

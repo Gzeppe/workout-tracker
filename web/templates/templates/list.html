@@ -6,7 +6,7 @@
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-slate-100">My Workout Templates</h1>
     <a href="{% url 'create_template' %}"
-       class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 font-semibold shadow-lg shadow-indigo-500/25 transition-all">
+       class="px-4 py-2 rounded-xl bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 font-semibold shadow-lg shadow-red-600/25 transition-all">
       + Create Template
     </a>
   </div>
@@ -14,19 +14,19 @@
   <!-- Filter -->
   <div class="flex gap-2 mb-6">
     <a href="{% url 'template_list' %}"
-       class="px-3 py-2 rounded-xl text-sm font-semibold transition-colors {% if not filter_type %}bg-indigo-600{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+       class="px-3 py-2 rounded-xl text-sm font-semibold transition-colors {% if not filter_type %}bg-red-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
       All
     </a>
     <a href="?type=weightlifting"
-       class="px-3 py-2 rounded-xl text-sm font-semibold transition-colors {% if filter_type == 'weightlifting' %}bg-purple-600{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+       class="px-3 py-2 rounded-xl text-sm font-semibold transition-colors {% if filter_type == 'weightlifting' %}bg-red-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
       Weightlifting
     </a>
     <a href="?type=cardio"
-       class="px-3 py-2 rounded-xl text-sm font-semibold transition-colors {% if filter_type == 'cardio' %}bg-cyan-600{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+       class="px-3 py-2 rounded-xl text-sm font-semibold transition-colors {% if filter_type == 'cardio' %}bg-red-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
       Cardio
     </a>
     <a href="?type=hiit"
-       class="px-3 py-2 rounded-xl text-sm font-semibold transition-colors {% if filter_type == 'hiit' %}bg-orange-600{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+       class="px-3 py-2 rounded-xl text-sm font-semibold transition-colors {% if filter_type == 'hiit' %}bg-red-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
       HIIT
     </a>
   </div>
@@ -38,9 +38,9 @@
       <div class="flex items-start justify-between mb-3">
         <div>
           <span class="px-2 py-1 rounded-lg text-xs font-semibold uppercase
-            {% if template.workout_type == 'weightlifting' %}bg-purple-500/20 text-purple-400
-            {% elif template.workout_type == 'cardio' %}bg-cyan-500/20 text-cyan-400
-            {% else %}bg-orange-500/20 text-orange-400{% endif %}">
+            {% if template.workout_type == 'weightlifting' %}bg-red-600/20 text-red-500
+            {% elif template.workout_type == 'cardio' %}bg-red-700/20 text-red-500
+            {% else %}bg-red-600/20 text-red-500{% endif %}">
             {{ template.get_workout_type_display }}
           </span>
         </div>
