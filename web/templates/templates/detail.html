@@ -9,9 +9,9 @@
       <div>
         <div class="flex items-center gap-3 mb-1">
           <span class="px-3 py-1 rounded-lg text-sm font-semibold uppercase
-            {% if template.workout_type == 'weightlifting' %}bg-red-600/20 text-red-500
-            {% elif template.workout_type == 'cardio' %}bg-red-700/20 text-red-500
-            {% else %}bg-red-600/20 text-red-500{% endif %}">
+            {% if template.workout_type == 'weightlifting' %}bg-blue-600/20 text-blue-500
+            {% elif template.workout_type == 'cardio' %}bg-blue-700/20 text-blue-500
+            {% else %}bg-blue-600/20 text-blue-500{% endif %}">
             {{ template.get_workout_type_display }}
           </span>
         </div>
@@ -105,7 +105,7 @@
     <h3 class="text-sm font-semibold text-slate-400 uppercase mb-4">HIIT Settings</h3>
     <div class="grid grid-cols-3 gap-4">
       <div class="text-center p-4 bg-slate-800 rounded-xl">
-        <div class="text-3xl font-bold text-red-500">{{ template.hiit_intervals }}</div>
+        <div class="text-3xl font-bold text-blue-500">{{ template.hiit_intervals }}</div>
         <div class="text-slate-400 text-sm">Intervals</div>
       </div>
       <div class="text-center p-4 bg-slate-800 rounded-xl">
@@ -132,9 +132,9 @@
   <!-- Use Template Button -->
   <a href="{% url 'use_template' template.id %}"
      class="block w-full text-center px-6 py-4 rounded-2xl bg-gradient-to-r
-       {% if template.workout_type == 'weightlifting' %}from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 shadow-red-600/25
-       {% elif template.workout_type == 'cardio' %}from-red-700 to-red-700 hover:from-red-700 hover:to-red-500 shadow-red-700/25
-       {% else %}from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 shadow-red-600/25{% endif %}
+       {% if template.workout_type == 'weightlifting' %}from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 shadow-blue-600/25
+       {% elif template.workout_type == 'cardio' %}from-blue-700 to-blue-700 hover:from-blue-700 hover:to-blue-500 shadow-blue-700/25
+       {% else %}from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 shadow-blue-600/25{% endif %}
        font-semibold text-lg shadow-lg transition-all">
     Start Workout with This Template
   </a>

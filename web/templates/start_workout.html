@@ -17,7 +17,7 @@
       <div>
         <label class="block">
           <span class="font-semibold mb-2 block">Workout Day</span>
-          <select name="day" class="w-full bg-slate-800 rounded-xl p-3" required>
+          <select name="day" class="w-full bg-slate-800 rounded-xl p-3" requiblue>
             <option value="" selected disabled>Select workout day...</option>
             {% for d in days %}
               <option value="{{ d }}">{{ d }}</option>
@@ -31,14 +31,14 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
           {% for m in moods %}
             <label class="bg-slate-800 hover:bg-slate-700 rounded-xl p-3 cursor-pointer flex items-center gap-2">
-              <input type="radio" name="mood" value="{{ m }}" required />
+              <input type="radio" name="mood" value="{{ m }}" requiblue />
               <span>{{ m }}</span>
             </label>
           {% endfor %}
         </div>
       </div>
 
-      <button class="px-5 py-3 rounded-xl bg-red-700 hover:bg-red-600 font-semibold">
+      <button class="px-5 py-3 rounded-xl bg-blue-700 hover:bg-blue-600 font-semibold">
         Start
       </button>
     </form>

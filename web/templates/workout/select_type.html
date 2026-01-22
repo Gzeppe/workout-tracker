@@ -10,37 +10,37 @@
   <div class="grid md:grid-cols-3 gap-6 mb-10">
     <!-- Weightlifting -->
     <a href="{% url 'start_weightlifting' %}"
-       class="group bg-slate-900 rounded-2xl p-8 border border-slate-800 hover:border-red-600/50 hover:bg-slate-800/50 transition-all duration-300 text-center">
-      <div class="text-red-500 mb-4 flex justify-center">
+       class="group bg-slate-900 rounded-2xl p-8 border border-slate-800 hover:border-blue-600/50 hover:bg-slate-800/50 transition-all duration-300 text-center">
+      <div class="text-blue-500 mb-4 flex justify-center">
         <svg class="w-16 h-16 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h2v12H4zM18 6h2v12h-2zM6 11h12v2H6zM2 9h2v6H2zM20 9h2v6h-2z"/>
         </svg>
       </div>
-      <h2 class="text-xl font-bold mb-2 text-slate-100 group-hover:text-red-500 transition-colors">Weightlifting</h2>
+      <h2 class="text-xl font-bold mb-2 text-slate-100 group-hover:text-blue-500 transition-colors">Weightlifting</h2>
       <p class="text-slate-400 text-sm">Build muscle and strength with targeted exercises</p>
     </a>
 
     <!-- Cardio -->
     <a href="{% url 'start_cardio' %}"
-       class="group bg-slate-900 rounded-2xl p-8 border border-slate-800 hover:border-red-700/50 hover:bg-slate-800/50 transition-all duration-300 text-center">
-      <div class="text-red-500 mb-4 flex justify-center">
+       class="group bg-slate-900 rounded-2xl p-8 border border-slate-800 hover:border-blue-700/50 hover:bg-slate-800/50 transition-all duration-300 text-center">
+      <div class="text-blue-500 mb-4 flex justify-center">
         <svg class="w-16 h-16 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
         </svg>
       </div>
-      <h2 class="text-xl font-bold mb-2 text-slate-100 group-hover:text-red-500 transition-colors">Cardio</h2>
+      <h2 class="text-xl font-bold mb-2 text-slate-100 group-hover:text-blue-500 transition-colors">Cardio</h2>
       <p class="text-slate-400 text-sm">Burn calories and build endurance</p>
     </a>
 
     <!-- HIIT -->
     <a href="{% url 'start_hiit' %}"
-       class="group bg-slate-900 rounded-2xl p-8 border border-slate-800 hover:border-red-600/50 hover:bg-slate-800/50 transition-all duration-300 text-center">
-      <div class="text-red-500 mb-4 flex justify-center">
+       class="group bg-slate-900 rounded-2xl p-8 border border-slate-800 hover:border-blue-600/50 hover:bg-slate-800/50 transition-all duration-300 text-center">
+      <div class="text-blue-500 mb-4 flex justify-center">
         <svg class="w-16 h-16 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
       </div>
-      <h2 class="text-xl font-bold mb-2 text-slate-100 group-hover:text-red-500 transition-colors">HIIT</h2>
+      <h2 class="text-xl font-bold mb-2 text-slate-100 group-hover:text-blue-500 transition-colors">HIIT</h2>
       <p class="text-slate-400 text-sm">High-intensity interval training</p>
     </a>
   </div>
@@ -56,11 +56,11 @@
         <div class="font-medium text-slate-200">{{ template.name }}</div>
         <div class="text-xs text-slate-400 mt-1">
           {% if template.workout_type == 'weightlifting' %}
-          <span class="text-red-500">Weightlifting</span>
+          <span class="text-blue-500">Weightlifting</span>
           {% elif template.workout_type == 'cardio' %}
-          <span class="text-red-500">Cardio</span>
+          <span class="text-blue-500">Cardio</span>
           {% else %}
-          <span class="text-red-500">HIIT</span>
+          <span class="text-blue-500">HIIT</span>
           {% endif %}
         </div>
       </a>

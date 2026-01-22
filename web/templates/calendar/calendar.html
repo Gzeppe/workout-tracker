@@ -7,7 +7,7 @@
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-slate-100">Workout Calendar</h1>
     <a href="{% url 'schedule_workout' %}"
-       class="px-4 py-2 rounded-xl bg-gradient-to-r from-red-700 to-red-700 hover:from-red-700 hover:to-red-500 font-semibold shadow-lg shadow-red-700/25 transition-all">
+       class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-700 to-blue-700 hover:from-blue-700 hover:to-blue-500 font-semibold shadow-lg shadow-blue-700/25 transition-all">
       Schedule Workout
     </a>
   </div>
@@ -42,8 +42,8 @@
           <tr>
             {% for d in week %}
             <td class="p-1 align-top">
-              <div class="min-h-[80px] rounded-xl p-2 {% if d == today %}bg-indigo-900/30 border border-red-600/50{% else %}bg-slate-800{% endif %}">
-                <div class="text-sm font-semibold mb-1 {% if d == today %}text-red-500{% else %}text-slate-400{% endif %}">
+              <div class="min-h-[80px] rounded-xl p-2 {% if d == today %}bg-indigo-900/30 border border-blue-600/50{% else %}bg-slate-800{% endif %}">
+                <div class="text-sm font-semibold mb-1 {% if d == today %}text-blue-500{% else %}text-slate-400{% endif %}">
                   {{ d.day }}
                 </div>
 
@@ -51,9 +51,9 @@
                 {% if d in workout_by_date %}
                   {% for w in workout_by_date|get_item:d %}
                   <div class="text-xs mb-1 px-2 py-1 rounded-lg truncate
-                    {% if w.workout_type == 'weightlifting' %}bg-red-600/20 text-red-400
-                    {% elif w.workout_type == 'cardio' %}bg-red-700/20 text-red-400
-                    {% else %}bg-red-600/20 text-red-400{% endif %}">
+                    {% if w.workout_type == 'weightlifting' %}bg-blue-600/20 text-blue-400
+                    {% elif w.workout_type == 'cardio' %}bg-blue-700/20 text-blue-400
+                    {% else %}bg-blue-600/20 text-blue-400{% endif %}">
                     {% if w.workout_type == 'weightlifting' %}&#128170;
                     {% elif w.workout_type == 'cardio' %}&#9889;
                     {% else %}&#9200;{% endif %}
@@ -67,9 +67,9 @@
                   {% for s in scheduled_by_date|get_item:d %}
                   {% if not s.completed %}
                   <div class="text-xs mb-1 px-2 py-1 rounded-lg border border-dashed truncate
-                    {% if s.workout_type == 'weightlifting' %}border-red-600/50 text-red-500
-                    {% elif s.workout_type == 'cardio' %}border-red-700/50 text-red-500
-                    {% else %}border-red-600/50 text-red-500{% endif %}">
+                    {% if s.workout_type == 'weightlifting' %}border-blue-600/50 text-blue-500
+                    {% elif s.workout_type == 'cardio' %}border-blue-700/50 text-blue-500
+                    {% else %}border-blue-600/50 text-blue-500{% endif %}">
                     {{ s.display_name|truncatechars:10 }}
                   </div>
                   {% endif %}
@@ -98,8 +98,8 @@
       {% for week in weeks %}
       <div class="grid grid-cols-7 gap-1 mb-1">
         {% for d in week %}
-        <div class="aspect-square rounded-lg p-1 flex flex-col items-center justify-start {% if d == today %}bg-indigo-900/30 border border-red-600/50{% else %}bg-slate-800{% endif %}">
-          <div class="text-xs font-semibold {% if d == today %}text-red-500{% else %}text-slate-400{% endif %}">
+        <div class="aspect-square rounded-lg p-1 flex flex-col items-center justify-start {% if d == today %}bg-indigo-900/30 border border-blue-600/50{% else %}bg-slate-800{% endif %}">
+          <div class="text-xs font-semibold {% if d == today %}text-blue-500{% else %}text-slate-400{% endif %}">
             {{ d.day }}
           </div>
           <!-- Workout indicators (dots) -->
@@ -107,18 +107,18 @@
             {% if d in workout_by_date %}
               {% for w in workout_by_date|get_item:d %}
               <div class="w-2 h-2 rounded-full
-                {% if w.workout_type == 'weightlifting' %}bg-red-500
-                {% elif w.workout_type == 'cardio' %}bg-red-500
-                {% else %}bg-red-500{% endif %}"></div>
+                {% if w.workout_type == 'weightlifting' %}bg-blue-500
+                {% elif w.workout_type == 'cardio' %}bg-blue-500
+                {% else %}bg-blue-500{% endif %}"></div>
               {% endfor %}
             {% endif %}
             {% if d in scheduled_by_date %}
               {% for s in scheduled_by_date|get_item:d %}
               {% if not s.completed %}
               <div class="w-2 h-2 rounded-full border
-                {% if s.workout_type == 'weightlifting' %}border-red-500
-                {% elif s.workout_type == 'cardio' %}border-red-500
-                {% else %}border-red-500{% endif %}"></div>
+                {% if s.workout_type == 'weightlifting' %}border-blue-500
+                {% elif s.workout_type == 'cardio' %}border-blue-500
+                {% else %}border-blue-500{% endif %}"></div>
               {% endif %}
               {% endfor %}
             {% endif %}
@@ -132,15 +132,15 @@
     <!-- Legend -->
     <div class="flex flex-wrap gap-4 mt-6 pt-4 border-t border-slate-700">
       <div class="flex items-center gap-2 text-sm">
-        <div class="w-4 h-4 rounded bg-red-600/30"></div>
+        <div class="w-4 h-4 rounded bg-blue-600/30"></div>
         <span class="text-slate-400">Weightlifting</span>
       </div>
       <div class="flex items-center gap-2 text-sm">
-        <div class="w-4 h-4 rounded bg-red-700/30"></div>
+        <div class="w-4 h-4 rounded bg-blue-700/30"></div>
         <span class="text-slate-400">Cardio</span>
       </div>
       <div class="flex items-center gap-2 text-sm">
-        <div class="w-4 h-4 rounded bg-red-600/30"></div>
+        <div class="w-4 h-4 rounded bg-blue-600/30"></div>
         <span class="text-slate-400">HIIT</span>
       </div>
       <div class="flex items-center gap-2 text-sm">

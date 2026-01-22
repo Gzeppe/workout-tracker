@@ -4,17 +4,17 @@
 <div class="max-w-3xl mx-auto">
   <!-- Header -->
   <div class="bg-slate-900 rounded-2xl p-6 shadow mb-6 border
-    {% if workout.workout_type == 'weightlifting' %}border-red-600/20
-    {% elif workout.workout_type == 'cardio' %}border-red-700/20
-    {% else %}border-red-600/20{% endif %}">
+    {% if workout.workout_type == 'weightlifting' %}border-blue-600/20
+    {% elif workout.workout_type == 'cardio' %}border-blue-700/20
+    {% else %}border-blue-600/20{% endif %}">
     <div class="flex items-center gap-2 mb-2">
       <span class="px-2 py-1 rounded-lg text-xs font-semibold uppercase
-        {% if workout.workout_type == 'weightlifting' %}bg-red-600/20 text-red-500
-        {% elif workout.workout_type == 'cardio' %}bg-red-700/20 text-red-500
-        {% else %}bg-red-600/20 text-red-500{% endif %}">
+        {% if workout.workout_type == 'weightlifting' %}bg-blue-600/20 text-blue-500
+        {% elif workout.workout_type == 'cardio' %}bg-blue-700/20 text-blue-500
+        {% else %}bg-blue-600/20 text-blue-500{% endif %}">
         {{ workout.workout_type_display }}
       </span>
-      <span class="text-red-400 font-semibold">Complete!</span>
+      <span class="text-blue-400 font-semibold">Complete!</span>
     </div>
     <h1 class="text-2xl font-bold text-slate-100">{{ workout.display_name }}</h1>
     <div class="text-slate-400 text-sm mt-1">
@@ -30,18 +30,18 @@
   <div class="grid grid-cols-2 gap-4 mb-6">
     <div class="bg-slate-900 rounded-2xl p-4 text-center">
       <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Total Sets</div>
-      <div class="text-3xl font-bold text-red-500">{{ total_sets }}</div>
+      <div class="text-3xl font-bold text-blue-500">{{ total_sets }}</div>
     </div>
     <div class="bg-slate-900 rounded-2xl p-4 text-center">
       <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Good/Great Sets</div>
-      <div class="text-3xl font-bold text-red-400">{{ good_great }}</div>
+      <div class="text-3xl font-bold text-blue-400">{{ good_great }}</div>
     </div>
   </div>
   {% elif workout.workout_type == 'cardio' and cardio_stats %}
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
     <div class="bg-slate-900 rounded-2xl p-4 text-center">
       <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Duration</div>
-      <div class="text-2xl font-bold text-red-500">
+      <div class="text-2xl font-bold text-blue-500">
         {% with mins=cardio_stats.total_duration|divisibleby:60 %}
         {{ cardio_stats.total_duration|floatformat:0 }}s
         {% endwith %}
@@ -49,26 +49,26 @@
     </div>
     <div class="bg-slate-900 rounded-2xl p-4 text-center">
       <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Distance</div>
-      <div class="text-2xl font-bold text-red-500">{{ cardio_stats.total_distance|floatformat:2 }} mi</div>
+      <div class="text-2xl font-bold text-blue-500">{{ cardio_stats.total_distance|floatformat:2 }} mi</div>
     </div>
     <div class="bg-slate-900 rounded-2xl p-4 text-center">
       <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Avg Speed</div>
-      <div class="text-2xl font-bold text-red-500">{{ cardio_stats.avg_speed|floatformat:1 }} mph</div>
+      <div class="text-2xl font-bold text-blue-500">{{ cardio_stats.avg_speed|floatformat:1 }} mph</div>
     </div>
     <div class="bg-slate-900 rounded-2xl p-4 text-center">
       <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Avg Incline</div>
-      <div class="text-2xl font-bold text-red-500">{{ cardio_stats.avg_incline|floatformat:1 }}%</div>
+      <div class="text-2xl font-bold text-blue-500">{{ cardio_stats.avg_incline|floatformat:1 }}%</div>
     </div>
   </div>
   {% elif workout.workout_type == 'hiit' and hiit_stats %}
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
     <div class="bg-slate-900 rounded-2xl p-4 text-center">
       <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Intervals</div>
-      <div class="text-2xl font-bold text-red-500">{{ hiit_stats.intervals_completed }} / {{ hiit_stats.total_intervals }}</div>
+      <div class="text-2xl font-bold text-blue-500">{{ hiit_stats.intervals_completed }} / {{ hiit_stats.total_intervals }}</div>
     </div>
     <div class="bg-slate-900 rounded-2xl p-4 text-center">
       <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Work Time</div>
-      <div class="text-2xl font-bold text-red-400">{{ hiit_stats.total_work_time }}s</div>
+      <div class="text-2xl font-bold text-blue-400">{{ hiit_stats.total_work_time }}s</div>
     </div>
     <div class="bg-slate-900 rounded-2xl p-4 text-center">
       <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Rest Time</div>
@@ -76,7 +76,7 @@
     </div>
     <div class="bg-slate-900 rounded-2xl p-4 text-center">
       <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Protocol</div>
-      <div class="text-lg font-bold text-red-500">{{ hiit_stats.work_duration }}/{{ hiit_stats.rest_duration }}</div>
+      <div class="text-lg font-bold text-blue-500">{{ hiit_stats.work_duration }}/{{ hiit_stats.rest_duration }}</div>
     </div>
   </div>
   {% endif %}
@@ -87,7 +87,7 @@
     <h2 class="text-xl font-semibold mb-4 text-slate-100">Workout Analysis</h2>
 
     {% if analysis.motivation %}
-    <div class="bg-red-600/10 border border-red-600/30 rounded-xl p-4 mb-4">
+    <div class="bg-blue-600/10 border border-blue-600/30 rounded-xl p-4 mb-4">
       <p class="text-indigo-200">{{ analysis.motivation }}</p>
     </div>
     {% endif %}
@@ -96,11 +96,11 @@
       <!-- Left Column -->
       <div class="space-y-4">
         {% if analysis.prs %}
-        <div class="bg-red-600/10 border border-red-600/30 rounded-xl p-4">
-          <h3 class="font-semibold text-red-400 mb-2">Personal Records</h3>
+        <div class="bg-blue-600/10 border border-blue-600/30 rounded-xl p-4">
+          <h3 class="font-semibold text-blue-400 mb-2">Personal Records</h3>
           <ul class="space-y-1">
             {% for pr in analysis.prs %}
-            <li class="text-red-200 text-sm">{{ pr }}</li>
+            <li class="text-blue-200 text-sm">{{ pr }}</li>
             {% endfor %}
           </ul>
         </div>
@@ -118,8 +118,8 @@
         {% endif %}
 
         {% if analysis.streaks %}
-        <div class="bg-red-600/10 border border-red-600/30 rounded-xl p-4">
-          <h3 class="font-semibold text-red-500 mb-2">Streaks</h3>
+        <div class="bg-blue-600/10 border border-blue-600/30 rounded-xl p-4">
+          <h3 class="font-semibold text-blue-500 mb-2">Streaks</h3>
           <ul class="space-y-1">
             {% for streak in analysis.streaks %}
             <li class="text-orange-200 text-sm">{{ streak }}</li>
@@ -159,7 +159,7 @@
       Save as Template
     </a>
     <a href="{% url 'select_workout_type' %}"
-       class="flex-1 px-5 py-3 rounded-xl bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 font-semibold text-center shadow-lg shadow-red-600/25 transition-all">
+       class="flex-1 px-5 py-3 rounded-xl bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 font-semibold text-center shadow-lg shadow-blue-600/25 transition-all">
       Start Another Workout
     </a>
     <a href="{% url 'dashboard' %}"

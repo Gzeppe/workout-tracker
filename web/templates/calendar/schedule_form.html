@@ -2,7 +2,7 @@
 {% block title %}Schedule Workout - Workout Tracker{% endblock %}
 {% block content %}
 <div class="max-w-xl mx-auto">
-  <div class="bg-slate-900 rounded-2xl p-6 shadow border border-red-700/20">
+  <div class="bg-slate-900 rounded-2xl p-6 shadow border border-blue-700/20">
     <h1 class="text-2xl font-bold text-slate-100 mb-6">Schedule a Workout</h1>
 
     <form method="post" class="space-y-6">
@@ -12,7 +12,7 @@
         <label class="block">
           <span class="font-semibold mb-2 block text-slate-300">Date</span>
           <input type="date" name="scheduled_date" value="{{ date }}"
-                 class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-red-700 focus:outline-none" required />
+                 class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-blue-700 focus:outline-none" requiblue />
         </label>
       </div>
 
@@ -20,7 +20,7 @@
         <label class="block">
           <span class="font-semibold mb-2 block text-slate-300">Workout Type</span>
           <select name="workout_type" id="workout_type" onchange="updateTypeOptions()"
-                  class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-red-700 focus:outline-none" required>
+                  class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-blue-700 focus:outline-none" requiblue>
             <option value="weightlifting">Weightlifting</option>
             <option value="cardio">Cardio</option>
             <option value="hiit">HIIT</option>
@@ -32,7 +32,7 @@
       <div id="weightlifting-options">
         <label class="block">
           <span class="font-semibold mb-2 block text-slate-300">Muscle Group</span>
-          <select name="day" class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-red-700 focus:outline-none">
+          <select name="day" class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-blue-700 focus:outline-none">
             <option value="">-- Select --</option>
             {% for d in days %}
             <option value="{{ d }}">{{ d }}</option>
@@ -45,7 +45,7 @@
       <div id="cardio-options" class="hidden">
         <label class="block">
           <span class="font-semibold mb-2 block text-slate-300">Cardio Type</span>
-          <select name="cardio_type" class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-red-700 focus:outline-none">
+          <select name="cardio_type" class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-blue-700 focus:outline-none">
             <option value="">-- Select --</option>
             {% for value, label in cardio_types %}
             <option value="{{ value }}">{{ label }}</option>
@@ -59,7 +59,7 @@
       <div>
         <label class="block">
           <span class="font-semibold mb-2 block text-slate-300">Use Template (Optional)</span>
-          <select name="template_id" class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-red-700 focus:outline-none">
+          <select name="template_id" class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-blue-700 focus:outline-none">
             <option value="">-- None --</option>
             {% for t in templates %}
             <option value="{{ t.id }}">{{ t.name }} ({{ t.get_workout_type_display }})</option>
@@ -73,13 +73,13 @@
         <label class="block">
           <span class="font-semibold mb-2 block text-slate-300">Notes (Optional)</span>
           <textarea name="notes" rows="2" placeholder="e.g., Focus on heavy squats"
-                    class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-red-700 focus:outline-none"></textarea>
+                    class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-blue-700 focus:outline-none"></textarea>
         </label>
       </div>
 
       <div class="flex gap-3 pt-4">
         <button type="submit"
-                class="flex-1 px-5 py-3 rounded-xl bg-gradient-to-r from-red-700 to-red-700 hover:from-red-700 hover:to-red-500 font-semibold shadow-lg shadow-red-700/25 transition-all">
+                class="flex-1 px-5 py-3 rounded-xl bg-gradient-to-r from-blue-700 to-blue-700 hover:from-blue-700 hover:to-blue-500 font-semibold shadow-lg shadow-blue-700/25 transition-all">
           Schedule
         </button>
         <a href="{% url 'calendar_view' %}"

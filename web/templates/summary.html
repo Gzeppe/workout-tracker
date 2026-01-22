@@ -40,7 +40,7 @@
           <!-- Personal Records -->
           {% if analysis.prs %}
           <div>
-            <h3 class="text-lg font-semibold text-red-400 mb-2">🏆 Personal Records</h3>
+            <h3 class="text-lg font-semibold text-blue-400 mb-2">🏆 Personal Records</h3>
             <ul class="space-y-2">
               {% for pr in analysis.prs %}
               <li class="bg-slate-900 rounded-lg p-3 text-sm">{{ pr }}</li>
@@ -64,7 +64,7 @@
           <!-- Streaks -->
           {% if analysis.streaks %}
           <div>
-            <h3 class="text-lg font-semibold text-red-500 mb-2">🔥 Streaks</h3>
+            <h3 class="text-lg font-semibold text-blue-500 mb-2">🔥 Streaks</h3>
             <ul class="space-y-2">
               {% for streak in analysis.streaks %}
               <li class="bg-slate-900 rounded-lg p-3 text-sm">{{ streak }}</li>
@@ -98,7 +98,7 @@
 
     <div class="mt-6 flex gap-2">
       <a href="{% url 'start_workout' %}"
-         class="px-4 py-2 rounded-xl bg-red-700 hover:bg-red-600 font-semibold">
+         class="px-4 py-2 rounded-xl bg-blue-700 hover:bg-blue-600 font-semibold">
         Start another workout
       </a>
 
