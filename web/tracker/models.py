@@ -75,6 +75,9 @@ class Workout(models.Model):
         related_name="workouts_from_template",
     )
 
+    # End-of-session notes
+    notes = models.TextField(blank=True, default="")
+
     def __str__(self) -> str:
         if self.name:
             return f"{self.name} - {self.started_at:%Y-%m-%d %I:%M %p}"

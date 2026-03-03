@@ -32,6 +32,7 @@ urlpatterns = [
     path("workouts/<int:workout_id>/hiit/", views.hiit_workout_detail, name="hiit_workout_detail"),
 
     # Workout actions
+    path("workouts/<int:workout_id>/notes/", views.save_workout_notes, name="save_workout_notes"),
     path("workouts/<int:workout_id>/add-set/", views.add_set, name="add_set"),
     path("workouts/<int:workout_id>/add-cardio/", views.add_cardio_entry, name="add_cardio_entry"),
     path("workouts/<int:workout_id>/update-hiit/", views.update_hiit_session, name="update_hiit_session"),

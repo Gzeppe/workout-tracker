@@ -14,7 +14,7 @@ from django.views.decorators.http import require_http_methods
 from django_ratelimit.decorators import ratelimit
 from django_ratelimit.exceptions import Ratelimited
 
-from datetime import timedelta
+from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 
 from .models import (
@@ -33,6 +33,14 @@ MOODS = ["Exhausted", "Low Energy", "Normal", "Energetic"]
 QUALITIES = ["bad", "ok", "good", "great"]
 WORKOUT_TYPES = ["weightlifting", "cardio", "hiit"]
 CARDIO_TYPES = ["running", "cycling", "swimming", "rowing", "elliptical", "stair_climber", "jump_rope", "walking", "other"]
+
+# Maps quality rating → difficulty score (higher = harder/worse)
+QUALITY_DIFFICULTY = {"bad": 4, "ok": 3, "good": 2, "great": 1}
+
+FATIGUE_KEYWORDS = frozenset({
+    "fatigue", "tired", "exhausted", "sore", "sick", "sleep", "stressed",
+    "stiff", "pain", "injury", "weak", "drained", "rough", "awful",
+})
 
 
 def ratelimited_error(request, exception):
@@ -653,160 +661,140 @@ def end_workout(request, workout_id: int):
     )
 
 
+@login_required
+@require_http_methods(["POST"])
+def save_workout_notes(request, workout_id: int):
+    """Save end-of-session notes for a completed workout."""
+    w = get_object_or_404(Workout, id=workout_id, user=request.user)
+    w.notes = request.POST.get("notes", "").strip()
+    w.save(update_fields=["notes"])
+    return redirect("end_workout", workout_id=workout_id)
+
+
 def generate_workout_analysis(current_workout, user):
-    """Generate comprehensive workout analysis with PRs, streaks, improvements, and motivation."""
+    """
+    Generate comprehensive workout analysis including PRs, volume trends,
+    strength progression, quality/RPE patterns, and contextual feedback tips.
+
+    Returns a dict with both legacy keys (prs, improvements, areas_to_improve,
+    streaks, motivation) and new keys (volume_trend, strength_trend,
+    quality_pattern, days_since_last, consecutive_weeks, feedback_tips).
+    """
+    from django.db.models import Max, Sum
+
     analysis = {
+        # Legacy keys
         "prs": [],
         "improvements": [],
         "areas_to_improve": [],
         "streaks": [],
         "motivation": "",
+        # New keys
+        "volume_trend": None,       # {current, previous, pct_change, direction}
+        "strength_trend": None,     # {direction, description, sessions}
+        "quality_pattern": None,    # {avg_score, high_effort, label}
+        "days_since_last": None,    # int
+        "consecutive_weeks": 0,     # int
+        "feedback_tips": [],        # list of contextual tip strings
     }
 
-    from django.db.models import Max, Sum
-
-    current_sets = current_workout.sets.select_related("exercise").all()
-    # Only analyze linked exercises (not custom exercise names)
+    current_sets = list(current_workout.sets.select_related("exercise").all())
     exercises_in_workout = set(s.exercise for s in current_sets if s.exercise is not None)
+    total_sets = len(current_sets)
+    good_great = sum(1 for s in current_sets if s.quality in ("good", "great"))
 
+    # ── PRs (per linked exercise) ─────────────────────────────────────────────
     for exercise in exercises_in_workout:
-        exercise_sets = [s for s in current_sets if s.exercise == exercise]
+        ex_sets = [s for s in current_sets if s.exercise == exercise]
+        if not ex_sets:
+            continue
 
-        all_time_sets = SetEntry.objects.filter(
+        all_time = SetEntry.objects.filter(
             workout__user=user, exercise=exercise, workout__ended_at__isnull=False
         ).exclude(workout=current_workout)
 
-        if exercise_sets:
-            current_max_weight = max(s.weight_lb for s in exercise_sets)
-            historical_max = (
-                all_time_sets.aggregate(Max("weight_lb"))["weight_lb__max"] or 0
-            )
+        cur_max_w = max(s.weight_lb for s in ex_sets)
+        hist_max_w = all_time.aggregate(Max("weight_lb"))["weight_lb__max"] or 0
+        if cur_max_w > hist_max_w:
+            analysis["prs"].append(f"New max weight PR for {exercise.name}: {cur_max_w} lb!")
 
-            if current_max_weight > historical_max:
-                analysis["prs"].append(
-                    f"New max weight PR for {exercise.name}: {current_max_weight} lb!"
-                )
+        cur_max_r = max(s.reps for s in ex_sets)
+        hist_max_r = all_time.aggregate(Max("reps"))["reps__max"] or 0
+        if cur_max_r > hist_max_r:
+            analysis["prs"].append(f"New max reps PR for {exercise.name}: {cur_max_r} reps!")
 
-            current_max_reps = max(s.reps for s in exercise_sets)
-            historical_max_reps = all_time_sets.aggregate(Max("reps"))["reps__max"] or 0
+        cur_vol = sum(s.weight_lb * s.reps for s in ex_sets)
+        prev_wids = list(all_time.values_list("workout_id", flat=True).distinct())
+        prev_vols = [sum(s.weight_lb * s.reps for s in all_time.filter(workout_id=wid)) for wid in prev_wids]
+        if prev_vols and cur_vol > max(prev_vols):
+            analysis["prs"].append(f"New volume PR for {exercise.name}: {cur_vol} total volume!")
 
-            if current_max_reps > historical_max_reps:
-                analysis["prs"].append(
-                    f"New max reps PR for {exercise.name}: {current_max_reps} reps!"
-                )
-
-            current_volume = sum(s.weight_lb * s.reps for s in exercise_sets)
-
-            previous_workouts_for_exercise = (
-                all_time_sets.values_list("workout_id", flat=True).distinct()
-            )
-
-            previous_volumes = []
-            for workout_id in previous_workouts_for_exercise:
-                workout_sets = all_time_sets.filter(workout_id=workout_id)
-                workout_volume = sum(s.weight_lb * s.reps for s in workout_sets)
-                previous_volumes.append(workout_volume)
-
-            if previous_volumes:
-                max_previous_volume = max(previous_volumes)
-                if current_volume > max_previous_volume:
-                    analysis["prs"].append(
-                        f"New volume PR for {exercise.name}: {current_volume} total volume!"
-                    )
-
-    previous_workouts = (
+    # ── Session-level comparisons (most recent workout of any type) ───────────
+    previous_workouts = list(
         Workout.objects.filter(user=user, ended_at__isnull=False)
         .exclude(id=current_workout.id)
         .order_by("-ended_at")[:5]
     )
 
-    total_sets = current_workout.sets.count()
-    good_great = current_workout.sets.filter(quality__in=["good", "great"]).count()
-
     if previous_workouts:
-        last_workout = previous_workouts[0]
+        last = previous_workouts[0]
+        last_total = last.sets.count()
+        if total_sets > last_total:
+            analysis["improvements"].append(f"Increased total sets from {last_total} to {total_sets}")
 
-        last_total_sets = last_workout.sets.count()
-        if total_sets > last_total_sets:
-            analysis["improvements"].append(
-                f"Increased total sets from {last_total_sets} to {total_sets}"
-            )
-
-        last_good = last_workout.sets.filter(quality__in=["good", "great"]).count()
+        last_good = last.sets.filter(quality__in=["good", "great"]).count()
         if good_great > last_good:
-            analysis["improvements"].append(
-                f"Improved quality sets from {last_good} to {good_great}"
-            )
+            analysis["improvements"].append(f"Improved quality sets from {last_good} to {good_great}")
 
         for exercise in exercises_in_workout:
             if exercise is None:
                 continue
-            current_ex_sets = [s for s in current_sets if s.exercise == exercise]
-            last_ex_sets = last_workout.sets.filter(exercise=exercise)
+            cur_ex = [s for s in current_sets if s.exercise == exercise]
+            last_ex = last.sets.filter(exercise=exercise)
+            if last_ex.exists() and cur_ex:
+                cur_avg = sum(s.weight_lb for s in cur_ex) / len(cur_ex)
+                last_avg = last_ex.aggregate(avg=Sum("weight_lb"))["avg"] / last_ex.count()
+                if cur_avg > last_avg:
+                    analysis["improvements"].append(f"Increased average weight for {exercise.name}")
 
-            if last_ex_sets.exists() and current_ex_sets:
-                current_avg = sum(s.weight_lb for s in current_ex_sets) / len(
-                    current_ex_sets
-                )
-                last_avg = (
-                    last_ex_sets.aggregate(avg=Sum("weight_lb"))["avg"]
-                    / last_ex_sets.count()
-                )
-
-                if current_avg > last_avg:
-                    analysis["improvements"].append(
-                        f"Increased average weight for {exercise.name}"
-                    )
-
-    low_quality_sets = current_workout.sets.filter(quality__in=["bad", "ok"])
-    if low_quality_sets.exists():
-        low_q_count = low_quality_sets.count()
+    # ── Areas to improve ─────────────────────────────────────────────────────
+    low_q = sum(1 for s in current_sets if s.quality in ("bad", "ok"))
+    if low_q:
         analysis["areas_to_improve"].append(
-            f"{low_q_count} sets rated as 'bad' or 'ok' - focus on form and recovery"
+            f"{low_q} sets rated as 'bad' or 'ok' - focus on form and recovery"
         )
 
     for exercise in exercises_in_workout:
         if exercise is None:
             continue
-        exercise_sets_ordered = sorted(
-            [s for s in current_sets if s.exercise == exercise],
-            key=lambda x: x.set_number,
-        )
-        if len(exercise_sets_ordered) >= 3:
-            if (
-                exercise_sets_ordered[-1].reps < exercise_sets_ordered[0].reps * 0.6
-            ):
-                analysis["areas_to_improve"].append(
-                    f"{exercise.name}: Significant rep drop across sets - consider reducing weight or longer rest"
-                )
-
-    recent_workouts = list(previous_workouts[:5])
-    if recent_workouts:
-        streak_count = 0
-        for workout in [current_workout] + recent_workouts:
-            good_pct = (
-                workout.sets.filter(quality__in=["good", "great"]).count()
-                / max(workout.sets.count(), 1)
-            )
-            if good_pct >= 0.7:
-                streak_count += 1
-            else:
-                break
-
-        if streak_count >= 3:
-            analysis["streaks"].append(
-                f"{streak_count} workout streak with 70%+ quality sets!"
+        ex_ordered = sorted([s for s in current_sets if s.exercise == exercise], key=lambda x: x.set_number)
+        if len(ex_ordered) >= 3 and ex_ordered[-1].reps < ex_ordered[0].reps * 0.6:
+            analysis["areas_to_improve"].append(
+                f"{exercise.name}: Significant rep drop across sets - consider reducing weight or longer rest"
             )
 
+    # ── Quality streak ────────────────────────────────────────────────────────
+    streak_count = 0
+    for workout in [current_workout] + previous_workouts[:5]:
+        s_count = workout.sets.count()
+        gpct = workout.sets.filter(quality__in=["good", "great"]).count() / max(s_count, 1)
+        if gpct >= 0.7:
+            streak_count += 1
+        else:
+            break
+    if streak_count >= 3:
+        analysis["streaks"].append(f"{streak_count} workout streak with 70%+ quality sets!")
+
+    # ── Motivation message ────────────────────────────────────────────────────
     mood = current_workout.mood
     quality_pct = good_great / max(total_sets, 1)
 
-    if mood in ["Exhausted", "Low Energy"] and quality_pct >= 0.6:
+    if mood in ("Exhausted", "Low Energy") and quality_pct >= 0.6:
         analysis["motivation"] = (
             "Amazing work pushing through despite low energy! Your dedication is impressive. "
             "Make sure to prioritize rest and recovery - you've earned it!"
         )
-    elif mood in ["Exhausted", "Low Energy"]:
+    elif mood in ("Exhausted", "Low Energy"):
         analysis["motivation"] = (
             "Great job showing up even when energy was low! Remember, consistency matters more than perfection. "
             "Rest well and come back stronger!"
@@ -832,12 +820,166 @@ def generate_workout_analysis(current_workout, user):
             "Keep building on this foundation and trust the process!"
         )
 
-    recent_moods = [w.mood for w in recent_workouts[:3]]
+    recent_moods = [w.mood for w in previous_workouts[:3]]
     if recent_moods.count("Exhausted") >= 2 or recent_moods.count("Low Energy") >= 2:
         analysis["motivation"] += (
             " (Your recent workouts show low energy - consider taking an extra rest day or adjusting intensity.)"
         )
 
+    # ── NEW: Same-muscle-group history (last 6 sessions) ─────────────────────
+    same_group = []
+    if current_workout.workout_type == "weightlifting" and current_workout.day:
+        same_group = list(
+            Workout.objects.filter(
+                user=user,
+                workout_type="weightlifting",
+                day=current_workout.day,
+                ended_at__isnull=False,
+            )
+            .exclude(id=current_workout.id)
+            .order_by("-ended_at")[:6]
+        )
+
+    # Volume trend vs last same-group session
+    if same_group:
+        cur_vol_total = sum(s.weight_lb * s.reps for s in current_sets)
+        prev_vol_total = sum(s.weight_lb * s.reps for s in same_group[0].sets.all())
+
+        if prev_vol_total > 0:
+            pct = ((cur_vol_total - prev_vol_total) / prev_vol_total) * 100
+            direction = "up" if pct > 2 else ("down" if pct < -2 else "same")
+        else:
+            pct, direction = 0.0, "same"
+
+        analysis["volume_trend"] = {
+            "current": cur_vol_total,
+            "previous": prev_vol_total,
+            "pct_change": round(abs(pct), 1),
+            "direction": direction,
+        }
+
+        # Days since last same-group session
+        analysis["days_since_last"] = (
+            timezone.now().date() - same_group[0].ended_at.date()
+        ).days
+
+        # Consecutive calendar weeks this muscle group was trained
+        weeks_seen = set()
+        for sess in [current_workout] + same_group:
+            d = sess.ended_at.date() if sess.ended_at else timezone.now().date()
+            weeks_seen.add(d.isocalendar()[:2])  # (iso_year, iso_week)
+
+        check_year, check_week = timezone.now().date().isocalendar()[:2]
+        wk_count = 0
+        while (check_year, check_week) in weeks_seen:
+            wk_count += 1
+            prev_monday = date.fromisocalendar(check_year, check_week, 1) - timedelta(days=7)
+            check_year, check_week = prev_monday.isocalendar()[:2]
+        analysis["consecutive_weeks"] = wk_count
+
+    # Strength trend — top set weight over last 3 same-group sessions
+    if len(same_group) >= 2:
+        top_weights = []
+        for sess in [current_workout] + same_group[:2]:
+            sess_sets = list(sess.sets.all())
+            top_weights.append(max((s.weight_lb for s in sess_sets), default=0))
+
+        if top_weights[0] > top_weights[1]:
+            s_dir, s_desc = "up", "Top set weight trending up"
+        elif top_weights[0] < top_weights[1]:
+            s_dir, s_desc = "down", "Top set weight has decreased"
+        else:
+            s_dir, s_desc = "same", "Top set weight holding steady"
+
+        if len(top_weights) == 3 and top_weights[0] == top_weights[1] == top_weights[2]:
+            s_dir = "plateau"
+            s_desc = f"Same top weight ({top_weights[0]} lb) for 3+ sessions"
+
+        analysis["strength_trend"] = {
+            "direction": s_dir,
+            "description": s_desc,
+            "sessions": top_weights,
+        }
+
+    # Quality/difficulty pattern (proxy for session RPE)
+    if current_sets:
+        scores = [QUALITY_DIFFICULTY.get(s.quality, 2) for s in current_sets]
+        avg_score = sum(scores) / len(scores)
+        analysis["quality_pattern"] = {
+            "avg_score": round(avg_score, 2),
+            "high_effort": avg_score >= 3.0,
+            "label": (
+                "very hard" if avg_score >= 3.5 else
+                "hard" if avg_score >= 3.0 else
+                "moderate" if avg_score >= 2.0 else
+                "easy"
+            ),
+        }
+
+    # ── NEW: Contextual feedback tips ─────────────────────────────────────────
+    notes_words = set((current_workout.notes or "").lower().split())
+    notes_has_fatigue = bool(FATIGUE_KEYWORDS & notes_words)
+
+    vt = analysis["volume_trend"]
+    st = analysis["strength_trend"]
+    qp = analysis["quality_pattern"]
+    tips = []
+
+    # Volume + effort context
+    if vt and qp:
+        if vt["direction"] == "up" and not qp["high_effort"]:
+            tips.append(
+                "Volume up with quality effort — consider adding weight or an extra set next session."
+            )
+        elif vt["direction"] == "down" and notes_has_fatigue:
+            tips.append(
+                "Volume dip flagged as a fatigue session — not a true regression. "
+                "Prioritize sleep and nutrition before next session."
+            )
+        elif vt["direction"] == "down":
+            tips.append(
+                "Volume dropped vs last session — consider whether rest, nutrition, or stress is a factor."
+            )
+
+    # High-effort pattern across sessions
+    if qp and qp["high_effort"]:
+        recent_high_count = 0
+        for sess in same_group[:2]:
+            sess_qs = list(sess.sets.all())
+            if sess_qs:
+                avg = sum(QUALITY_DIFFICULTY.get(s.quality, 2) for s in sess_qs) / len(sess_qs)
+                if avg >= 3.0:
+                    recent_high_count += 1
+
+        if recent_high_count >= 2:
+            tips.append(
+                "Consistently high effort across last 3 sessions — "
+                "a deload or extra rest day may improve your next performance."
+            )
+        else:
+            tips.append(
+                "High effort session — prioritize sleep and protein before your next session."
+            )
+
+    # Plateau detection
+    if st and st["direction"] == "plateau":
+        tips.append(
+            f"Plateau detected: {st['description']} — "
+            "try a rep range change, technique variation, or a planned deload week."
+        )
+
+    # PR highlight
+    if analysis["prs"]:
+        tips.append("Personal record achieved — use this as your new progressive overload baseline.")
+
+    # Back-to-back warning
+    if analysis["days_since_last"] is not None and analysis["days_since_last"] <= 1:
+        tips.append(
+            "Back-to-back sessions for this muscle group — ensure adequate recovery "
+            "before your next session of the same type."
+        )
+
+    analysis["feedback_tips"] = tips
     return analysis
 
 
