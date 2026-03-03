@@ -17,8 +17,7 @@
     <div class="text-brand-accent text-sm font-medium mt-1">
       <span class="text-brand-textMuted">Set {{ s.set_number }}</span> <span class="mx-1 opacity-50">•</span>
       {% if s.duration_seconds > 0 %}
-      {% widthratio s.duration_seconds 60 1 %} min{% if s.weight_lb > 0 %} @ {{ s.weight_lb }} lb{% endif %}{% if s.reps
-      > 0 %} x {{ s.reps }}{% endif %}
+      {% widthratio s.duration_seconds 60 1 %} min{% if s.weight_lb > 0 %} @ {{ s.weight_lb }} lb{% endif %}{% if s.reps > 0 %} x {{ s.reps }}{% endif %}
       {% else %}
       {{ s.weight_lb }} lb x {{ s.reps }}
       {% endif %}
