@@ -6,12 +6,10 @@
       {{ s.exercise_name }}
       {% if s.custom_equipment %}
       <span
-        class="text-brand-textMuted text-xs font-medium px-2 py-0.5 rounded-md bg-brand-surface border border-brand-surfaceBorder">{{
-        s.custom_equipment }}</span>
+        class="text-brand-textMuted text-xs font-medium px-2 py-0.5 rounded-md bg-brand-surface border border-brand-surfaceBorder">{{ s.custom_equipment }}</span>
       {% elif s.exercise and s.exercise.equipment %}
       <span
-        class="text-brand-textMuted text-xs font-medium px-2 py-0.5 rounded-md bg-brand-surface border border-brand-surfaceBorder">{{
-        s.exercise.equipment }}</span>
+        class="text-brand-textMuted text-xs font-medium px-2 py-0.5 rounded-md bg-brand-surface border border-brand-surfaceBorder">{{ s.exercise.equipment }}</span>
       {% endif %}
     </div>
     <div class="text-brand-accent text-sm font-medium mt-1">
@@ -23,8 +21,7 @@
       {% endif %}
       <span class="mx-1 opacity-50">•</span>
       <span
-        class="uppercase tracking-wider text-[10px] {% if s.quality == 'good' %}text-[#00E5FF]{% elif s.quality == 'ok' %}text-[#FFD700]{% else %}text-brand-danger{% endif %}">{{
-        s.quality }}</span>
+        class="uppercase tracking-wider text-[10px] {% if s.quality == 'good' %}text-[#00E5FF]{% elif s.quality == 'ok' %}text-[#FFD700]{% else %}text-brand-danger{% endif %}">{{ s.quality }}</span>
     </div>
   </div>
 

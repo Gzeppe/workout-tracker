@@ -28,7 +28,7 @@ from .models import (
 )
 
 
-DAYS = ["Custom Workout", "Back & Biceps", "Chest & Triceps", "Legs", "Core", "Shoulders & Traps"]
+DAYS = ["Back & Biceps", "Chest & Triceps", "Legs", "Core", "Shoulders & Traps", "Other"]
 MOODS = ["Exhausted", "Low Energy", "Normal", "Energetic"]
 QUALITIES = ["bad", "ok", "good", "great"]
 WORKOUT_TYPES = ["weightlifting", "cardio", "hiit"]
@@ -39,7 +39,17 @@ QUALITY_DIFFICULTY = {"bad": 4, "ok": 3, "good": 2, "great": 1}
 
 FATIGUE_KEYWORDS = frozenset({
     "fatigue", "tired", "exhausted", "sore", "sick", "sleep", "stressed",
-    "stiff", "pain", "injury", "weak", "drained", "rough", "awful",
+    "stiff", "pain", "weak", "drained", "rough", "awful",
+})
+
+INJURY_KEYWORDS = frozenset({
+    "injury", "injured", "hurt", "sprain", "strain", "pulled", "tweaked",
+    "sharp", "ache", "aching", "swollen", "inflammation", "tendon", "ligament",
+})
+
+TIME_LIMIT_KEYWORDS = frozenset({
+    "rushed", "short", "quick", "time", "late", "early", "cut", "limited",
+    "busy", "hurried", "fast", "couldn't", "skip", "skipped",
 })
 
 
@@ -370,9 +380,9 @@ def weightlifting_workout_detail(request, workout_id: int):
     """Weightlifting workout detail page"""
     w = get_object_or_404(Workout, id=workout_id, user=request.user)
 
-    # Custom Workout: no exercise dropdown, user types exercise name
+    # Custom Workout / Other: no exercise dropdown, user types exercise name
     # Other days: filter exercises by day
-    is_custom = w.day == "Custom Workout"
+    is_custom = w.day in ("Custom Workout", "Other")
     if is_custom:
         exercises = []
     else:
@@ -463,7 +473,7 @@ def add_set(request, workout_id: int):
 
     if not use_custom:
         # No custom name entered, must use dropdown (unless Custom Workout day)
-        if w.day == "Custom Workout":
+        if w.day in ("Custom Workout", "Other"):
             return HttpResponseBadRequest("Exercise name required")
         if not exercise_id.isdigit():
             return HttpResponseBadRequest("Please enter an exercise name or select from the list")
@@ -729,20 +739,36 @@ def generate_workout_analysis(current_workout, user):
         if prev_vols and cur_vol > max(prev_vols):
             analysis["prs"].append(f"New volume PR for {exercise.name}: {cur_vol} total volume!")
 
-    # ── Session-level comparisons (most recent workout of any type) ───────────
+    # ── Same-muscle-group history (computed early for apples-to-apples comparisons) ──
+    same_group = []
+    if current_workout.workout_type == "weightlifting" and current_workout.day:
+        same_group = list(
+            Workout.objects.filter(
+                user=user,
+                workout_type="weightlifting",
+                day=current_workout.day,
+                ended_at__isnull=False,
+            )
+            .exclude(id=current_workout.id)
+            .order_by("-ended_at")[:6]
+        )
+
+    # ── Recent workouts (any type) for streak/mood analysis ───────────────────
     previous_workouts = list(
         Workout.objects.filter(user=user, ended_at__isnull=False)
         .exclude(id=current_workout.id)
         .order_by("-ended_at")[:5]
     )
 
-    if previous_workouts:
-        last = previous_workouts[0]
-        last_total = last.sets.count()
+    # ── Session-level comparisons (same muscle group — apples-to-apples) ──────
+    comparison_base = same_group[0] if same_group else None
+
+    if comparison_base:
+        last_total = comparison_base.sets.count()
         if total_sets > last_total:
             analysis["improvements"].append(f"Increased total sets from {last_total} to {total_sets}")
 
-        last_good = last.sets.filter(quality__in=["good", "great"]).count()
+        last_good = comparison_base.sets.filter(quality__in=["good", "great"]).count()
         if good_great > last_good:
             analysis["improvements"].append(f"Improved quality sets from {last_good} to {good_great}")
 
@@ -750,7 +776,7 @@ def generate_workout_analysis(current_workout, user):
             if exercise is None:
                 continue
             cur_ex = [s for s in current_sets if s.exercise == exercise]
-            last_ex = last.sets.filter(exercise=exercise)
+            last_ex = comparison_base.sets.filter(exercise=exercise)
             if last_ex.exists() and cur_ex:
                 cur_avg = sum(s.weight_lb for s in cur_ex) / len(cur_ex)
                 last_avg = last_ex.aggregate(avg=Sum("weight_lb"))["avg"] / last_ex.count()
@@ -824,20 +850,6 @@ def generate_workout_analysis(current_workout, user):
     if recent_moods.count("Exhausted") >= 2 or recent_moods.count("Low Energy") >= 2:
         analysis["motivation"] += (
             " (Your recent workouts show low energy - consider taking an extra rest day or adjusting intensity.)"
-        )
-
-    # ── NEW: Same-muscle-group history (last 6 sessions) ─────────────────────
-    same_group = []
-    if current_workout.workout_type == "weightlifting" and current_workout.day:
-        same_group = list(
-            Workout.objects.filter(
-                user=user,
-                workout_type="weightlifting",
-                day=current_workout.day,
-                ended_at__isnull=False,
-            )
-            .exclude(id=current_workout.id)
-            .order_by("-ended_at")[:6]
         )
 
     # Volume trend vs last same-group session
@@ -919,6 +931,8 @@ def generate_workout_analysis(current_workout, user):
     # ── NEW: Contextual feedback tips ─────────────────────────────────────────
     notes_words = set((current_workout.notes or "").lower().split())
     notes_has_fatigue = bool(FATIGUE_KEYWORDS & notes_words)
+    notes_has_injury = bool(INJURY_KEYWORDS & notes_words)
+    notes_has_time_limit = bool(TIME_LIMIT_KEYWORDS & notes_words)
 
     vt = analysis["volume_trend"]
     st = analysis["strength_trend"]
@@ -931,10 +945,10 @@ def generate_workout_analysis(current_workout, user):
             tips.append(
                 "Volume up with quality effort — consider adding weight or an extra set next session."
             )
-        elif vt["direction"] == "down" and notes_has_fatigue:
+        elif vt["direction"] == "down" and (notes_has_fatigue or notes_has_injury or notes_has_time_limit):
             tips.append(
-                "Volume dip flagged as a fatigue session — not a true regression. "
-                "Prioritize sleep and nutrition before next session."
+                "Volume dip noted — your notes suggest this wasn't a typical session. "
+                "Not a true regression; prioritize recovery before your next session."
             )
         elif vt["direction"] == "down":
             tips.append(
@@ -977,6 +991,20 @@ def generate_workout_analysis(current_workout, user):
         tips.append(
             "Back-to-back sessions for this muscle group — ensure adequate recovery "
             "before your next session of the same type."
+        )
+
+    # Injury flag
+    if notes_has_injury:
+        tips.append(
+            "Injury or pain noted — avoid pushing through discomfort. "
+            "Consider rest, ice, and consulting a professional before your next session."
+        )
+
+    # Time-limited session flag
+    if notes_has_time_limit and not notes_has_injury:
+        tips.append(
+            "Looks like this was a time-limited session. "
+            "Volume may be lower than usual — don't count this as a regression."
         )
 
     analysis["feedback_tips"] = tips

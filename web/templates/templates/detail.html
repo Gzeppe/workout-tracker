@@ -95,12 +95,10 @@
         </div>
         <div class="flex gap-2 text-sm font-medium">
           {% if ex.target_sets %}
-          <span class="px-2.5 py-1 rounded-md bg-brand-surface border border-brand-surfaceBorder text-brand-accent">{{
-            ex.target_sets }} sets</span>
+          <span class="px-2.5 py-1 rounded-md bg-brand-surface border border-brand-surfaceBorder text-brand-accent">{{ ex.target_sets }} sets</span>
           {% endif %}
           {% if ex.target_reps %}
-          <span class="px-2.5 py-1 rounded-md bg-brand-surface border border-brand-surfaceBorder text-white">x {{
-            ex.target_reps }}</span>
+          <span class="px-2.5 py-1 rounded-md bg-brand-surface border border-brand-surfaceBorder text-white">x {{ ex.target_reps }}</span>
           {% endif %}
           {% if ex.target_weight %}
           <span class="px-2.5 py-1 rounded-md bg-brand-surface border border-brand-surfaceBorder text-brand-textMuted">@
@@ -180,8 +178,7 @@
     </div>
     <div class="p-4 bg-brand-surface border border-brand-surfaceBorder rounded-xl text-center text-sm">
       <span class="text-brand-textMuted">Estimated Total Time:</span>
-      <span class="mx-2 text-white/30">{{ template.hiit_intervals|add:0 }} x ({{ template.hiit_work_seconds }}s + {{
-        template.hiit_rest_seconds }}s) =</span>
+      <span class="mx-2 text-white/30">{{ template.hiit_intervals|add:0 }} x ({{ template.hiit_work_seconds }}s + {{ template.hiit_rest_seconds }}s) =</span>
       <span class="text-[#FFD700] font-bold text-lg">
         {% widthratio template.hiit_intervals 1 1 as intervals %}
         {% widthratio template.hiit_work_seconds 1 1 as work %}

@@ -10,12 +10,13 @@ class Workout(models.Model):
     ]
 
     DAY_CHOICES = [
-        ("Custom Workout", "Custom Workout"),
+        ("Custom Workout", "Custom Workout"),  # kept for legacy data
         ("Back & Biceps", "Back & Biceps"),
         ("Chest & Triceps", "Chest & Triceps"),
         ("Legs", "Legs"),
         ("Core", "Core"),
         ("Shoulders & Traps", "Shoulders & Traps"),
+        ("Other", "Other"),
     ]
 
     MOOD_CHOICES = [

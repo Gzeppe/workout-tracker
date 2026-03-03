@@ -194,8 +194,7 @@
               <select name="quality"
                 class="w-full bg-black/40 border border-brand-surfaceBorder focus:border-brand-accent focus:ring-1 focus:ring-brand-accent rounded-xl p-3.5 text-white appearance-none transition-all outline-none">
                 {% for q in qualities %}
-                <option value="{{ q }}" {% if q=="good" %}selected{% endif %} class="bg-[#050505] text-white py-1">{{
-                  q|capfirst }}</option>
+                <option value="{{ q }}" {% if q=="good" %}selected{% endif %} class="bg-[#050505] text-white py-1">{{ q|capfirst }}</option>
                 {% endfor %}
               </select>
               <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-brand-textMuted">

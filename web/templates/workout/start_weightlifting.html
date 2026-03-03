@@ -18,9 +18,9 @@
       {% if templates %}
       <div>
         <label class="block">
-          <span class="font-semibold mb-2 block text-[#FFF8F0]/80">Use Template (Optional)</span>
+          <span class="font-semibold mb-2 block text-[#FFF8F0]/80">Use Previous Workout Template</span>
           <select name="template_id" class="w-full bg-[#FFF8F0]/[0.08] rounded-xl p-3 border border-[#FFF8F0]/10 focus:border-[#00B7FF] focus:outline-none">
-            <option value="">-- Start Fresh --</option>
+            <option value="">-- No Template --</option>
             {% for t in templates %}
               <option value="{{ t.id }}">{{ t.name }}{% if t.day %} ({{ t.day }}){% endif %}</option>
             {% endfor %}
@@ -43,8 +43,8 @@
 
       <div>
         <label class="block">
-          <span class="font-semibold mb-2 block text-[#FFF8F0]/80">Custom Name (Optional)</span>
-          <input type="text" name="name" placeholder="e.g., Morning Push Day"
+          <span class="font-semibold mb-2 block text-[#FFF8F0]/80">If Other, name the Muscle(s) Group being trained today</span>
+          <input type="text" name="name" placeholder="e.g., Full Body, Push/Pull"
                  class="w-full bg-[#FFF8F0]/[0.08] rounded-xl p-3 border border-[#FFF8F0]/10 focus:border-[#00B7FF] focus:outline-none" />
         </label>
       </div>
