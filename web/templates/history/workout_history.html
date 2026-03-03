@@ -1,42 +1,59 @@
 {% extends "base.html" %}
 {% block title %}Workout History - Workout Tracker{% endblock %}
 {% block content %}
-<div class="max-w-4xl mx-auto">
+<div class="max-w-5xl mx-auto space-y-8 animate-[fadeIn_0.5s_ease-out]">
   <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-slate-100">Previous Workouts</h1>
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+    <div>
+      <h1 class="text-3xl md:text-4xl font-heading font-bold text-white text-glow">Previous Workouts</h1>
+      <p class="text-brand-textMuted mt-1">Review your past performance and stats</p>
+    </div>
   </div>
 
-  <!-- View Tabs -->
-  <div class="flex gap-2 mb-6">
-    <a href="?view=list{% if filter_type %}&type={{ filter_type }}{% endif %}"
-       class="px-4 py-2 rounded-xl font-semibold transition-colors {% if view_mode == 'list' %}bg-blue-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
-      List View
-    </a>
-    <a href="?view=stats{% if filter_type %}&type={{ filter_type }}{% endif %}"
-       class="px-4 py-2 rounded-xl font-semibold transition-colors {% if view_mode == 'stats' %}bg-blue-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
-      Stats View
-    </a>
-  </div>
+  <!-- View Tabs & Filter -->
+  <div class="glass-panel p-2 flex flex-col md:flex-row items-center justify-between gap-4 relative z-10">
+    <div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 px-2 md:px-0">
+      <a href="?view=list{% if filter_type %}&type={{ filter_type }}{% endif %}"
+        class="px-5 py-2.5 rounded-xl font-bold transition-all whitespace-nowrap {% if view_mode == 'list' %}bg-brand-accent text-black shadow-[0_0_15px_rgba(0,229,255,0.3)]{% else %}bg-transparent hover:bg-white/5 text-brand-textMuted hover:text-white{% endif %}">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16">
+            </path>
+          </svg>
+          List View
+        </div>
+      </a>
+      <a href="?view=stats{% if filter_type %}&type={{ filter_type }}{% endif %}"
+        class="px-5 py-2.5 rounded-xl font-bold transition-all whitespace-nowrap {% if view_mode == 'stats' %}bg-brand-accent text-black shadow-[0_0_15px_rgba(0,229,255,0.3)]{% else %}bg-transparent hover:bg-white/5 text-brand-textMuted hover:text-white{% endif %}">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+            </path>
+          </svg>
+          Stats View
+        </div>
+      </a>
+    </div>
 
-  <!-- Filter -->
-  <div class="bg-slate-900 rounded-xl p-4 mb-6 border border-slate-700">
-    <div class="flex items-center gap-3">
-      <span class="text-slate-400 text-sm">Filter:</span>
+    <!-- Filter -->
+    <div
+      class="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 px-2 md:px-0 border-t md:border-t-0 border-brand-surfaceBorder pt-2 md:pt-0">
+      <span class="text-brand-textMuted text-xs font-bold uppercase tracking-wider mr-2 hidden sm:block">Filter:</span>
       <a href="?view={{ view_mode }}"
-         class="px-3 py-1 rounded-lg text-sm transition-colors {% if not filter_type %}bg-blue-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+        class="px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap {% if not filter_type %}bg-white/10 text-white shadow-inner{% else %}bg-transparent hover:bg-white/5 text-brand-textMuted hover:text-white{% endif %}">
         All
       </a>
       <a href="?view={{ view_mode }}&type=weightlifting"
-         class="px-3 py-1 rounded-lg text-sm transition-colors {% if filter_type == 'weightlifting' %}bg-blue-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+        class="px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap {% if filter_type == 'weightlifting' %}bg-brand-accent/20 text-brand-accent ring-1 ring-brand-accent/50{% else %}bg-transparent hover:bg-brand-accent/10 text-brand-textMuted hover:text-brand-accent{% endif %}">
         Weightlifting
       </a>
       <a href="?view={{ view_mode }}&type=cardio"
-         class="px-3 py-1 rounded-lg text-sm transition-colors {% if filter_type == 'cardio' %}bg-blue-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+        class="px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap {% if filter_type == 'cardio' %}bg-[#FF3366]/20 text-[#FF3366] ring-1 ring-[#FF3366]/50{% else %}bg-transparent hover:bg-[#FF3366]/10 text-brand-textMuted hover:text-[#FF3366]{% endif %}">
         Cardio
       </a>
       <a href="?view={{ view_mode }}&type=hiit"
-         class="px-3 py-1 rounded-lg text-sm transition-colors {% if filter_type == 'hiit' %}bg-blue-700{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+        class="px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap {% if filter_type == 'hiit' %}bg-[#FFD700]/20 text-[#FFD700] ring-1 ring-[#FFD700]/50{% else %}bg-transparent hover:bg-[#FFD700]/10 text-brand-textMuted hover:text-[#FFD700]{% endif %}">
         HIIT
       </a>
     </div>
@@ -44,46 +61,68 @@
 
   {% if view_mode == 'stats' and stats %}
   <!-- Stats View -->
-  <div class="grid md:grid-cols-2 gap-6 mb-6">
+  <div class="grid md:grid-cols-2 gap-6 relative z-10">
     <!-- Summary Stats -->
-    <div class="bg-slate-900 rounded-2xl p-6 border border-slate-700">
-      <h3 class="text-lg font-semibold text-slate-200 mb-4">Overview</h3>
+    <div class="glass-panel p-8 relative overflow-hidden group">
+      <div
+        class="absolute -right-20 -top-20 w-64 h-64 bg-brand-primary/10 blur-[80px] rounded-full pointer-events-none transition-opacity duration-300 group-hover:bg-brand-primary/20">
+      </div>
+      <h3 class="text-lg font-heading font-bold text-white mb-6 flex items-center gap-2">
+        <svg class="w-5 h-5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6">
+          </path>
+        </svg>
+        Overview
+      </h3>
       <div class="grid grid-cols-2 gap-4">
-        <div class="text-center p-4 bg-slate-800 rounded-xl">
-          <div class="text-3xl font-bold text-blue-500">{{ stats.total_workouts }}</div>
-          <div class="text-slate-400 text-sm">Total Workouts</div>
+        <div
+          class="text-center p-5 bg-black/40 rounded-2xl border border-brand-surfaceBorder hover:border-brand-accent/30 transition-colors">
+          <div class="text-4xl font-heading font-bold text-white">{{ stats.total_workouts }}</div>
+          <div class="text-brand-textMuted text-xs font-bold uppercase tracking-wider mt-2">Total Workouts</div>
         </div>
-        <div class="text-center p-4 bg-slate-800 rounded-xl">
-          <div class="text-3xl font-bold text-blue-400">{{ stats.total_sets }}</div>
-          <div class="text-slate-400 text-sm">Total Sets</div>
+        <div
+          class="text-center p-5 bg-black/40 rounded-2xl border border-brand-surfaceBorder hover:border-brand-accent/30 transition-colors">
+          <div class="text-4xl font-heading font-bold text-white/70">{{ stats.total_sets }}</div>
+          <div class="text-brand-textMuted text-xs font-bold uppercase tracking-wider mt-2">Total Sets</div>
         </div>
-        <div class="text-center p-4 bg-slate-800 rounded-xl">
-          <div class="text-3xl font-bold text-blue-500">{{ stats.streak }}</div>
-          <div class="text-slate-400 text-sm">Current Streak</div>
+        <div
+          class="col-span-2 text-center p-5 bg-brand-surface border border-brand-accent/20 rounded-2xl shadow-[0_0_15px_rgba(0,229,255,0.05)]">
+          <div class="text-4xl font-heading font-bold text-brand-accent drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]">{{
+            stats.streak }}</div>
+          <div class="text-brand-textMuted text-xs font-bold uppercase tracking-wider mt-2">Current Day Streak</div>
         </div>
       </div>
     </div>
 
     <!-- Workout Type Distribution -->
-    <div class="bg-slate-900 rounded-2xl p-6 border border-slate-700">
-      <h3 class="text-lg font-semibold text-slate-200 mb-4">Workout Types</h3>
-      <div class="space-y-3">
+    <div class="glass-panel p-8">
+      <h3 class="text-lg font-heading font-bold text-white mb-6 flex items-center gap-2">
+        <svg class="w-5 h-5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+        </svg>
+        Workout Types
+      </h3>
+      <div class="space-y-5">
         {% for item in stats.type_distribution %}
-        <div class="flex items-center gap-3">
-          <div class="w-24 text-sm
-            {% if item.workout_type == 'weightlifting' %}text-blue-500
-            {% elif item.workout_type == 'cardio' %}text-blue-500
-            {% else %}text-blue-500{% endif %}">
-            {{ item.workout_type|capfirst }}
+        <div>
+          <div class="flex justify-between items-end mb-2">
+            <span class="text-sm font-bold tracking-wide uppercase
+              {% if item.workout_type == 'weightlifting' %}text-brand-accent
+              {% elif item.workout_type == 'cardio' %}text-[#FF3366]
+              {% else %}text-[#FFD700]{% endif %}">
+              {{ item.workout_type }}
+            </span>
+            <span class="text-white font-heading font-bold">{{ item.count }} <span
+                class="text-brand-textMuted text-xs font-normal">sessions</span></span>
           </div>
-          <div class="flex-1 bg-slate-800 rounded-full h-4 overflow-hidden">
-            <div class="h-full rounded-full
-              {% if item.workout_type == 'weightlifting' %}bg-blue-600
-              {% elif item.workout_type == 'cardio' %}bg-blue-700
-              {% else %}bg-blue-600{% endif %}"
-                 style="width: {% widthratio item.count stats.total_workouts 100 %}%"></div>
+          <div class="w-full bg-black/40 rounded-full h-3 overflow-hidden border border-brand-surfaceBorder">
+            <div class="h-full rounded-full shadow-[0_0_8px_currentColor]
+              {% if item.workout_type == 'weightlifting' %}bg-brand-accent text-brand-accent
+              {% elif item.workout_type == 'cardio' %}bg-[#FF3366] text-[#FF3366]
+              {% else %}bg-[#FFD700] text-[#FFD700]{% endif %}"
+              style="width: {% widthratio item.count stats.total_workouts 100 %}%"></div>
           </div>
-          <div class="text-slate-400 text-sm w-10 text-right">{{ item.count }}</div>
         </div>
         {% endfor %}
       </div>
@@ -91,16 +130,41 @@
   </div>
 
   <!-- Weekly Activity -->
-  <div class="bg-slate-900 rounded-2xl p-6 border border-slate-700 mb-6">
-    <h3 class="text-lg font-semibold text-slate-200 mb-4">Weekly Activity (Last 8 Weeks)</h3>
-    <div class="flex items-end gap-2 h-32">
+  <div class="glass-panel p-8 relative z-10">
+    <h3 class="text-lg font-heading font-bold text-white mb-8 flex items-center gap-2">
+      <svg class="w-5 h-5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+      </svg>
+      Weekly Activity &nbsp;<span class="text-brand-textMuted text-sm font-normal">(Last 8 Weeks)</span>
+    </h3>
+    <div class="flex items-end gap-3 h-40">
       {% for week in stats.weekly_workouts %}
-      <div class="flex-1 flex flex-col items-center">
-        <div class="w-full bg-blue-600 rounded-t" style="height: {% widthratio week.count 7 100 %}%;"></div>
-        <div class="text-xs text-slate-500 mt-2">{{ week.week|date:"M j" }}</div>
+      <div class="flex-1 flex flex-col items-center group">
+        <div class="relative w-full flex flex-col items-center justify-end h-32">
+          <!-- Tooltip -->
+          <div
+            class="absolute -top-8 bg-black/80 px-2 py-1 rounded text-white text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity border border-brand-surfaceBorder whitespace-nowrap z-20 pointer-events-none">
+            {{ week.count }} workouts
+          </div>
+          <!-- Bar -->
+          <div
+            class="w-full bg-brand-surface border border-brand-surfaceBorder rounded-t-lg relative overflow-hidden group-hover:border-brand-accent transition-colors"
+            style="height: {% widthratio week.count 7 100 %}%;">
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-brand-accent/50 to-brand-accent/10 opacity-50 group-hover:opacity-100 transition-opacity">
+            </div>
+            <div class="absolute top-0 left-0 right-0 h-1 bg-brand-accent shadow-[0_0_5px_rgba(0,229,255,0.8)]"></div>
+          </div>
+        </div>
+        <div
+          class="text-xs text-brand-textMuted font-medium tracking-wide mt-3 transform -rotate-45 sm:rotate-0 origin-top-left sm:origin-center">
+          {{ week.week|date:"M j" }}</div>
       </div>
       {% empty %}
-      <div class="text-slate-400 text-center w-full">No data yet</div>
+      <div
+        class="text-brand-textMuted w-full text-center py-8 font-medium border border-dashed border-brand-surfaceBorder rounded-xl bg-black/20">
+        No data yet</div>
       {% endfor %}
     </div>
   </div>
@@ -108,52 +172,87 @@
 
   <!-- List View -->
   {% if view_mode == 'list' %}
-  <div class="space-y-3">
+  <div class="grid sm:grid-cols-2 gap-4 relative z-10">
     {% for w in workouts %}
     <a href="{% url 'workout_detail' w.id %}"
-       class="block bg-slate-900 rounded-xl p-4 border border-slate-700 hover:border-slate-600 transition-colors">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl flex items-center justify-center
-            {% if w.workout_type == 'weightlifting' %}bg-blue-600/20 text-blue-500
-            {% elif w.workout_type == 'cardio' %}bg-blue-700/20 text-blue-500
-            {% else %}bg-blue-600/20 text-blue-500{% endif %}">
+      class="block glass-panel p-5 hover:border-brand-accent/40 hover:bg-brand-surfaceHover transition-all group overflow-hidden relative">
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-brand-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+      </div>
+
+      <div class="flex items-start justify-between relative z-10">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-inner
+            {% if w.workout_type == 'weightlifting' %}bg-brand-accent/10 text-brand-accent border border-brand-accent/20
+            {% elif w.workout_type == 'cardio' %}bg-[#FF3366]/10 text-[#FF3366] border border-[#FF3366]/20
+            {% else %}bg-[#FFD700]/10 text-[#FFD700] border border-[#FFD700]/20{% endif %}">
             {% if w.workout_type == 'weightlifting' %}
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h2v12H4zM18 6h2v12h-2zM6 11h12v2H6z"/>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6h2v12H4zM18 6h2v12h-2zM6 11h12v2H6z" />
             </svg>
             {% elif w.workout_type == 'cardio' %}
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             {% else %}
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             {% endif %}
           </div>
           <div>
-            <div class="font-semibold text-slate-200">{{ w.display_name }}</div>
-            <div class="text-slate-400 text-sm">{{ w.started_at|date:"l, M j, Y" }} &middot; {{ w.mood }}</div>
+            <div
+              class="font-heading font-bold text-white text-lg group-hover:text-brand-accent transition-colors leading-tight">
+              {{ w.display_name }}</div>
+            <div class="text-brand-textMuted text-sm mt-1 mb-2 font-medium">{{ w.started_at|date:"l, M j, Y" }}</div>
+            <div class="flex items-center gap-2">
+              <span
+                class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-black/40 border border-brand-surfaceBorder text-brand-textMuted">{{
+                w.mood }}</span>
+              <span
+                class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-black/40 border border-brand-surfaceBorder text-brand-accent">{{
+                w.sets.count }} sets</span>
+            </div>
           </div>
         </div>
-        <div class="text-slate-400 text-sm">
-          {{ w.sets.count }} sets
+        <div
+          class="text-brand-textMuted opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
         </div>
       </div>
     </a>
     {% empty %}
-    <div class="text-slate-400 text-center py-8">
-      No workouts yet. <a href="{% url 'select_workout_type' %}" class="text-blue-500 hover:text-blue-400">Start your first workout!</a>
+    <div class="col-span-full glass-panel py-12 text-center border-dashed">
+      <div
+        class="w-16 h-16 rounded-full bg-brand-surface border border-brand-surfaceBorder flex items-center justify-center text-brand-textMuted mx-auto mb-4">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-heading font-bold text-white mb-2">No workouts yet</h3>
+      <p class="text-brand-textMuted text-sm mb-6">Complete your first session to build history.</p>
+      <a href="{% url 'select_workout_type' %}"
+        class="inline-flex items-center px-6 py-3 rounded-xl bg-brand-accent hover:bg-brand-accentHover text-black font-bold shadow-[0_0_15px_rgba(0,229,255,0.4)] transition-all">
+        Start a Workout
+      </a>
     </div>
     {% endfor %}
   </div>
   {% endif %}
 
   <!-- Back to Dashboard -->
-  <div class="text-center mt-8">
-    <a href="{% url 'dashboard' %}" class="text-slate-400 hover:text-slate-200 transition-colors">
-      &larr; Back to Dashboard
+  <div class="text-center pt-6">
+    <a href="{% url 'dashboard' %}"
+      class="inline-flex items-center px-6 py-3 rounded-xl bg-brand-surface border border-brand-surfaceBorder text-brand-textMuted hover:text-white hover:bg-brand-surfaceHover hover:border-white/20 transition-all font-medium">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Dashboard
     </a>
   </div>
 </div>

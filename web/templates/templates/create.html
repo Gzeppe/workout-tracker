@@ -1,136 +1,184 @@
 {% extends "base.html" %}
 {% block title %}Create Template - Workout Tracker{% endblock %}
 {% block content %}
-<div class="max-w-2xl mx-auto">
-  <!-- Header -->
-  <div class="mb-6">
-    <a href="{% url 'template_list' %}" class="text-slate-400 hover:text-slate-200 text-sm">&larr; Back to Templates</a>
-    <h1 class="text-2xl font-bold text-slate-100 mt-2">Create Workout Template</h1>
-    <p class="text-slate-400 mt-1">Save a workout structure to quickly start workouts later</p>
+<div class="max-w-2xl mx-auto glass-panel p-8 md:p-10 relative overflow-hidden animate-[fadeIn_0.5s_ease-out]">
+  <!-- Decorative Background -->
+  <div class="absolute -right-20 -top-20 w-64 h-64 bg-brand-primary/10 blur-[80px] rounded-full pointer-events-none">
   </div>
 
-  <form method="post" class="space-y-6">
+  <!-- Header -->
+  <div class="mb-8 relative z-10">
+    <a href="{% url 'template_list' %}"
+      class="inline-flex items-center text-brand-textMuted hover:text-white transition-colors text-sm font-semibold mb-4">
+      <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Templates
+    </a>
+    <h1 class="text-3xl font-heading font-bold text-white text-glow">Create Workout Template</h1>
+    <p class="text-brand-textMuted mt-2">Save a workout structure to quickly start sessions later</p>
+  </div>
+
+  <form method="post" class="space-y-8 relative z-10">
     {% csrf_token %}
 
     <!-- Template Name -->
     <div>
-      <label class="block text-slate-300 font-semibold mb-2">Template Name *</label>
-      <input type="text" name="name" requiblue
-             placeholder="e.g., Morning Cardio, Push Day, Tabata HIIT"
-             class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 text-slate-100 placeholder-slate-500">
+      <label class="block text-brand-textMuted text-xs font-bold uppercase tracking-wider mb-2">Template Name <span
+          class="text-brand-accent">*</span></label>
+      <input type="text" name="name" required placeholder="e.g. Morning Cardio, Push Day"
+        class="w-full px-4 py-3.5 rounded-xl bg-black/40 border border-brand-surfaceBorder focus:border-brand-accent focus:ring-1 focus:ring-brand-accent text-white placeholder-white/20 transition-all outline-none">
     </div>
 
     <!-- Workout Type Selection -->
     <div>
-      <label class="block text-slate-300 font-semibold mb-3">Workout Type *</label>
-      <div class="grid grid-cols-3 gap-3">
-        <label class="cursor-pointer">
-          <input type="radio" name="workout_type" value="weightlifting" class="hidden peer" requiblue>
-          <div class="p-4 rounded-xl border-2 border-slate-700 peer-checked:border-blue-600 peer-checked:bg-blue-600/10 transition-all text-center">
-            <div class="text-3xl mb-2">🏋️</div>
-            <div class="font-semibold text-slate-100">Weightlifting</div>
+      <label class="block text-brand-textMuted text-xs font-bold uppercase tracking-wider mb-3">Workout Type <span
+          class="text-brand-accent">*</span></label>
+      <div class="grid grid-cols-3 gap-3 md:gap-4">
+        <label class="cursor-pointer group">
+          <input type="radio" name="workout_type" value="weightlifting" class="hidden peer" required>
+          <div
+            class="p-4 rounded-xl border-2 border-brand-surfaceBorder peer-checked:border-brand-accent peer-checked:bg-brand-accent/10 peer-checked:shadow-[0_0_15px_rgba(0,229,255,0.15)] group-hover:border-white/30 transition-all text-center h-full flex flex-col items-center justify-center">
+            <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">🏋️</div>
+            <div class="font-bold text-white/50 peer-checked:text-brand-accent group-hover:text-white text-sm">
+              Weightlifting</div>
           </div>
         </label>
-        <label class="cursor-pointer">
+        <label class="cursor-pointer group">
           <input type="radio" name="workout_type" value="cardio" class="hidden peer">
-          <div class="p-4 rounded-xl border-2 border-slate-700 peer-checked:border-blue-700 peer-checked:bg-blue-700/10 transition-all text-center">
-            <div class="text-3xl mb-2">🏃</div>
-            <div class="font-semibold text-slate-100">Cardio</div>
+          <div
+            class="p-4 rounded-xl border-2 border-brand-surfaceBorder peer-checked:border-[#FF3366] peer-checked:bg-[#FF3366]/10 peer-checked:shadow-[0_0_15px_rgba(255,51,102,0.15)] group-hover:border-white/30 transition-all text-center h-full flex flex-col items-center justify-center">
+            <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">🏃</div>
+            <div class="font-bold text-white/50 peer-checked:text-[#FF3366] group-hover:text-white text-sm">Cardio</div>
           </div>
         </label>
-        <label class="cursor-pointer">
+        <label class="cursor-pointer group">
           <input type="radio" name="workout_type" value="hiit" class="hidden peer">
-          <div class="p-4 rounded-xl border-2 border-slate-700 peer-checked:border-blue-600 peer-checked:bg-blue-600/10 transition-all text-center">
-            <div class="text-3xl mb-2">⚡</div>
-            <div class="font-semibold text-slate-100">HIIT</div>
+          <div
+            class="p-4 rounded-xl border-2 border-brand-surfaceBorder peer-checked:border-[#FFD700] peer-checked:bg-[#FFD700]/10 peer-checked:shadow-[0_0_15px_rgba(255,215,0,0.15)] group-hover:border-white/30 transition-all text-center h-full flex flex-col items-center justify-center">
+            <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">⚡</div>
+            <div class="font-bold text-white/50 peer-checked:text-[#FFD700] group-hover:text-white text-sm">HIIT</div>
           </div>
         </label>
       </div>
     </div>
 
-    <!-- Weightlifting Options (shown when weightlifting selected) -->
-    <div id="weightlifting-options" class="hidden space-y-4">
+    <!-- Weightlifting Options -->
+    <div id="weightlifting-options" class="hidden space-y-4 animate-[fadeIn_0.3s_ease-out]">
       <div>
-        <label class="block text-slate-300 font-semibold mb-2">Muscle Group</label>
-        <select name="day" class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-blue-600 text-slate-100">
-          <option value="">Select a day type...</option>
-          {% for day in days %}
-          <option value="{{ day }}">{{ day }}</option>
-          {% endfor %}
-        </select>
+        <label class="block text-brand-textMuted text-xs font-bold uppercase tracking-wider mb-2">Muscle Group</label>
+        <div class="relative">
+          <select name="day"
+            class="w-full px-4 py-3.5 rounded-xl bg-black/40 border border-brand-surfaceBorder focus:border-brand-accent focus:ring-1 focus:ring-brand-accent text-white appearance-none transition-all outline-none">
+            <option value="" class="bg-[#050505] text-brand-textMuted">Select a day type...</option>
+            {% for day in days %}
+            <option value="{{ day }}" class="bg-[#050505] text-white py-1">{{ day }}</option>
+            {% endfor %}
+          </select>
+          <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-brand-textMuted">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Cardio Options (shown when cardio selected) -->
-    <div id="cardio-options" class="hidden space-y-4">
+    <!-- Cardio Options -->
+    <div id="cardio-options" class="hidden space-y-5 animate-[fadeIn_0.3s_ease-out]">
       <div>
-        <label class="block text-slate-300 font-semibold mb-2">Cardio Type</label>
-        <select name="cardio_type" class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-blue-700 text-slate-100">
-          <option value="">Select cardio type...</option>
-          {% for value, label in cardio_types %}
-          <option value="{{ value }}">{{ label }}</option>
-          {% endfor %}
-        </select>
+        <label class="block text-brand-textMuted text-xs font-bold uppercase tracking-wider mb-2">Cardio Type</label>
+        <div class="relative">
+          <select name="cardio_type"
+            class="w-full px-4 py-3.5 rounded-xl bg-black/40 border border-brand-surfaceBorder focus:border-brand-accent focus:ring-1 focus:ring-brand-accent text-white appearance-none transition-all outline-none">
+            <option value="" class="bg-[#050505] text-brand-textMuted">Select cardio type...</option>
+            {% for value, label in cardio_types %}
+            <option value="{{ value }}" class="bg-[#050505] text-white py-1">{{ label }}</option>
+            {% endfor %}
+          </select>
+          <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-brand-textMuted">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
+        </div>
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-slate-300 font-semibold mb-2">Target Duration (min)</label>
+          <label class="block text-brand-textMuted text-xs font-bold uppercase tracking-wider mb-2">Target Duration
+            (min)</label>
           <input type="number" name="target_duration" min="0" placeholder="30"
-                 class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-blue-700 text-slate-100">
+            class="w-full px-4 py-3.5 rounded-xl bg-black/40 border border-brand-surfaceBorder focus:border-brand-accent focus:ring-1 focus:ring-brand-accent text-white transition-all outline-none">
         </div>
         <div>
-          <label class="block text-slate-300 font-semibold mb-2">Target Distance (mi)</label>
+          <label class="block text-brand-textMuted text-xs font-bold uppercase tracking-wider mb-2">Target Distance
+            (mi)</label>
           <input type="number" name="target_distance" min="0" step="0.1" placeholder="3.0"
-                 class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-blue-700 text-slate-100">
+            class="w-full px-4 py-3.5 rounded-xl bg-black/40 border border-brand-surfaceBorder focus:border-brand-accent focus:ring-1 focus:ring-brand-accent text-white transition-all outline-none">
         </div>
       </div>
     </div>
 
-    <!-- HIIT Options (shown when hiit selected) -->
-    <div id="hiit-options" class="hidden space-y-4">
+    <!-- HIIT Options -->
+    <div id="hiit-options" class="hidden space-y-5 animate-[fadeIn_0.3s_ease-out]">
       <div class="grid grid-cols-3 gap-4">
         <div>
-          <label class="block text-slate-300 font-semibold mb-2">Intervals</label>
+          <label class="block text-brand-textMuted text-xs font-bold uppercase tracking-wider mb-2">Intervals</label>
           <input type="number" name="hiit_intervals" min="1" max="50" value="8"
-                 class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-blue-600 text-slate-100">
+            class="w-full px-4 py-3.5 rounded-xl bg-black/40 border border-brand-surfaceBorder focus:border-brand-accent focus:ring-1 focus:ring-brand-accent text-white text-center font-bold text-lg transition-all outline-none">
         </div>
         <div>
-          <label class="block text-slate-300 font-semibold mb-2">Work (sec)</label>
+          <label class="block text-brand-textMuted text-xs font-bold uppercase tracking-wider mb-2">Work (s)</label>
           <input type="number" name="hiit_work" min="5" max="300" value="30"
-                 class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-blue-600 text-slate-100">
+            class="w-full px-4 py-3.5 rounded-xl bg-black/40 border border-brand-surfaceBorder focus:border-brand-accent focus:ring-1 focus:ring-brand-accent text-white text-center font-bold text-lg transition-all outline-none">
         </div>
         <div>
-          <label class="block text-slate-300 font-semibold mb-2">Rest (sec)</label>
+          <label class="block text-brand-textMuted text-xs font-bold uppercase tracking-wider mb-2">Rest (s)</label>
           <input type="number" name="hiit_rest" min="5" max="300" value="15"
-                 class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-blue-600 text-slate-100">
+            class="w-full px-4 py-3.5 rounded-xl bg-black/40 border border-brand-surfaceBorder focus:border-brand-accent focus:ring-1 focus:ring-brand-accent text-white text-center font-bold text-lg transition-all outline-none">
         </div>
       </div>
-      <div class="bg-slate-800/50 rounded-xl p-4 text-sm text-slate-400">
-        <div class="font-semibold text-slate-300 mb-2">Common HIIT Presets:</div>
-        <ul class="space-y-1">
-          <li>• <strong>Tabata:</strong> 8 intervals, 20s work, 10s rest</li>
-          <li>• <strong>30/30:</strong> 10 intervals, 30s work, 30s rest</li>
-          <li>• <strong>EMOM:</strong> 10 intervals, 40s work, 20s rest</li>
+      <div class="bg-brand-surface border border-brand-surfaceBorder rounded-xl p-5 shadow-inner">
+        <div class="font-bold text-white mb-3 text-sm flex items-center gap-2">
+          <svg class="w-4 h-4 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          Common Presets:
+        </div>
+        <ul class="space-y-2 text-sm text-brand-textMuted">
+          <li class="flex items-center gap-2">
+            <div class="w-1.5 h-1.5 rounded-full bg-[#FFD700]"></div><strong class="text-white/80">Tabata:</strong> 8
+            intervals (20s work / 10s rest)
+          </li>
+          <li class="flex items-center gap-2">
+            <div class="w-1.5 h-1.5 rounded-full bg-[#FFD700]"></div><strong class="text-white/80">30/30:</strong> 10
+            intervals (30s work / 30s rest)
+          </li>
+          <li class="flex items-center gap-2">
+            <div class="w-1.5 h-1.5 rounded-full bg-[#FFD700]"></div><strong class="text-white/80">EMOM:</strong> 10
+            intervals (40s work / 20s rest)
+          </li>
         </ul>
       </div>
     </div>
 
     <!-- Description -->
     <div>
-      <label class="block text-slate-300 font-semibold mb-2">Description (optional)</label>
-      <textarea name="description" rows="3"
-                placeholder="Notes about this template..."
-                class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-blue-600 text-slate-100 placeholder-slate-500"></textarea>
+      <label class="block text-brand-textMuted text-xs font-bold uppercase tracking-wider mb-2">Description <span
+          class="text-white/30 font-normal lowercase">(optional)</span></label>
+      <textarea name="description" rows="3" placeholder="Notes about this template..."
+        class="w-full px-4 py-3.5 rounded-xl bg-black/40 border border-brand-surfaceBorder focus:border-brand-accent focus:ring-1 focus:ring-brand-accent text-white placeholder-white/20 transition-all outline-none resize-y"></textarea>
     </div>
 
     <!-- Submit -->
-    <div class="flex gap-3">
+    <div class="flex flex-col sm:flex-row gap-4 pt-4">
       <button type="submit"
-              class="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 font-semibold shadow-lg shadow-blue-600/25 transition-all">
+        class="flex-1 px-6 py-4 rounded-xl bg-brand-accent hover:bg-brand-accentHover text-black font-bold text-lg shadow-[0_0_15px_rgba(0,229,255,0.4)] transition-all order-1 sm:order-2">
         Create Template
       </button>
       <a href="{% url 'template_list' %}"
-         class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold transition-colors">
+        class="px-6 py-4 rounded-xl bg-brand-surface border border-brand-surfaceBorder hover:bg-brand-surfaceHover hover:border-white/20 text-white font-bold transition-all text-center order-2 sm:order-1">
         Cancel
       </a>
     </div>
@@ -145,7 +193,7 @@
   const hiitOptions = document.getElementById('hiit-options');
 
   typeRadios.forEach(radio => {
-    radio.addEventListener('change', function() {
+    radio.addEventListener('change', function () {
       weightliftingOptions.classList.add('hidden');
       cardioOptions.classList.add('hidden');
       hiitOptions.classList.add('hidden');

@@ -1,36 +1,36 @@
 {% extends "base.html" %}
 {% block title %}Summary{% endblock %}
 {% block content %}
-  <div class="bg-slate-900 rounded-2xl p-6 shadow">
+  <div class="bg-[#FFF8F0]/5 rounded-2xl p-6 shadow">
     <div class="flex items-start justify-between gap-4">
       <div>
         <h1 class="text-2xl font-semibold mb-2">Workout Summary</h1>
-        <div class="text-slate-400 text-sm">
+        <div class="text-[#FFF8F0]/50 text-sm">
           {{ workout.day }} — {{ workout.mood }} — {{ workout.started_at|date:"M j, Y  h:i A" }}
         </div>
       </div>
     </div>
 
     <div class="grid md:grid-cols-2 gap-4 mt-6">
-      <div class="bg-slate-800 rounded-xl p-4">
-        <div class="text-slate-300 text-sm">Total Sets</div>
+      <div class="bg-[#FFF8F0]/[0.08] rounded-xl p-4">
+        <div class="text-[#FFF8F0]/80 text-sm">Total Sets</div>
         <div class="text-2xl font-bold">{{ total_sets }}</div>
       </div>
 
-      <div class="bg-slate-800 rounded-xl p-4">
-        <div class="text-slate-300 text-sm">Good/Great Sets</div>
+      <div class="bg-[#FFF8F0]/[0.08] rounded-xl p-4">
+        <div class="text-[#FFF8F0]/80 text-sm">Good/Great Sets</div>
         <div class="text-2xl font-bold">{{ good_great }}</div>
       </div>
     </div>
 
     <!-- Workout Analysis Section -->
-    <div class="bg-slate-800 rounded-xl p-6 mt-6">
+    <div class="bg-[#FFF8F0]/[0.08] rounded-xl p-6 mt-6">
       <h2 class="text-xl font-semibold mb-4">Workout Analysis</h2>
 
       <!-- Motivation Message -->
       {% if analysis.motivation %}
-      <div class="bg-indigo-900/30 border border-indigo-700 rounded-xl p-4 mb-4">
-        <div class="text-indigo-200">{{ analysis.motivation }}</div>
+      <div class="bg-[#FFF8F0]/[0.08] border border-[#FFF8F0]/10 rounded-xl p-4 mb-4">
+        <div class="text-[#FFF8F0]/70">{{ analysis.motivation }}</div>
       </div>
       {% endif %}
 
@@ -40,10 +40,10 @@
           <!-- Personal Records -->
           {% if analysis.prs %}
           <div>
-            <h3 class="text-lg font-semibold text-blue-400 mb-2">🏆 Personal Records</h3>
+            <h3 class="text-lg font-semibold text-[#FFF8F0]/70 mb-2">🏆 Personal Records</h3>
             <ul class="space-y-2">
               {% for pr in analysis.prs %}
-              <li class="bg-slate-900 rounded-lg p-3 text-sm">{{ pr }}</li>
+              <li class="bg-[#FFF8F0]/5 rounded-lg p-3 text-sm">{{ pr }}</li>
               {% endfor %}
             </ul>
           </div>
@@ -52,10 +52,10 @@
           <!-- Improvements -->
           {% if analysis.improvements %}
           <div>
-            <h3 class="text-lg font-semibold text-blue-400 mb-2">📈 Improvements</h3>
+            <h3 class="text-lg font-semibold text-[#FFF8F0]/70 mb-2">📈 Improvements</h3>
             <ul class="space-y-2">
               {% for improvement in analysis.improvements %}
-              <li class="bg-slate-900 rounded-lg p-3 text-sm">{{ improvement }}</li>
+              <li class="bg-[#FFF8F0]/5 rounded-lg p-3 text-sm">{{ improvement }}</li>
               {% endfor %}
             </ul>
           </div>
@@ -64,10 +64,10 @@
           <!-- Streaks -->
           {% if analysis.streaks %}
           <div>
-            <h3 class="text-lg font-semibold text-blue-500 mb-2">🔥 Streaks</h3>
+            <h3 class="text-lg font-semibold text-[#FFF8F0] mb-2">🔥 Streaks</h3>
             <ul class="space-y-2">
               {% for streak in analysis.streaks %}
-              <li class="bg-slate-900 rounded-lg p-3 text-sm">{{ streak }}</li>
+              <li class="bg-[#FFF8F0]/5 rounded-lg p-3 text-sm">{{ streak }}</li>
               {% endfor %}
             </ul>
           </div>
@@ -81,14 +81,14 @@
             <h3 class="text-lg font-semibold text-yellow-400 mb-2">⚠️ Areas to Improve</h3>
             <ul class="space-y-2">
               {% for area in analysis.areas_to_improve %}
-              <li class="bg-slate-900 rounded-lg p-3 text-sm">{{ area }}</li>
+              <li class="bg-[#FFF8F0]/5 rounded-lg p-3 text-sm">{{ area }}</li>
               {% endfor %}
             </ul>
           </div>
           {% endif %}
 
           {% if not analysis.prs and not analysis.improvements and not analysis.streaks and not analysis.areas_to_improve %}
-          <div class="bg-slate-900 rounded-lg p-6 text-center text-slate-400">
+          <div class="bg-[#FFF8F0]/5 rounded-lg p-6 text-center text-[#FFF8F0]/50">
             <p>Complete more workouts to see detailed analysis and track your progress!</p>
           </div>
           {% endif %}
@@ -98,12 +98,12 @@
 
     <div class="mt-6 flex gap-2">
       <a href="{% url 'start_workout' %}"
-         class="px-4 py-2 rounded-xl bg-blue-700 hover:bg-blue-600 font-semibold">
+         class="px-4 py-2 rounded-xl bg-[#00B7FF] hover:bg-[#009AD8] text-white font-semibold">
         Start another workout
       </a>
 
       <a href="{% url 'dashboard' %}"
-         class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold">
+         class="px-4 py-2 rounded-xl bg-[#FFF8F0]/5 hover:bg-[#FFF8F0]/10 font-semibold">
         Dashboard
       </a>
     </div>

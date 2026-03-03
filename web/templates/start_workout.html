@@ -1,46 +1,73 @@
 {% extends "base.html" %}
 {% block title %}Start Workout{% endblock %}
 {% block content %}
-  <div class="bg-slate-900 rounded-2xl p-6 shadow">
-    <div class="flex items-start justify-between gap-4 mb-6">
-      <h1 class="text-2xl font-semibold">Start Workout</h1>
+<div class="max-w-3xl mx-auto glass-panel p-8 md:p-10 relative overflow-hidden">
+  <!-- Decorative background element -->
+  <div class="absolute top-0 right-0 w-64 h-64 bg-brand-accent/10 blur-[80px] rounded-full pointer-events-none"></div>
 
-      <a href="{% url 'dashboard' %}"
-         class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold">
-        Back to dashboard
-      </a>
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-10 relative z-10">
+    <div>
+      <h1 class="text-3xl md:text-4xl font-heading font-bold text-white">Start Workout</h1>
+      <p class="text-brand-textMuted mt-2">Configure your session details</p>
     </div>
 
-    <form method="post" class="space-y-6">
-      {% csrf_token %}
+    <a href="{% url 'dashboard' %}"
+      class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-brand-surface border border-brand-surfaceBorder text-brand-textMuted hover:text-white hover:bg-brand-surfaceHover transition-all text-sm font-medium">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Cancel
+    </a>
+  </div>
 
-      <div>
-        <label class="block">
-          <span class="font-semibold mb-2 block">Workout Day</span>
-          <select name="day" class="w-full bg-slate-800 rounded-xl p-3" requiblue>
-            <option value="" selected disabled>Select workout day...</option>
-            {% for d in days %}
-              <option value="{{ d }}">{{ d }}</option>
-            {% endfor %}
-          </select>
-        </label>
-      </div>
+  <form method="post" class="space-y-8 relative z-10">
+    {% csrf_token %}
 
-      <div>
-        <div class="font-semibold mb-2">Energy Level</div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {% for m in moods %}
-            <label class="bg-slate-800 hover:bg-slate-700 rounded-xl p-3 cursor-pointer flex items-center gap-2">
-              <input type="radio" name="mood" value="{{ m }}" requiblue />
-              <span>{{ m }}</span>
-            </label>
+    <div class="space-y-3">
+      <label class="block text-sm font-semibold text-brand-textMuted uppercase tracking-wider mb-2">Workout Day</label>
+      <div class="relative">
+        <select name="day"
+          class="w-full bg-black/40 border border-brand-surfaceBorder focus:border-brand-accent focus:ring-1 focus:ring-brand-accent rounded-xl p-4 text-white appearance-none transition-all outline-none"
+          required>
+          <option value="" selected disabled class="bg-[#050505] text-brand-textMuted">Select workout day...</option>
+          {% for d in days %}
+          <option value="{{ d }}" class="bg-[#050505] text-white py-2">{{ d }}</option>
           {% endfor %}
+        </select>
+        <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-brand-textMuted">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
         </div>
       </div>
+    </div>
 
-      <button class="px-5 py-3 rounded-xl bg-blue-700 hover:bg-blue-600 font-semibold">
-        Start
+    <!-- Energy Level using modern radio buttons -->
+    <div class="space-y-3">
+      <label class="block text-sm font-semibold text-brand-textMuted uppercase tracking-wider mb-2">Energy Level</label>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {% for m in moods %}
+        <label class="relative group cursor-pointer">
+          <input type="radio" name="mood" value="{{ m }}" class="peer sr-only" required />
+          <div
+            class="flex items-center justify-center bg-black/40 border border-brand-surfaceBorder rounded-xl p-4 text-brand-textMuted peer-checked:bg-brand-accent/10 peer-checked:border-brand-accent peer-checked:text-brand-accent hover:border-white/30 hover:text-white transition-all font-medium">
+            {{ m }}
+          </div>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="pt-4">
+      <button
+        class="w-full flex items-center justify-center px-8 py-4 rounded-xl bg-brand-accent text-black font-bold text-lg hover:bg-brand-accentHover hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-all duration-300 gap-2 group">
+        <span>Start Session</span>
+        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+        </svg>
       </button>
-    </form>
-  </div>
+    </div>
+  </form>
+</div>
 {% endblock %}

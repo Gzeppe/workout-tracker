@@ -1,19 +1,19 @@
 <!-- HIIT Progress Partial (for HTMX updates) -->
 <div class="text-center">
-  <div class="text-slate-400 mb-2">Progress</div>
-  <div class="text-4xl font-bold text-slate-100 mb-2">
+  <div class="text-[#FFF8F0]/50 mb-2">Progress</div>
+  <div class="text-4xl font-bold text-[#FFF8F0] mb-2">
     {{ hiit_session.intervals_completed }} / {{ hiit_session.total_intervals }}
   </div>
-  <div class="text-slate-400 text-sm">intervals completed</div>
+  <div class="text-[#FFF8F0]/50 text-sm">intervals completed</div>
 </div>
 
 <div class="mt-4 grid grid-cols-2 gap-4 text-center">
-  <div class="bg-slate-800 rounded-xl p-3">
-    <div class="text-green-400 font-bold text-xl">{{ hiit_session.total_work_time }}s</div>
-    <div class="text-slate-400 text-xs">Total Work</div>
+  <div class="bg-[#FFF8F0]/[0.08] rounded-xl p-3">
+    <div class="text-[#FFF8F0] font-bold text-xl">{{ hiit_session.total_work_time }}s</div>
+    <div class="text-[#FFF8F0]/50 text-xs">Total Work</div>
   </div>
-  <div class="bg-slate-800 rounded-xl p-3">
-    <div class="text-blue-400 font-bold text-xl">{{ hiit_session.total_rest_time }}s</div>
-    <div class="text-slate-400 text-xs">Total Rest</div>
+  <div class="bg-[#FFF8F0]/[0.08] rounded-xl p-3">
+    <div class="text-[#FFF8F0]/70 font-bold text-xl">{{ hiit_session.total_rest_time }}s</div>
+    <div class="text-[#FFF8F0]/50 text-xs">Total Rest</div>
   </div>
 </div>

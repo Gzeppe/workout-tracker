@@ -1,99 +1,149 @@
 {% extends "base.html" %}
 {% block title %}{{ template.name }} - Workout Tracker{% endblock %}
 {% block content %}
-<div class="max-w-2xl mx-auto">
+<div class="max-w-3xl mx-auto space-y-6 animate-[fadeIn_0.5s_ease-out]">
   <!-- Header -->
-  <div class="mb-6">
-    <a href="{% url 'template_list' %}" class="text-slate-400 hover:text-slate-200 text-sm">&larr; Back to Templates</a>
-    <div class="flex items-start justify-between mt-2">
-      <div>
-        <div class="flex items-center gap-3 mb-1">
-          <span class="px-3 py-1 rounded-lg text-sm font-semibold uppercase
-            {% if template.workout_type == 'weightlifting' %}bg-blue-600/20 text-blue-500
-            {% elif template.workout_type == 'cardio' %}bg-blue-700/20 text-blue-500
-            {% else %}bg-blue-600/20 text-blue-500{% endif %}">
-            {{ template.get_workout_type_display }}
-          </span>
-        </div>
-        <h1 class="text-2xl font-bold text-slate-100">{{ template.name }}</h1>
+  <div class="glass-panel p-8 md:p-10 relative overflow-hidden">
+    <div class="absolute -right-20 -top-20 w-64 h-64 bg-brand-primary/10 blur-[80px] rounded-full pointer-events-none">
+    </div>
+
+    <a href="{% url 'template_list' %}"
+      class="inline-flex items-center text-brand-textMuted hover:text-white transition-colors text-sm font-semibold mb-6 relative z-10">
+      <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Templates
+    </a>
+
+    <div class="flex flex-col md:flex-row md:items-start justify-between gap-6 relative z-10">
+      <div class="space-y-3">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border
+          {% if template.workout_type == 'weightlifting' %}bg-brand-accent/10 text-brand-accent border-brand-accent/20
+          {% elif template.workout_type == 'cardio' %}bg-[#FF3366]/10 text-[#FF3366] border-[#FF3366]/20
+          {% else %}bg-[#FFD700]/10 text-[#FFD700] border-[#FFD700]/20{% endif %}">
+          {{ template.get_workout_type_display }}
+        </span>
+
+        <h1 class="text-3xl md:text-4xl font-heading font-bold text-white text-glow leading-tight">{{ template.name }}
+        </h1>
+
         {% if template.day %}
-        <p class="text-slate-400 mt-1">{{ template.day }}</p>
+        <p
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-brand-surfaceBorder text-brand-textMuted text-sm font-bold uppercase tracking-wider">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          {{ template.day }}
+        </p>
         {% endif %}
       </div>
+
       <div class="flex gap-2">
         <a href="{% url 'edit_template' template.id %}"
-           class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-semibold transition-colors">
+          class="px-4 py-2 rounded-xl bg-brand-surface border border-brand-surfaceBorder hover:bg-brand-surfaceHover hover:border-white/20 hover:text-white text-brand-textMuted text-sm font-bold transition-all shadow-sm">
           Edit
         </a>
-        <form method="post" action="{% url 'delete_template' template.id %}" class="inline">
+        <form method="post" action="{% url 'delete_template' template.id %}" class="inline m-0 p-0">
           {% csrf_token %}
           <button type="submit" onclick="return confirm('Delete this template?')"
-                  class="px-3 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 text-sm font-semibold transition-colors">
+            class="px-4 py-2 rounded-xl bg-brand-danger/10 border border-brand-danger/20 hover:bg-brand-danger hover:text-white text-brand-danger text-sm font-bold transition-all shadow-sm">
             Delete
           </button>
         </form>
       </div>
     </div>
-  </div>
 
-  {% if template.description %}
-  <div class="bg-slate-900 rounded-2xl p-5 border border-slate-700 mb-6">
-    <h3 class="text-sm font-semibold text-slate-400 uppercase mb-2">Description</h3>
-    <p class="text-slate-200">{{ template.description }}</p>
+    {% if template.description %}
+    <div class="mt-8 pt-6 border-t border-brand-surfaceBorder relative z-10">
+      <h3 class="text-xs font-bold text-brand-textMuted uppercase tracking-wider mb-2">Description</h3>
+      <p class="text-white/80 leading-relaxed">{{ template.description }}</p>
+    </div>
+    {% endif %}
   </div>
-  {% endif %}
 
   <!-- Type-specific details -->
   {% if template.workout_type == 'weightlifting' %}
   <!-- Weightlifting Template Details -->
-  <div class="bg-slate-900 rounded-2xl p-5 border border-slate-700 mb-6">
-    <h3 class="text-sm font-semibold text-slate-400 uppercase mb-4">Exercises</h3>
+  <div class="glass-panel p-8 relative overflow-hidden">
+    <h3 class="text-sm font-heading font-bold text-white flex items-center gap-2 mb-6">
+      <svg class="w-5 h-5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16">
+        </path>
+      </svg>
+      Saved Exercises
+    </h3>
     {% if exercises %}
     <div class="space-y-3">
       {% for ex in exercises %}
-      <div class="flex items-center justify-between py-2 border-b border-slate-800 last:border-0">
+      <div
+        class="bg-black/40 border border-brand-surfaceBorder hover:border-brand-accent/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors group">
         <div>
-          <div class="font-semibold text-slate-100">
+          <div class="font-heading font-bold text-white text-lg group-hover:text-brand-accent transition-colors">
             {% if ex.exercise %}{{ ex.exercise.name }}{% else %}{{ ex.custom_exercise_name }}{% endif %}
           </div>
           {% if ex.custom_equipment %}
-          <div class="text-sm text-slate-400">{{ ex.custom_equipment }}</div>
+          <div class="text-sm text-brand-textMuted mt-1 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+              </path>
+            </svg>
+            {{ ex.custom_equipment }}
+          </div>
           {% endif %}
         </div>
-        <div class="text-right text-sm text-slate-400">
-          {% if ex.target_sets %}{{ ex.target_sets }} sets{% endif %}
-          {% if ex.target_reps %} x {{ ex.target_reps }} reps{% endif %}
-          {% if ex.target_weight %} @ {{ ex.target_weight }} lb{% endif %}
+        <div class="flex gap-2 text-sm font-medium">
+          {% if ex.target_sets %}
+          <span class="px-2.5 py-1 rounded-md bg-brand-surface border border-brand-surfaceBorder text-brand-accent">{{
+            ex.target_sets }} sets</span>
+          {% endif %}
+          {% if ex.target_reps %}
+          <span class="px-2.5 py-1 rounded-md bg-brand-surface border border-brand-surfaceBorder text-white">x {{
+            ex.target_reps }}</span>
+          {% endif %}
+          {% if ex.target_weight %}
+          <span class="px-2.5 py-1 rounded-md bg-brand-surface border border-brand-surfaceBorder text-brand-textMuted">@
+            {{ ex.target_weight }} lb</span>
+          {% endif %}
         </div>
       </div>
       {% endfor %}
     </div>
     {% else %}
-    <p class="text-slate-500">No exercises saved. Start a workout to add exercises.</p>
+    <div class="bg-black/20 border border-dashed border-brand-surfaceBorder rounded-xl p-8 text-center">
+      <p class="text-brand-textMuted font-medium">No exercises saved in this template.</p>
+      <p class="text-white/30 text-sm mt-1">Start a workout from this template to add some!</p>
+    </div>
     {% endif %}
   </div>
 
   {% elif template.workout_type == 'cardio' %}
   <!-- Cardio Template Details -->
-  <div class="bg-slate-900 rounded-2xl p-5 border border-slate-700 mb-6">
-    <h3 class="text-sm font-semibold text-slate-400 uppercase mb-4">Cardio Settings</h3>
-    <div class="grid grid-cols-2 gap-4">
+  <div class="glass-panel p-8 relative overflow-hidden">
+    <h3 class="text-sm font-heading font-bold text-white flex items-center gap-2 mb-6">
+      <svg class="w-5 h-5 text-[#FF3366]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+      </svg>
+      Cardio Targets
+    </h3>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {% if template.cardio_type %}
-      <div>
-        <div class="text-slate-400 text-sm">Type</div>
-        <div class="text-slate-100 font-semibold">{{ template.get_cardio_type_display }}</div>
+      <div class="bg-black/40 border border-brand-surfaceBorder rounded-xl p-5">
+        <div class="text-brand-textMuted text-xs font-bold uppercase tracking-wider mb-1.5">Type</div>
+        <div class="text-xl font-heading font-bold text-white">{{ template.get_cardio_type_display }}</div>
       </div>
       {% endif %}
       {% if template.target_duration_minutes %}
-      <div>
-        <div class="text-slate-400 text-sm">Target Duration</div>
-        <div class="text-slate-100 font-semibold">{{ template.target_duration_minutes }} min</div>
+      <div class="bg-black/40 border border-brand-surfaceBorder rounded-xl p-5">
+        <div class="text-brand-textMuted text-xs font-bold uppercase tracking-wider mb-1.5">Target Duration</div>
+        <div class="text-xl font-heading font-bold text-[#FF3366]">{{ template.target_duration_minutes }} min</div>
       </div>
       {% endif %}
       {% if template.target_distance_miles %}
-      <div>
-        <div class="text-slate-400 text-sm">Target Distance</div>
-        <div class="text-slate-100 font-semibold">{{ template.target_distance_miles }} mi</div>
+      <div class="bg-black/40 border border-brand-surfaceBorder rounded-xl p-5">
+        <div class="text-brand-textMuted text-xs font-bold uppercase tracking-wider mb-1.5">Target Distance</div>
+        <div class="text-xl font-heading font-bold text-[#FF3366]">{{ template.target_distance_miles }} mi</div>
       </div>
       {% endif %}
     </div>
@@ -101,25 +151,38 @@
 
   {% elif template.workout_type == 'hiit' %}
   <!-- HIIT Template Details -->
-  <div class="bg-slate-900 rounded-2xl p-5 border border-slate-700 mb-6">
-    <h3 class="text-sm font-semibold text-slate-400 uppercase mb-4">HIIT Settings</h3>
-    <div class="grid grid-cols-3 gap-4">
-      <div class="text-center p-4 bg-slate-800 rounded-xl">
-        <div class="text-3xl font-bold text-blue-500">{{ template.hiit_intervals }}</div>
-        <div class="text-slate-400 text-sm">Intervals</div>
+  <div class="glass-panel p-8 relative overflow-hidden">
+    <h3 class="text-sm font-heading font-bold text-white flex items-center gap-2 mb-6">
+      <svg class="w-5 h-5 text-[#FFD700]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      HIIT Settings
+    </h3>
+    <div class="grid grid-cols-3 gap-4 mb-6">
+      <div
+        class="text-center p-5 bg-black/40 border border-brand-surfaceBorder hover:border-[#FFD700]/30 transition-colors rounded-xl">
+        <div class="text-4xl font-heading font-bold text-white">{{ template.hiit_intervals }}</div>
+        <div class="text-brand-textMuted text-xs font-bold uppercase tracking-wider mt-2">Intervals</div>
       </div>
-      <div class="text-center p-4 bg-slate-800 rounded-xl">
-        <div class="text-3xl font-bold text-green-400">{{ template.hiit_work_seconds }}s</div>
-        <div class="text-slate-400 text-sm">Work</div>
+      <div
+        class="text-center p-5 bg-black/40 border border-brand-surfaceBorder hover:border-[#FFD700]/30 transition-colors rounded-xl">
+        <div class="text-4xl font-heading font-bold text-[#FFD700]">{{ template.hiit_work_seconds }}<span
+            class="text-xl">s</span></div>
+        <div class="text-brand-textMuted text-xs font-bold uppercase tracking-wider mt-2">Work</div>
       </div>
-      <div class="text-center p-4 bg-slate-800 rounded-xl">
-        <div class="text-3xl font-bold text-blue-400">{{ template.hiit_rest_seconds }}s</div>
-        <div class="text-slate-400 text-sm">Rest</div>
+      <div
+        class="text-center p-5 bg-black/40 border border-brand-surfaceBorder hover:border-[#FFD700]/30 transition-colors rounded-xl">
+        <div class="text-4xl font-heading font-bold text-white/50">{{ template.hiit_rest_seconds }}<span
+            class="text-xl">s</span></div>
+        <div class="text-brand-textMuted text-xs font-bold uppercase tracking-wider mt-2">Rest</div>
       </div>
     </div>
-    <div class="mt-4 text-center text-slate-400">
-      Total Time: {{ template.hiit_intervals|add:0 }} x ({{ template.hiit_work_seconds }}s + {{ template.hiit_rest_seconds }}s) =
-      <span class="text-slate-200 font-semibold">
+    <div class="p-4 bg-brand-surface border border-brand-surfaceBorder rounded-xl text-center text-sm">
+      <span class="text-brand-textMuted">Estimated Total Time:</span>
+      <span class="mx-2 text-white/30">{{ template.hiit_intervals|add:0 }} x ({{ template.hiit_work_seconds }}s + {{
+        template.hiit_rest_seconds }}s) =</span>
+      <span class="text-[#FFD700] font-bold text-lg">
         {% widthratio template.hiit_intervals 1 1 as intervals %}
         {% widthratio template.hiit_work_seconds 1 1 as work %}
         {% widthratio template.hiit_rest_seconds 1 1 as rest %}
@@ -131,12 +194,14 @@
 
   <!-- Use Template Button -->
   <a href="{% url 'use_template' template.id %}"
-     class="block w-full text-center px-6 py-4 rounded-2xl bg-gradient-to-r
-       {% if template.workout_type == 'weightlifting' %}from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 shadow-blue-600/25
-       {% elif template.workout_type == 'cardio' %}from-blue-700 to-blue-700 hover:from-blue-700 hover:to-blue-500 shadow-blue-700/25
-       {% else %}from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 shadow-blue-600/25{% endif %}
-       font-semibold text-lg shadow-lg transition-all">
-    Start Workout with This Template
+    class="flex items-center justify-center gap-2 w-full text-center px-8 py-5 rounded-2xl bg-brand-accent hover:bg-brand-accentHover text-black font-bold text-xl shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-all transform hover:-translate-y-1">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+      </path>
+    </svg>
+    Start Session
   </a>
 </div>
 {% endblock %}

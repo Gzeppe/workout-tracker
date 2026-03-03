@@ -3,65 +3,105 @@
 {% block title %}Start Workout - Workout Tracker{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-  <h1 class="text-3xl font-bold text-center mb-8 text-slate-100">What type of workout today?</h1>
+<div class="max-w-4xl mx-auto space-y-10">
+  <div class="text-center space-y-4">
+    <h1 class="text-4xl md:text-5xl font-heading font-bold text-white text-glow">What type of workout today?</h1>
+    <p class="text-brand-textMuted text-lg">Select a category to begin your session</p>
+  </div>
 
   <!-- Workout Type Cards -->
-  <div class="grid md:grid-cols-3 gap-6 mb-10">
+  <div class="grid md:grid-cols-3 gap-6">
     <!-- Weightlifting -->
     <a href="{% url 'start_weightlifting' %}"
-       class="group bg-slate-900 rounded-2xl p-8 border border-slate-800 hover:border-blue-600/50 hover:bg-slate-800/50 transition-all duration-300 text-center">
-      <div class="text-blue-500 mb-4 flex justify-center">
-        <svg class="w-16 h-16 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h2v12H4zM18 6h2v12h-2zM6 11h12v2H6zM2 9h2v6H2zM20 9h2v6h-2z"/>
+      class="group glass-panel p-8 md:p-10 hover:border-brand-accent/50 hover:bg-brand-surfaceHover transition-all duration-300 relative overflow-hidden flex flex-col items-center text-center">
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-brand-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+      </div>
+
+      <div class="text-brand-accent mb-6 relative">
+        <div
+          class="absolute inset-0 bg-brand-accent/20 blur-[25px] rounded-full scale-50 group-hover:scale-150 transition-transform duration-500 pointer-events-none">
+        </div>
+        <svg
+          class="w-16 h-16 relative z-10 transform group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300"
+          fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M4 6h2v12H4zM18 6h2v12h-2zM6 11h12v2H6zM2 9h2v6H2zM20 9h2v6h-2z" />
         </svg>
       </div>
-      <h2 class="text-xl font-bold mb-2 text-slate-100 group-hover:text-blue-500 transition-colors">Weightlifting</h2>
-      <p class="text-slate-400 text-sm">Build muscle and strength with targeted exercises</p>
+      <h2 class="text-2xl font-heading font-bold mb-3 text-white group-hover:text-brand-accent transition-colors">
+        Weightlifting</h2>
+      <p class="text-brand-textMuted text-sm leading-relaxed">Build muscle and strength with targeted exercises</p>
     </a>
 
     <!-- Cardio -->
     <a href="{% url 'start_cardio' %}"
-       class="group bg-slate-900 rounded-2xl p-8 border border-slate-800 hover:border-blue-700/50 hover:bg-slate-800/50 transition-all duration-300 text-center">
-      <div class="text-blue-500 mb-4 flex justify-center">
-        <svg class="w-16 h-16 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+      class="group glass-panel p-8 md:p-10 hover:border-[#FF3366]/50 hover:bg-brand-surfaceHover transition-all duration-300 relative overflow-hidden flex flex-col items-center text-center">
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-[#FF3366]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+      </div>
+
+      <div class="text-[#FF3366] mb-6 relative">
+        <div
+          class="absolute inset-0 bg-[#FF3366]/20 blur-[25px] rounded-full scale-50 group-hover:scale-150 transition-transform duration-500 pointer-events-none">
+        </div>
+        <svg
+          class="w-16 h-16 relative z-10 transform group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300"
+          fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
       </div>
-      <h2 class="text-xl font-bold mb-2 text-slate-100 group-hover:text-blue-500 transition-colors">Cardio</h2>
-      <p class="text-slate-400 text-sm">Burn calories and build endurance</p>
+      <h2 class="text-2xl font-heading font-bold mb-3 text-white group-hover:text-[#FF3366] transition-colors">Cardio
+      </h2>
+      <p class="text-brand-textMuted text-sm leading-relaxed">Burn calories and build endurance</p>
     </a>
 
     <!-- HIIT -->
     <a href="{% url 'start_hiit' %}"
-       class="group bg-slate-900 rounded-2xl p-8 border border-slate-800 hover:border-blue-600/50 hover:bg-slate-800/50 transition-all duration-300 text-center">
-      <div class="text-blue-500 mb-4 flex justify-center">
-        <svg class="w-16 h-16 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      class="group glass-panel p-8 md:p-10 hover:border-[#FFd700]/50 hover:bg-brand-surfaceHover transition-all duration-300 relative overflow-hidden flex flex-col items-center text-center">
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-[#FFd700]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+      </div>
+
+      <div class="text-[#FFd700] mb-6 relative">
+        <div
+          class="absolute inset-0 bg-[#FFd700]/20 blur-[25px] rounded-full scale-50 group-hover:scale-150 transition-transform duration-500 pointer-events-none">
+        </div>
+        <svg
+          class="w-16 h-16 relative z-10 transform group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300"
+          fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
-      <h2 class="text-xl font-bold mb-2 text-slate-100 group-hover:text-blue-500 transition-colors">HIIT</h2>
-      <p class="text-slate-400 text-sm">High-intensity interval training</p>
+      <h2 class="text-2xl font-heading font-bold mb-3 text-white group-hover:text-[#FFd700] transition-colors">HIIT</h2>
+      <p class="text-brand-textMuted text-sm leading-relaxed">High-intensity interval training for maximum burn</p>
     </a>
   </div>
 
   {% if templates %}
   <!-- Quick Start Templates -->
-  <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
-    <h3 class="text-lg font-semibold text-slate-300 mb-4">Quick Start from Template</h3>
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+  <div class="glass-panel p-8 relative overflow-hidden">
+    <div class="absolute -right-20 -top-20 w-64 h-64 bg-brand-primary/10 blur-[80px] rounded-full pointer-events-none">
+    </div>
+
+    <div class="flex items-center justify-between mb-8 relative z-10">
+      <h3 class="text-xl font-heading font-bold text-white flex items-center gap-3">
+        <svg class="w-6 h-6 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>
+        Quick Start from Template
+      </h3>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 relative z-10">
       {% for template in templates %}
       <a href="{% url 'use_template' template.id %}"
-         class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors text-center">
-        <div class="font-medium text-slate-200">{{ template.name }}</div>
-        <div class="text-xs text-slate-400 mt-1">
-          {% if template.workout_type == 'weightlifting' %}
-          <span class="text-blue-500">Weightlifting</span>
-          {% elif template.workout_type == 'cardio' %}
-          <span class="text-blue-500">Cardio</span>
-          {% else %}
-          <span class="text-blue-500">HIIT</span>
-          {% endif %}
+        class="bg-black/20 hover:bg-brand-surfaceHover rounded-xl p-5 transition-all duration-300 text-center border border-brand-surfaceBorder hover:border-brand-accent/30 group">
+        <div class="font-heading font-bold text-white text-lg mb-2 group-hover:text-brand-accent transition-colors">{{
+          template.name }}</div>
+        <div
+          class="inline-block px-3 py-1 rounded-full bg-brand-surface text-brand-textMuted text-xs font-semibold uppercase tracking-wider">
+          {{ template.get_workout_type_display }}
         </div>
       </a>
       {% endfor %}
@@ -70,9 +110,13 @@
   {% endif %}
 
   <!-- Back to Dashboard -->
-  <div class="text-center mt-8">
-    <a href="{% url 'dashboard' %}" class="text-slate-400 hover:text-slate-200 transition-colors">
-      &larr; Back to Dashboard
+  <div class="text-center pt-4">
+    <a href="{% url 'dashboard' %}"
+      class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-brand-surface border border-brand-surfaceBorder text-brand-textMuted hover:text-white hover:bg-brand-surfaceHover hover:border-white/20 transition-all font-medium">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Dashboard
     </a>
   </div>
 </div>

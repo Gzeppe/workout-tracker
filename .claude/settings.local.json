@@ -9,7 +9,8 @@
       "Bash(python manage.py makemigrations:*)",
       "Bash(python manage.py migrate:*)",
       "Bash(python -c:*)",
-      "Bash(python manage.py:*)"
+      "Bash(python manage.py:*)",
+      "Bash(find . -name \"*.html\" -exec grep -l \"bg-slate-950\\\\|text-slate-100\\\\|text-slate-200\\\\|text-slate-300\\\\|text-blue-500\\\\|text-blue-400\\\\|bg-blue-700\\\\|bg-blue-600\\\\|border-slate-700\\\\|border-slate-800\\\\|bg-slate-900\\\\b\\\\|bg-slate-800\\\\b\\\\|text-slate-400\\\\b\\\\|text-slate-500\\\\b\\\\|hover:bg-slate-700\\\\|hover:bg-slate-600\\\\|hover:text-slate-200\\\\|hover:text-slate-300\\\\|hover:text-blue-400\\\\|hover:text-blue-300\\\\|shadow-blue\\\\|from-blue\\\\|to-blue\\\\|from-slate-900\\\\|to-slate-800\\\\|bg-indigo\\\\|border-indigo\\\\|text-indigo\\\\|text-orange\\\\|bg-rose\\\\|border-rose\\\\|text-rose\\\\|hover:bg-rose\\\\|hover:text-rose\\\\|bg-blue-950\\\\|bg-cyan\\\\|border-cyan\\\\|bg-orange\\\\|border-orange\" {} ;)"
     ]
   }
 }

@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Edit Set{% endblock %}
 {% block content %}
-  <div class="bg-slate-900 rounded-2xl p-6 shadow max-w-xl">
-    <h1 class="text-2xl font-semibold mb-2">Edit Set</h1>
-    <div class="text-slate-400 text-sm mb-6">
+  <div class="bg-[#FFF8F0]/5 border border-[#FFF8F0]/10 shadow-sm rounded-2xl p-6 max-w-xl">
+    <h1 class="text-2xl font-semibold mb-2 text-[#FFF8F0]">Edit Set</h1>
+    <div class="text-[#FFF8F0]/50 text-sm mb-6">
       {{ set.exercise.name }} | {{ set.exercise.equipment }}
     </div>
 
@@ -11,22 +11,22 @@
       {% csrf_token %}
 
       <label class="block">
-        <span class="text-slate-300 text-sm">Weight (0 = bodyweight)</span>
+        <span class="text-[#FFF8F0]/80 text-sm">Weight (0 = bodyweight)</span>
         <input name="weight_lb" type="number" min="0"
                value="{{ set.weight_lb }}"
-               class="w-full bg-slate-800 rounded-xl p-3 mt-1" requiblue />
+               class="w-full bg-[#FFF8F0]/[0.08] border border-[#FFF8F0]/10 rounded-xl p-3 mt-1" required />
       </label>
 
       <label class="block">
-        <span class="text-slate-300 text-sm">Reps</span>
+        <span class="text-[#FFF8F0]/80 text-sm">Reps</span>
         <input name="reps" type="number" min="0"
                value="{{ set.reps }}"
-               class="w-full bg-slate-800 rounded-xl p-3 mt-1" requiblue />
+               class="w-full bg-[#FFF8F0]/[0.08] border border-[#FFF8F0]/10 rounded-xl p-3 mt-1" required />
       </label>
 
       <label class="block">
-        <span class="text-slate-300 text-sm">Quality</span>
-        <select name="quality" class="w-full bg-slate-800 rounded-xl p-3 mt-1" requiblue>
+        <span class="text-[#FFF8F0]/80 text-sm">Quality</span>
+        <select name="quality" class="w-full bg-[#FFF8F0]/[0.08] border border-[#FFF8F0]/10 rounded-xl p-3 mt-1" required>
           {% for q in qualities %}
             <option value="{{ q }}" {% if q == set.quality %}selected{% endif %}>
               {{ q|capfirst }}
@@ -36,10 +36,10 @@
       </label>
 
       <div class="flex gap-3">
-        <button class="px-5 py-3 rounded-xl bg-blue-700 hover:bg-blue-600 font-semibold">
+        <button class="px-5 py-3 rounded-xl bg-[#00B7FF] hover:bg-[#009AD8] text-white font-semibold">
           Save
         </button>
-        <a class="px-5 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold"
+        <a class="px-5 py-3 rounded-xl bg-[#FFF8F0]/5 hover:bg-[#FFF8F0]/10 font-semibold text-[#FFF8F0]"
            href="{% url 'workout_detail' set.workout.id %}">
           Cancel
         </a>

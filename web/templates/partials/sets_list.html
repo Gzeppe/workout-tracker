@@ -1,49 +1,83 @@
 {% for s in sets %}
-  <div class="bg-slate-800 rounded-xl p-3 flex items-start justify-between gap-3">
-    <div class="flex-1">
-      <div class="font-semibold">{{ s.exercise_name }}{% if s.custom_equipment %} | {{ s.custom_equipment }}{% elif s.exercise and s.exercise.equipment %} | {{ s.exercise.equipment }}{% endif %}</div>
-      <div class="text-slate-300 text-sm">
-        Set {{ s.set_number }} —
-        {% if s.duration_seconds > 0 %}
-          {% widthratio s.duration_seconds 60 1 %} min{% if s.weight_lb > 0 %} @ {{ s.weight_lb }} lb{% endif %}{% if s.reps > 0 %} x {{ s.reps }}{% endif %}
-        {% else %}
-          {{ s.weight_lb }} lb x {{ s.reps }}
-        {% endif %}
-        — {{ s.quality|capfirst }}
-      </div>
+<div
+  class="bg-black/30 border border-brand-surfaceBorder hover:border-brand-accent/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors group">
+  <div class="flex-1">
+    <div class="font-heading font-bold text-white text-lg flex items-center gap-2">
+      {{ s.exercise_name }}
+      {% if s.custom_equipment %}
+      <span
+        class="text-brand-textMuted text-xs font-medium px-2 py-0.5 rounded-md bg-brand-surface border border-brand-surfaceBorder">{{
+        s.custom_equipment }}</span>
+      {% elif s.exercise and s.exercise.equipment %}
+      <span
+        class="text-brand-textMuted text-xs font-medium px-2 py-0.5 rounded-md bg-brand-surface border border-brand-surfaceBorder">{{
+        s.exercise.equipment }}</span>
+      {% endif %}
     </div>
+    <div class="text-brand-accent text-sm font-medium mt-1">
+      <span class="text-brand-textMuted">Set {{ s.set_number }}</span> <span class="mx-1 opacity-50">•</span>
+      {% if s.duration_seconds > 0 %}
+      {% widthratio s.duration_seconds 60 1 %} min{% if s.weight_lb > 0 %} @ {{ s.weight_lb }} lb{% endif %}{% if s.reps
+      > 0 %} x {{ s.reps }}{% endif %}
+      {% else %}
+      {{ s.weight_lb }} lb x {{ s.reps }}
+      {% endif %}
+      <span class="mx-1 opacity-50">•</span>
+      <span
+        class="uppercase tracking-wider text-[10px] {% if s.quality == 'good' %}text-[#00E5FF]{% elif s.quality == 'ok' %}text-[#FFD700]{% else %}text-brand-danger{% endif %}">{{
+        s.quality }}</span>
+    </div>
+  </div>
 
-    <div class="flex gap-1 items-center">
-      <!-- Move buttons -->
-      <form method="post" action="{% url 'move_set' s.id %}" hx-post="{% url 'move_set' s.id %}" hx-target="#sets-container" hx-swap="innerHTML">
+  <div
+    class="flex gap-2 items-center w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-brand-surfaceBorder/50 justify-between sm:justify-start">
+    <!-- Move buttons -->
+    <div class="flex gap-1">
+      <form method="post" action="{% url 'move_set' s.id %}" hx-post="{% url 'move_set' s.id %}"
+        hx-target="#sets-container" hx-swap="innerHTML">
         {% csrf_token %}
         <input type="hidden" name="direction" value="up">
-        <button type="submit" class="px-2 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs" title="Move up">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+        <button type="submit"
+          class="p-2 rounded-lg bg-brand-surface border border-brand-surfaceBorder hover:bg-brand-surfaceHover hover:text-white text-brand-textMuted transition-colors"
+          title="Move up">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+          </svg>
         </button>
       </form>
-      <form method="post" action="{% url 'move_set' s.id %}" hx-post="{% url 'move_set' s.id %}" hx-target="#sets-container" hx-swap="innerHTML">
+      <form method="post" action="{% url 'move_set' s.id %}" hx-post="{% url 'move_set' s.id %}"
+        hx-target="#sets-container" hx-swap="innerHTML">
         {% csrf_token %}
         <input type="hidden" name="direction" value="down">
-        <button type="submit" class="px-2 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs" title="Move down">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        <button type="submit"
+          class="p-2 rounded-lg bg-brand-surface border border-brand-surfaceBorder hover:bg-brand-surfaceHover hover:text-white text-brand-textMuted transition-colors"
+          title="Move down">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
         </button>
       </form>
+    </div>
 
+    <div class="flex gap-2">
       <a href="{% url 'edit_set' s.id %}"
-         class="px-3 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-sm font-semibold">
+        class="px-4 py-2 rounded-lg bg-brand-surface border border-brand-surfaceBorder hover:bg-brand-surfaceHover hover:border-white/20 text-brand-textMuted hover:text-white text-sm font-semibold transition-all">
         Edit
       </a>
-
-      <form method="post" action="{% url 'delete_set' s.id %}" hx-post="{% url 'delete_set' s.id %}" hx-target="#sets-container" hx-swap="innerHTML">
+      <form method="post" action="{% url 'delete_set' s.id %}" hx-post="{% url 'delete_set' s.id %}"
+        hx-target="#sets-container" hx-swap="innerHTML">
         {% csrf_token %}
         <button type="submit"
-                class="px-3 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-sm font-semibold">
+          class="px-4 py-2 rounded-lg bg-brand-danger/10 border border-brand-danger/20 hover:bg-brand-danger hover:text-white text-brand-danger text-sm font-semibold transition-all">
           Delete
         </button>
       </form>
     </div>
   </div>
+</div>
 {% empty %}
-  <div class="text-slate-400">No sets yet.</div>
+<div class="text-center py-8 bg-black/20 rounded-xl border border-dashed border-brand-surfaceBorder">
+  <div class="text-brand-textMuted font-medium mb-1">No sets logged yet</div>
+  <div class="text-brand-textMuted/50 text-sm">Add your first set below</div>
+</div>
 {% endfor %}

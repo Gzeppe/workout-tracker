@@ -1,54 +1,109 @@
 {% load static %}
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              heading: ['Outfit', 'sans-serif'],
+              body: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              brand: {
+                bg: '#050505',
+                surface: 'rgba(255, 255, 255, 0.03)',
+                surfaceHover: 'rgba(255, 255, 255, 0.08)',
+                surfaceBorder: 'rgba(255, 255, 255, 0.1)',
+                accent: '#00E5FF',
+                accentHover: '#00C4DB',
+                text: '#FFFFFF',
+                textMuted: '#A1A1AA',
+                danger: '#FF3B30',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .glass-panel {
+          @apply bg-brand-surface border border-brand-surfaceBorder backdrop-blur-xl rounded-2xl;
+        }
+        .text-glow {
+          text-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+        }
+        .box-glow {
+          box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
+        }
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+      h1, h2, h3, h4, h5, h6, .font-heading {
+        font-family: 'Outfit', sans-serif;
+      }
+      /* Prevent sudden layout shifts for menus */
+      [x-cloak] { display: none !important; }
+    </style>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
     <title>{% block title %}Workout Tracker{% endblock %}</title>
   </head>
-  <body class="bg-slate-950 text-slate-100 min-h-screen">
-    <div class="max-w-5xl mx-auto p-6">
-      <header class="mb-6">
+  <body class="bg-brand-bg text-brand-text min-h-screen selection:bg-brand-accent selection:text-black">
+    <!-- Ambient glowing background effect -->
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-accent/10 blur-[120px] rounded-full pointer-events-none -z-10"></div>
+    
+    <div class="max-w-5xl mx-auto p-6 relative z-10">
+      <header class="mb-10">
         <!-- Top Bar with Menu -->
-        <div class="flex justify-end mb-4 relative">
-          <button id="menu-toggle" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex justify-end mb-6 relative">
+          <button id="menu-toggle" class="px-5 py-2.5 rounded-xl glass-panel hover:bg-brand-surfaceHover font-medium flex items-center gap-2 transition-all duration-300">
+            <svg class="w-5 h-5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
             Menu
           </button>
 
           <!-- Dropdown Menu -->
-          <div id="menu-dropdown" class="hidden absolute right-0 top-12 w-56 bg-slate-800 rounded-xl shadow-lg border border-slate-700 z-50">
-            <div class="p-2">
+          <div id="menu-dropdown" class="hidden absolute right-0 top-14 w-64 glass-panel shadow-2xl z-50 transform origin-top-right transition-all">
+            <div class="p-3">
               <!-- About Section -->
-              <div class="px-3 py-2 text-xs uppercase text-slate-500 font-semibold">About</div>
-              <a href="{% url 'about_how_it_works' %}" class="block px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-200">
+              <div class="px-3 py-2 text-xs uppercase tracking-wider text-brand-textMuted font-bold">About</div>
+              <a href="{% url 'about_how_it_works' %}" class="block px-4 py-2.5 rounded-xl hover:bg-brand-surfaceHover text-sm transition-colors">
                 How the App Works
               </a>
-              <a href="{% url 'about_training' %}" class="block px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-200">
+              <a href="{% url 'about_training' %}" class="block px-4 py-2.5 rounded-xl hover:bg-brand-surfaceHover text-sm transition-colors">
                 Training Suggestions
               </a>
-              <a href="{% url 'about_cardio' %}" class="block px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-200">
+              <a href="{% url 'about_cardio' %}" class="block px-4 py-2.5 rounded-xl hover:bg-brand-surfaceHover text-sm transition-colors">
                 Cardio Guide
               </a>
-              <a href="{% url 'about_hiit' %}" class="block px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-200">
+              <a href="{% url 'about_hiit' %}" class="block px-4 py-2.5 rounded-xl hover:bg-brand-surfaceHover text-sm transition-colors">
                 HIIT Guide
               </a>
 
               {% if user.is_authenticated %}
-              <div class="border-t border-slate-700 my-2"></div>
+              <div class="border-t border-brand-surfaceBorder my-2 mx-2"></div>
               <!-- Account Section -->
-              <div class="px-3 py-2 text-xs uppercase text-slate-500 font-semibold">Account</div>
-              <a href="{% url 'account' %}" class="block px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-200">
+              <div class="px-3 py-2 text-xs uppercase tracking-wider text-brand-textMuted font-bold">Account</div>
+              <a href="{% url 'account' %}" class="block px-4 py-2.5 rounded-xl hover:bg-brand-surfaceHover text-sm transition-colors">
                 My Account
               </a>
               <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
-                <button type="submit" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-200">
+                <button type="submit" class="w-full text-left px-4 py-2.5 rounded-xl hover:bg-brand-surfaceHover text-sm transition-colors text-brand-danger font-bold">
                   Logout
                 </button>
               </form>
@@ -60,31 +115,44 @@
         {% block logo %}{% endblock %}
 
         <script>
-          document.getElementById('menu-toggle').addEventListener('click', function(e) {
+          const menuToggle = document.getElementById('menu-toggle');
+          const menuDropdown = document.getElementById('menu-dropdown');
+          
+          menuToggle.addEventListener('click', function(e) {
             e.stopPropagation();
-            document.getElementById('menu-dropdown').classList.toggle('hidden');
+            menuDropdown.classList.toggle('hidden');
+            if(!menuDropdown.classList.contains('hidden')) {
+                menuDropdown.animate([
+                    { opacity: 0, transform: 'scale(0.95) translateY(-10px)' },
+                    { opacity: 1, transform: 'scale(1) translateY(0)' }
+                ], { duration: 200, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' });
+            }
           });
-          document.addEventListener('click', function() {
-            document.getElementById('menu-dropdown').classList.add('hidden');
+          document.addEventListener('click', function(e) {
+            if (!menuToggle.contains(e.target) && !menuDropdown.contains(e.target)) {
+               menuDropdown.classList.add('hidden');
+            }
           });
         </script>
       </header>
 
       {% if user.is_authenticated %}
-      <div class="text-center mb-8">
-        <div class="text-slate-400 text-lg">Hi, <span class="text-slate-200 font-semibold">{{ user.username }}</span></div>
-        <div class="text-3xl font-bold text-blue-500 mt-2">Start Tracking Your Workouts!</div>
+      <div class="text-center mb-12 animate-[fadeIn_0.5s_ease-out]">
+        <div class="text-brand-textMuted text-lg font-medium tracking-wide">Hi, <span class="text-white">{{ user.username }}</span></div>
+        <div class="text-4xl md:text-5xl font-heading font-bold text-white mt-3 text-glow">Start Tracking Your Workouts!</div>
       </div>
       {% endif %}
 
-      {% block content %}{% endblock %}
+      <main class="animate-[fadeIn_0.5s_ease-out]">
+        {% block content %}{% endblock %}
+      </main>
 
       <!-- Footer -->
-      <div class="text-center mt-8 py-4 text-slate-500 text-sm">
-        <a href="{% url 'privacy' %}" class="hover:text-slate-300">Privacy Policy</a>
-        <span class="mx-2">|</span>
-        Built by <span class="text-slate-300 font-semibold">Gtech LLC</span>
-      </div>
+      <footer class="text-center mt-16 pb-8 text-brand-textMuted text-sm font-medium">
+        <a href="{% url 'privacy' %}" class="hover:text-white transition-colors">Privacy Policy</a>
+        <span class="mx-3 opacity-30">|</span>
+        Built by <span class="text-white">Gtech LLC</span>
+      </footer>
     </div>
   </body>
 </html>

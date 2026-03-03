@@ -2,25 +2,25 @@
 {% block title %}Schedule Workout - Workout Tracker{% endblock %}
 {% block content %}
 <div class="max-w-xl mx-auto">
-  <div class="bg-slate-900 rounded-2xl p-6 shadow border border-blue-700/20">
-    <h1 class="text-2xl font-bold text-slate-100 mb-6">Schedule a Workout</h1>
+  <div class="bg-[#FFF8F0]/5 rounded-2xl p-6 shadow border border-[#FFF8F0]/10">
+    <h1 class="text-2xl font-bold text-[#FFF8F0] mb-6">Schedule a Workout</h1>
 
     <form method="post" class="space-y-6">
       {% csrf_token %}
 
       <div>
         <label class="block">
-          <span class="font-semibold mb-2 block text-slate-300">Date</span>
+          <span class="font-semibold mb-2 block text-[#FFF8F0]/80">Date</span>
           <input type="date" name="scheduled_date" value="{{ date }}"
-                 class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-blue-700 focus:outline-none" requiblue />
+                 class="w-full bg-[#FFF8F0]/[0.08] rounded-xl p-3 border border-[#FFF8F0]/10 focus:border-[#FFF8F0]/15 focus:outline-none" required />
         </label>
       </div>
 
       <div>
         <label class="block">
-          <span class="font-semibold mb-2 block text-slate-300">Workout Type</span>
+          <span class="font-semibold mb-2 block text-[#FFF8F0]/80">Workout Type</span>
           <select name="workout_type" id="workout_type" onchange="updateTypeOptions()"
-                  class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-blue-700 focus:outline-none" requiblue>
+                  class="w-full bg-[#FFF8F0]/[0.08] rounded-xl p-3 border border-[#FFF8F0]/10 focus:border-[#FFF8F0]/15 focus:outline-none" required>
             <option value="weightlifting">Weightlifting</option>
             <option value="cardio">Cardio</option>
             <option value="hiit">HIIT</option>
@@ -31,8 +31,8 @@
       <!-- Weightlifting Options -->
       <div id="weightlifting-options">
         <label class="block">
-          <span class="font-semibold mb-2 block text-slate-300">Muscle Group</span>
-          <select name="day" class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-blue-700 focus:outline-none">
+          <span class="font-semibold mb-2 block text-[#FFF8F0]/80">Muscle Group</span>
+          <select name="day" class="w-full bg-[#FFF8F0]/[0.08] rounded-xl p-3 border border-[#FFF8F0]/10 focus:border-[#FFF8F0]/15 focus:outline-none">
             <option value="">-- Select --</option>
             {% for d in days %}
             <option value="{{ d }}">{{ d }}</option>
@@ -44,8 +44,8 @@
       <!-- Cardio Options -->
       <div id="cardio-options" class="hidden">
         <label class="block">
-          <span class="font-semibold mb-2 block text-slate-300">Cardio Type</span>
-          <select name="cardio_type" class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-blue-700 focus:outline-none">
+          <span class="font-semibold mb-2 block text-[#FFF8F0]/80">Cardio Type</span>
+          <select name="cardio_type" class="w-full bg-[#FFF8F0]/[0.08] rounded-xl p-3 border border-[#FFF8F0]/10 focus:border-[#FFF8F0]/15 focus:outline-none">
             <option value="">-- Select --</option>
             {% for value, label in cardio_types %}
             <option value="{{ value }}">{{ label }}</option>
@@ -58,8 +58,8 @@
       {% if templates %}
       <div>
         <label class="block">
-          <span class="font-semibold mb-2 block text-slate-300">Use Template (Optional)</span>
-          <select name="template_id" class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-blue-700 focus:outline-none">
+          <span class="font-semibold mb-2 block text-[#FFF8F0]/80">Use Template (Optional)</span>
+          <select name="template_id" class="w-full bg-[#FFF8F0]/[0.08] rounded-xl p-3 border border-[#FFF8F0]/10 focus:border-[#FFF8F0]/15 focus:outline-none">
             <option value="">-- None --</option>
             {% for t in templates %}
             <option value="{{ t.id }}">{{ t.name }} ({{ t.get_workout_type_display }})</option>
@@ -71,19 +71,19 @@
 
       <div>
         <label class="block">
-          <span class="font-semibold mb-2 block text-slate-300">Notes (Optional)</span>
+          <span class="font-semibold mb-2 block text-[#FFF8F0]/80">Notes (Optional)</span>
           <textarea name="notes" rows="2" placeholder="e.g., Focus on heavy squats"
-                    class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 focus:border-blue-700 focus:outline-none"></textarea>
+                    class="w-full bg-[#FFF8F0]/[0.08] rounded-xl p-3 border border-[#FFF8F0]/10 focus:border-[#FFF8F0]/15 focus:outline-none"></textarea>
         </label>
       </div>
 
       <div class="flex gap-3 pt-4">
         <button type="submit"
-                class="flex-1 px-5 py-3 rounded-xl bg-gradient-to-r from-blue-700 to-blue-700 hover:from-blue-700 hover:to-blue-500 font-semibold shadow-lg shadow-blue-700/25 transition-all">
+                class="flex-1 px-5 py-3 rounded-xl bg-[#00B7FF] hover:bg-[#009AD8] text-white font-semibold shadow-lg shadow-[#00B7FF]/25 transition-all">
           Schedule
         </button>
         <a href="{% url 'calendar_view' %}"
-           class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold transition-colors">
+           class="px-5 py-3 rounded-xl bg-[#FFF8F0]/5 hover:bg-[#FFF8F0]/10 font-semibold transition-colors">
           Cancel
         </a>
       </div>
