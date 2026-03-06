@@ -16,7 +16,7 @@
         {% endif %}
       </div>
 
-      <a href="{% url 'end_workout' workout.id %}" class="px-6 py-3 rounded-xl bg-[#00B7FF] hover:bg-[#009AD8] text-white font-semibold shadow-lg shadow-[#00B7FF]/25 transition-all">
+      <a id="end-workout-top" href="{% url 'end_workout' workout.id %}" class="end-workout-btn px-6 py-3 rounded-xl bg-[#00B7FF] hover:bg-[#009AD8] text-white font-semibold shadow-lg shadow-[#00B7FF]/25 transition-all">
         End Workout
       </a>
     </div>
@@ -106,7 +106,7 @@
           </select>
         </label>
 
-        <button class="w-full px-5 py-3 rounded-xl bg-[#00B7FF] hover:bg-[#009AD8] text-white font-semibold shadow-lg shadow-[#00B7FF]/25">
+        <button id="add-set-btn" class="w-full px-5 py-3 rounded-xl bg-[#00B7FF] text-white font-semibold shadow-lg shadow-[#00B7FF]/25 transition-all duration-200">
           Add Set
         </button>
       </form>
@@ -120,7 +120,7 @@
 
       <!-- End Workout Button (bottom of logged sets) -->
       <div class="mt-6 pt-6 border-t border-[#FFF8F0]/10">
-        <a href="{% url 'end_workout' workout.id %}" class="block w-full text-center px-6 py-4 rounded-xl bg-[#00B7FF] hover:bg-[#009AD8] text-white font-semibold text-lg shadow-lg shadow-[#00B7FF]/25 transition-all">
+        <a id="end-workout-bottom" href="{% url 'end_workout' workout.id %}" class="end-workout-btn block w-full text-center px-6 py-4 rounded-xl bg-[#00B7FF] hover:bg-[#009AD8] text-white font-semibold text-lg shadow-lg shadow-[#00B7FF]/25 transition-all">
           End Workout
         </a>
       </div>
@@ -328,5 +328,51 @@
     }
 
     loadState();
+
+    // ── Add Set button animation ──────────────────────────────────────────────
+    const addSetBtn = document.getElementById('add-set-btn');
+    const addSetForm = addSetBtn ? addSetBtn.closest('form') : null;
+
+    if (addSetForm) {
+      addSetForm.addEventListener('htmx:afterRequest', function (e) {
+        if (!e.detail.successful) return;
+
+        addSetBtn.disabled = true;
+        addSetBtn.textContent = '✓ Set Added!';
+        addSetBtn.style.cssText = [
+          'background-color: #AEFF00',
+          'color: #0C0808',
+          'box-shadow: 0 0 20px rgba(174,255,0,0.4)',
+          'transform: scale(1.03)',
+        ].join(';');
+
+        // Bounce back after brief hold
+        setTimeout(() => {
+          addSetBtn.style.transform = 'scale(1)';
+        }, 120);
+
+        setTimeout(() => {
+          addSetBtn.style.cssText = '';
+          addSetBtn.textContent = 'Add Set';
+          addSetBtn.disabled = false;
+        }, 1400);
+      });
+    }
+
+    // ── End Workout button animation ─────────────────────────────────────────
+    document.querySelectorAll('.end-workout-btn').forEach(btn => {
+      btn.addEventListener('click', function (e) {
+        // Let navigation happen but animate first (non-blocking)
+        this.textContent = 'Ending…';
+        this.style.cssText = [
+          'background-color: #AEFF00',
+          'color: #0C0808',
+          'box-shadow: 0 0 24px rgba(174,255,0,0.5)',
+          'transform: scale(1.04)',
+          'transition: transform 0.15s ease, background-color 0.15s ease',
+          'pointer-events: none',
+        ].join(';');
+      });
+    });
   </script>
 {% endblock %}
