@@ -729,7 +729,7 @@ def save_warmup(request, workout_id: int):
         f'<div id="warmup-saved" class="flex items-center gap-2 px-4 py-3 rounded-xl '
         f'bg-[#AEFF00]/10 border border-[#AEFF00]/30 text-[#AEFF00] text-sm font-semibold">'
         f'<span>✓ Warmup logged</span>'
-        f'<span class="text-[#AEFF00]/60 font-normal">— {dur} min'
+        f'<span class="text-[#AEFF00]/60 font-normal">- {dur} min'
         f'{": " + preview if preview else ""}</span></div>'
     )
     return HttpResponse(html)
@@ -749,7 +749,7 @@ def save_finisher(request, workout_id: int):
         f'<div id="finisher-saved" class="flex items-center gap-2 px-4 py-3 rounded-xl '
         f'bg-[#AEFF00]/10 border border-[#AEFF00]/30 text-[#AEFF00] text-sm font-semibold">'
         f'<span>✓ Finisher logged</span>'
-        f'<span class="text-[#AEFF00]/60 font-normal">— {dur} min'
+        f'<span class="text-[#AEFF00]/60 font-normal">- {dur} min'
         f'{": " + preview if preview else ""}</span></div>'
     )
     return HttpResponse(html)
@@ -840,7 +840,7 @@ def generate_workout_analysis(current_workout, user, adaptive=False):
             if avg_score <= 2.0:
                 target = {"exercise": exercise.name, "current_weight": 0, "suggested_weight": 0,
                           "current_reps": avg_reps, "suggested_reps": avg_reps + 2,
-                          "reasoning": "Bodyweight — add 2 reps per set next session"}
+                          "reasoning": "Bodyweight - add 2 reps per set next session"}
             else:
                 target = {"exercise": exercise.name, "current_weight": 0, "suggested_weight": 0,
                           "current_reps": avg_reps, "suggested_reps": avg_reps,
@@ -851,12 +851,12 @@ def generate_workout_analysis(current_workout, user, adaptive=False):
                 target = {"exercise": exercise.name, "current_weight": max_weight,
                           "suggested_weight": max_weight + bump,
                           "current_reps": avg_reps, "suggested_reps": avg_reps,
-                          "reasoning": f"Excellent effort — increase load by {bump} lb"}
+                          "reasoning": f"Excellent effort - increase load by {bump} lb"}
             elif avg_score <= 2.5:
                 target = {"exercise": exercise.name, "current_weight": max_weight,
                           "suggested_weight": max_weight + 5,
                           "current_reps": avg_reps, "suggested_reps": avg_reps,
-                          "reasoning": "Solid session — try +5 lb next time"}
+                          "reasoning": "Solid session - try +5 lb next time"}
             elif avg_score <= 3.0:
                 target = {"exercise": exercise.name, "current_weight": max_weight,
                           "suggested_weight": max_weight,
@@ -866,7 +866,7 @@ def generate_workout_analysis(current_workout, user, adaptive=False):
                 target = {"exercise": exercise.name, "current_weight": max_weight,
                           "suggested_weight": max(0, max_weight - 5),
                           "current_reps": avg_reps, "suggested_reps": avg_reps,
-                          "reasoning": "Challenging session — drop 5 lb and rebuild quality"}
+                          "reasoning": "Challenging session - drop 5 lb and rebuild quality"}
 
         analysis["overload_targets"].append(target)
 
@@ -891,7 +891,7 @@ def generate_workout_analysis(current_workout, user, adaptive=False):
         .order_by("-ended_at")[:5]
     )
 
-    # ── Session-level comparisons (same muscle group — apples-to-apples) ──────
+    # ── Session-level comparisons (same muscle group - apples-to-apples) ──────
     comparison_base = same_group[0] if same_group else None
 
     if comparison_base:
@@ -1020,7 +1020,7 @@ def generate_workout_analysis(current_workout, user, adaptive=False):
             check_year, check_week = prev_monday.isocalendar()[:2]
         analysis["consecutive_weeks"] = wk_count
 
-    # Strength trend — top set weight over last 3 same-group sessions
+    # Strength trend - top set weight over last 3 same-group sessions
     if len(same_group) >= 2:
         top_weights = []
         for sess in [current_workout] + same_group[:2]:
@@ -1084,16 +1084,16 @@ def generate_workout_analysis(current_workout, user, adaptive=False):
     if vt and qp:
         if vt["direction"] == "up" and not qp["high_effort"]:
             tips.append(
-                "Volume up with quality effort — consider adding weight or an extra set next session."
+                "Volume up with quality effort - consider adding weight or an extra set next session."
             )
         elif vt["direction"] == "down" and (notes_has_fatigue or notes_has_injury or notes_has_time_limit):
             tips.append(
-                "Volume dip noted — your notes suggest this wasn't a typical session. "
+                "Volume dip noted - your notes suggest this wasn't a typical session. "
                 "Not a true regression; prioritize recovery before your next session."
             )
         elif vt["direction"] == "down":
             tips.append(
-                "Volume dropped vs last session — consider whether rest, nutrition, or stress is a factor."
+                "Volume dropped vs last session - consider whether rest, nutrition, or stress is a factor."
             )
 
     # High-effort pattern across sessions
@@ -1108,36 +1108,36 @@ def generate_workout_analysis(current_workout, user, adaptive=False):
 
         if recent_high_count >= 2:
             tips.append(
-                "Consistently high effort across last 3 sessions — "
+                "Consistently high effort across last 3 sessions - "
                 "a deload or extra rest day may improve your next performance."
             )
         else:
             tips.append(
-                "High effort session — prioritize sleep and protein before your next session."
+                "High effort session - prioritize sleep and protein before your next session."
             )
 
     # Plateau detection
     if st and st["direction"] == "plateau":
         tips.append(
-            f"Plateau detected: {st['description']} — "
+            f"Plateau detected: {st['description']} - "
             "try a rep range change, technique variation, or a planned deload week."
         )
 
     # PR highlight
     if analysis["prs"]:
-        tips.append("Personal record achieved — use this as your new progressive overload baseline.")
+        tips.append("Personal record achieved - use this as your new progressive overload baseline.")
 
     # Back-to-back warning
     if analysis["days_since_last"] is not None and analysis["days_since_last"] <= 1:
         tips.append(
-            "Back-to-back sessions for this muscle group — ensure adequate recovery "
+            "Back-to-back sessions for this muscle group - ensure adequate recovery "
             "before your next session of the same type."
         )
 
     # Injury flag
     if notes_has_injury:
         tips.append(
-            "Injury or pain noted — avoid pushing through discomfort. "
+            "Injury or pain noted - avoid pushing through discomfort. "
             "Consider rest, ice, and consulting a professional before your next session."
         )
 
@@ -1145,7 +1145,7 @@ def generate_workout_analysis(current_workout, user, adaptive=False):
     if notes_has_time_limit and not notes_has_injury:
         tips.append(
             "Looks like this was a time-limited session. "
-            "Volume may be lower than usual — don't count this as a regression."
+            "Volume may be lower than usual - don't count this as a regression."
         )
 
     # Warmup context
@@ -1158,7 +1158,7 @@ def generate_workout_analysis(current_workout, user, adaptive=False):
             )
         else:
             tips.append(
-                f"{current_workout.warmup_duration_minutes}-min warmup logged — "
+                f"{current_workout.warmup_duration_minutes}-min warmup logged - "
                 "consistent preparation like this directly improves performance quality and reduces injury risk."
             )
 
@@ -1171,12 +1171,12 @@ def generate_workout_analysis(current_workout, user, adaptive=False):
         if high_intensity_finisher:
             tips.append(
                 f"High-intensity finisher logged ({current_workout.finisher_duration_minutes} min). "
-                "This adds meaningful metabolic stress on top of your main work — "
+                "This adds meaningful metabolic stress on top of your main work - "
                 "prioritize protein intake and sleep tonight for full recovery."
             )
         else:
             tips.append(
-                f"{current_workout.finisher_duration_minutes}-min finisher completed — "
+                f"{current_workout.finisher_duration_minutes}-min finisher completed - "
                 "great habit for conditioning and caloric burn beyond your main lifts."
             )
 
@@ -1204,7 +1204,7 @@ def generate_workout_analysis(current_workout, user, adaptive=False):
 
         if analysis["strength_trend"] and analysis["strength_trend"]["direction"] == "plateau":
             plan.append(
-                "Plateau detected — consider cycling rep ranges: drop to 5s with heavier "
+                "Plateau detected - consider cycling rep ranges: drop to 5s with heavier "
                 "weight, or push 15s at lighter load, for 2–3 sessions."
             )
 

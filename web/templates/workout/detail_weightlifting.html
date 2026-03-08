@@ -8,7 +8,7 @@
           <span class="px-2 py-1 rounded-lg bg-[#FFF8F0]/5 text-[#FFF8F0] text-xs font-semibold uppercase">Weightlifting</span>
         </div>
         <h1 class="text-2xl font-semibold text-[#FFF8F0]">
-          {{ workout.display_name }} — {{ workout.mood }}
+          {{ workout.display_name }} - {{ workout.mood }}
         </h1>
         <div class="text-[#FFF8F0]/50 text-sm">{{ workout.started_at|date:"M j, Y  h:i A" }}</div>
         {% if workout.name and workout.day %}
@@ -42,7 +42,7 @@
         {% if workout.warmup_duration_minutes %}
         <div id="warmup-saved" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#AEFF00]/10 border border-[#AEFF00]/30 text-[#AEFF00] text-sm font-semibold mb-3">
           <span>✓ Warmup logged</span>
-          <span class="text-[#AEFF00]/60 font-normal">— {{ workout.warmup_duration_minutes }} min{% if workout.warmup_notes %}: {{ workout.warmup_notes|truncatechars:50 }}{% endif %}</span>
+          <span class="text-[#AEFF00]/60 font-normal">- {{ workout.warmup_duration_minutes }} min{% if workout.warmup_notes %}: {{ workout.warmup_notes|truncatechars:50 }}{% endif %}</span>
         </div>
         {% else %}
         <div id="warmup-saved"></div>
@@ -131,7 +131,7 @@
         </div>
 
         {% if not is_custom %}
-        <div class="text-center text-[#FFF8F0]/40 text-sm">— or select from list —</div>
+        <div class="text-center text-[#FFF8F0]/40 text-sm">- or select from list -</div>
 
         <!-- Previous best badge -->
         <div id="prev-best" class="hidden px-3 py-2 rounded-lg bg-[#00B7FF]/10 border border-[#00B7FF]/20 text-[#00B7FF] text-xs font-semibold"></div>
@@ -213,7 +213,7 @@
             {% if workout.finisher_duration_minutes %}
             <div id="finisher-saved" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#AEFF00]/10 border border-[#AEFF00]/30 text-[#AEFF00] text-sm font-semibold mb-3">
               <span>✓ Finisher logged</span>
-              <span class="text-[#AEFF00]/60 font-normal">— {{ workout.finisher_duration_minutes }} min{% if workout.finisher_notes %}: {{ workout.finisher_notes|truncatechars:50 }}{% endif %}</span>
+              <span class="text-[#AEFF00]/60 font-normal">- {{ workout.finisher_duration_minutes }} min{% if workout.finisher_notes %}: {{ workout.finisher_notes|truncatechars:50 }}{% endif %}</span>
             </div>
             {% else %}
             <div id="finisher-saved"></div>

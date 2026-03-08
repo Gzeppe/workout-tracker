@@ -10,7 +10,7 @@
       <div>
         <h1 class="text-3xl font-heading font-bold text-white text-glow">
           {% if workout.name %}{{ workout.name }}{% else %}{{ workout.day }}{% endif %}
-          <span class="text-brand-accent ml-2">— {{ workout.mood }}</span>
+          <span class="text-brand-accent ml-2">- {{ workout.mood }}</span>
         </h1>
         <div class="flex items-center gap-3 mt-2">
           <div class="text-brand-textMuted text-sm font-medium flex items-center gap-1.5">
