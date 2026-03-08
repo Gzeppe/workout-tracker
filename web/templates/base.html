@@ -56,6 +56,11 @@
       }
       /* Prevent sudden layout shifts for menus */
       [x-cloak] { display: none !important; }
+      /* Desktop dropdown option readability — options don't inherit parent bg on most OSes */
+      option {
+        background-color: #0C0808;
+        color: #FFF8F0;
+      }
     </style>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
