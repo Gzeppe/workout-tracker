@@ -1,7 +1,7 @@
 import calendar
 import re
 
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -25,6 +25,7 @@ from .models import (
     WorkoutTemplate,
     TemplateExercise,
     HIITSession,
+    UserProfile,
 )
 
 
@@ -148,6 +149,13 @@ def dashboard(request):
     # User's templates for quick start
     templates = WorkoutTemplate.objects.filter(user=user)[:6]
 
+    # Last completed workout for dashboard summary card
+    last_workout = (
+        Workout.objects.filter(user=user, ended_at__isnull=False)
+        .order_by("-ended_at")
+        .first()
+    )
+
     return render(
         request,
         "dashboard.html",
@@ -157,6 +165,7 @@ def dashboard(request):
             "recent_prs": recent_prs,
             "upcoming_scheduled": upcoming_scheduled,
             "templates": templates,
+            "last_workout": last_workout,
         },
     )
 
@@ -653,9 +662,10 @@ def end_workout(request, workout_id: int):
             pass
 
     # Analysis section (for weightlifting)
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
     analysis = None
     if w.workout_type == "weightlifting":
-        analysis = generate_workout_analysis(w, request.user)
+        analysis = generate_workout_analysis(w, request.user, adaptive=profile.adaptive_programming)
 
     return render(
         request,
@@ -667,6 +677,7 @@ def end_workout(request, workout_id: int):
             "analysis": analysis,
             "cardio_stats": cardio_stats,
             "hiit_stats": hiit_stats,
+            "adaptive_enabled": profile.adaptive_programming,
         },
     )
 
@@ -681,7 +692,57 @@ def save_workout_notes(request, workout_id: int):
     return redirect("end_workout", workout_id=workout_id)
 
 
-def generate_workout_analysis(current_workout, user):
+@login_required
+@require_http_methods(["POST"])
+def save_warmup(request, workout_id: int):
+    w = get_object_or_404(Workout, id=workout_id, user=request.user)
+    duration = request.POST.get("warmup_duration", "0").strip()
+    w.warmup_duration_minutes = int(duration) if duration.isdigit() else 0
+    w.warmup_notes = request.POST.get("warmup_notes", "").strip()
+    w.save(update_fields=["warmup_duration_minutes", "warmup_notes"])
+    dur = w.warmup_duration_minutes
+    preview = (w.warmup_notes[:60] + "…") if len(w.warmup_notes) > 60 else w.warmup_notes
+    html = (
+        f'<div id="warmup-saved" class="flex items-center gap-2 px-4 py-3 rounded-xl '
+        f'bg-[#AEFF00]/10 border border-[#AEFF00]/30 text-[#AEFF00] text-sm font-semibold">'
+        f'<span>✓ Warmup logged</span>'
+        f'<span class="text-[#AEFF00]/60 font-normal">— {dur} min'
+        f'{": " + preview if preview else ""}</span></div>'
+    )
+    return HttpResponse(html)
+
+
+@login_required
+@require_http_methods(["POST"])
+def save_finisher(request, workout_id: int):
+    w = get_object_or_404(Workout, id=workout_id, user=request.user)
+    duration = request.POST.get("finisher_duration", "0").strip()
+    w.finisher_duration_minutes = int(duration) if duration.isdigit() else 0
+    w.finisher_notes = request.POST.get("finisher_notes", "").strip()
+    w.save(update_fields=["finisher_duration_minutes", "finisher_notes"])
+    dur = w.finisher_duration_minutes
+    preview = (w.finisher_notes[:60] + "…") if len(w.finisher_notes) > 60 else w.finisher_notes
+    html = (
+        f'<div id="finisher-saved" class="flex items-center gap-2 px-4 py-3 rounded-xl '
+        f'bg-[#AEFF00]/10 border border-[#AEFF00]/30 text-[#AEFF00] text-sm font-semibold">'
+        f'<span>✓ Finisher logged</span>'
+        f'<span class="text-[#AEFF00]/60 font-normal">— {dur} min'
+        f'{": " + preview if preview else ""}</span></div>'
+    )
+    return HttpResponse(html)
+
+
+@login_required
+@require_http_methods(["POST"])
+def toggle_adaptive_programming(request):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    profile.adaptive_programming = not profile.adaptive_programming
+    profile.save()
+    next_url = request.POST.get("next") or request.META.get("HTTP_REFERER") or "/"
+    return redirect(next_url)
+
+
+def generate_workout_analysis(current_workout, user, adaptive=False):
     """
     Generate comprehensive workout analysis including PRs, volume trends,
     strength progression, quality/RPE patterns, and contextual feedback tips.
@@ -693,19 +754,19 @@ def generate_workout_analysis(current_workout, user):
     from django.db.models import Max, Sum
 
     analysis = {
-        # Legacy keys
         "prs": [],
         "improvements": [],
         "areas_to_improve": [],
         "streaks": [],
         "motivation": "",
-        # New keys
-        "volume_trend": None,       # {current, previous, pct_change, direction}
-        "strength_trend": None,     # {direction, description, sessions}
-        "quality_pattern": None,    # {avg_score, high_effort, label}
-        "days_since_last": None,    # int
-        "consecutive_weeks": 0,     # int
-        "feedback_tips": [],        # list of contextual tip strings
+        "volume_trend": None,
+        "strength_trend": None,
+        "quality_pattern": None,
+        "days_since_last": None,
+        "consecutive_weeks": 0,
+        "feedback_tips": [],
+        "overload_targets": [],     # per-exercise progressive overload suggestions
+        "next_session_plan": [],    # adaptive programming: concrete next-session instructions
     }
 
     current_sets = list(current_workout.sets.select_related("exercise").all())
@@ -738,6 +799,53 @@ def generate_workout_analysis(current_workout, user):
         prev_vols = [sum(s.weight_lb * s.reps for s in all_time.filter(workout_id=wid)) for wid in prev_wids]
         if prev_vols and cur_vol > max(prev_vols):
             analysis["prs"].append(f"New volume PR for {exercise.name}: {cur_vol} total volume!")
+
+    # ── Progressive overload targets (per exercise) ───────────────────────────
+    for exercise in exercises_in_workout:
+        if exercise is None:
+            continue
+        ex_sets = [s for s in current_sets if s.exercise == exercise and s.reps > 0]
+        if not ex_sets:
+            continue
+
+        avg_score = sum(QUALITY_DIFFICULTY.get(s.quality, 2) for s in ex_sets) / len(ex_sets)
+        max_weight = max(s.weight_lb for s in ex_sets)
+        avg_reps = round(sum(s.reps for s in ex_sets) / len(ex_sets))
+
+        if max_weight == 0:
+            # Bodyweight exercise
+            if avg_score <= 2.0:
+                target = {"exercise": exercise.name, "current_weight": 0, "suggested_weight": 0,
+                          "current_reps": avg_reps, "suggested_reps": avg_reps + 2,
+                          "reasoning": "Bodyweight — add 2 reps per set next session"}
+            else:
+                target = {"exercise": exercise.name, "current_weight": 0, "suggested_weight": 0,
+                          "current_reps": avg_reps, "suggested_reps": avg_reps,
+                          "reasoning": "Maintain reps and focus on controlled form"}
+        else:
+            if avg_score <= 1.5:
+                bump = 5 if max_weight >= 45 else 2
+                target = {"exercise": exercise.name, "current_weight": max_weight,
+                          "suggested_weight": max_weight + bump,
+                          "current_reps": avg_reps, "suggested_reps": avg_reps,
+                          "reasoning": f"Excellent effort — increase load by {bump} lb"}
+            elif avg_score <= 2.5:
+                target = {"exercise": exercise.name, "current_weight": max_weight,
+                          "suggested_weight": max_weight + 5,
+                          "current_reps": avg_reps, "suggested_reps": avg_reps,
+                          "reasoning": "Solid session — try +5 lb next time"}
+            elif avg_score <= 3.0:
+                target = {"exercise": exercise.name, "current_weight": max_weight,
+                          "suggested_weight": max_weight,
+                          "current_reps": avg_reps, "suggested_reps": avg_reps + 1,
+                          "reasoning": "Maintain weight, aim for +1 rep per set"}
+            else:
+                target = {"exercise": exercise.name, "current_weight": max_weight,
+                          "suggested_weight": max(0, max_weight - 5),
+                          "current_reps": avg_reps, "suggested_reps": avg_reps,
+                          "reasoning": "Challenging session — drop 5 lb and rebuild quality"}
+
+        analysis["overload_targets"].append(target)
 
     # ── Same-muscle-group history (computed early for apples-to-apples comparisons) ──
     same_group = []
@@ -929,10 +1037,20 @@ def generate_workout_analysis(current_workout, user):
         }
 
     # ── NEW: Contextual feedback tips ─────────────────────────────────────────
-    notes_words = set((current_workout.notes or "").lower().split())
+    # Combine all notes sources for holistic analysis
+    all_notes_text = " ".join(filter(None, [
+        current_workout.notes or "",
+        current_workout.warmup_notes or "",
+        current_workout.finisher_notes or "",
+    ]))
+    notes_words = set(all_notes_text.lower().split())
     notes_has_fatigue = bool(FATIGUE_KEYWORDS & notes_words)
     notes_has_injury = bool(INJURY_KEYWORDS & notes_words)
     notes_has_time_limit = bool(TIME_LIMIT_KEYWORDS & notes_words)
+
+    # Warmup-specific word set for body-part cross-referencing
+    warmup_words = set((current_workout.warmup_notes or "").lower().split())
+    warmup_has_discomfort = bool((FATIGUE_KEYWORDS | INJURY_KEYWORDS) & warmup_words)
 
     vt = analysis["volume_trend"]
     st = analysis["strength_trend"]
@@ -1007,7 +1125,74 @@ def generate_workout_analysis(current_workout, user):
             "Volume may be lower than usual — don't count this as a regression."
         )
 
+    # Warmup context
+    if current_workout.warmup_duration_minutes > 0:
+        if warmup_has_discomfort:
+            tips.append(
+                f"Your warmup notes flag some pre-existing tightness or discomfort "
+                f"({current_workout.warmup_duration_minutes} min logged). If this pattern continues, "
+                "prioritize a dedicated mobility session before your next training day."
+            )
+        else:
+            tips.append(
+                f"{current_workout.warmup_duration_minutes}-min warmup logged — "
+                "consistent preparation like this directly improves performance quality and reduces injury risk."
+            )
+
+    # Finisher context
+    if current_workout.finisher_duration_minutes > 0:
+        fin_lower = (current_workout.finisher_notes or "").lower()
+        high_intensity_finisher = any(
+            w in fin_lower for w in ["amrap", "burnout", "drop", "superset", "hiit", "circuit", "sprint"]
+        )
+        if high_intensity_finisher:
+            tips.append(
+                f"High-intensity finisher logged ({current_workout.finisher_duration_minutes} min). "
+                "This adds meaningful metabolic stress on top of your main work — "
+                "prioritize protein intake and sleep tonight for full recovery."
+            )
+        else:
+            tips.append(
+                f"{current_workout.finisher_duration_minutes}-min finisher completed — "
+                "great habit for conditioning and caloric burn beyond your main lifts."
+            )
+
     analysis["feedback_tips"] = tips
+
+    # ── Adaptive programming: next-session plan ───────────────────────────────
+    if adaptive and analysis["overload_targets"]:
+        rest_days = 2
+        if analysis["days_since_last"] is not None:
+            rest_days = max(2, min(analysis["days_since_last"], 4))
+
+        plan = []
+        for t in analysis["overload_targets"]:
+            if t["current_weight"] == 0:
+                line = (
+                    f"{t['exercise']}: target {t['suggested_reps']} reps/set "
+                    f"({t['reasoning']})"
+                )
+            else:
+                line = (
+                    f"{t['exercise']}: {t['suggested_weight']} lb × {t['suggested_reps']} reps "
+                    f"({t['reasoning']})"
+                )
+            plan.append(line)
+
+        if analysis["strength_trend"] and analysis["strength_trend"]["direction"] == "plateau":
+            plan.append(
+                "Plateau detected — consider cycling rep ranges: drop to 5s with heavier "
+                "weight, or push 15s at lighter load, for 2–3 sessions."
+            )
+
+        if analysis["days_since_last"] is not None:
+            plan.append(
+                f"Suggested rest before next {current_workout.day} session: "
+                f"at least {rest_days} day{'s' if rest_days != 1 else ''}."
+            )
+
+        analysis["next_session_plan"] = plan
+
     return analysis
 
 

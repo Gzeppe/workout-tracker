@@ -79,6 +79,12 @@ class Workout(models.Model):
     # End-of-session notes
     notes = models.TextField(blank=True, default="")
 
+    # Warmup / finisher tracking
+    warmup_duration_minutes = models.PositiveIntegerField(default=0)
+    warmup_notes = models.TextField(blank=True, default="")
+    finisher_duration_minutes = models.PositiveIntegerField(default=0)
+    finisher_notes = models.TextField(blank=True, default="")
+
     def __str__(self) -> str:
         if self.name:
             return f"{self.name} - {self.started_at:%Y-%m-%d %I:%M %p}"
@@ -304,6 +310,20 @@ class TemplateExercise(models.Model):
 
     def __str__(self) -> str:
         return f"{self.exercise_name} - {self.target_sets}x{self.target_reps}"
+
+
+class UserProfile(models.Model):
+    """Per-user preferences and settings."""
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="profile",
+    )
+    adaptive_programming = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return f"Profile({self.user.username})"
 
 
 class HIITSession(models.Model):

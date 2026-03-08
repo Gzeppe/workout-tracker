@@ -33,6 +33,11 @@ urlpatterns = [
 
     # Workout actions
     path("workouts/<int:workout_id>/notes/", views.save_workout_notes, name="save_workout_notes"),
+    path("workouts/<int:workout_id>/warmup/", views.save_warmup, name="save_warmup"),
+    path("workouts/<int:workout_id>/finisher/", views.save_finisher, name="save_finisher"),
+
+    # User preferences
+    path("preferences/adaptive/", views.toggle_adaptive_programming, name="toggle_adaptive_programming"),
     path("workouts/<int:workout_id>/add-set/", views.add_set, name="add_set"),
     path("workouts/<int:workout_id>/add-cardio/", views.add_cardio_entry, name="add_cardio_entry"),
     path("workouts/<int:workout_id>/update-hiit/", views.update_hiit_session, name="update_hiit_session"),
