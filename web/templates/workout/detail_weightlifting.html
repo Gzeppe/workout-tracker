@@ -22,9 +22,8 @@
     </div>
   </div>
 
-  <!-- Warmup / Finisher Log -->
-  <div class="grid grid-cols-2 gap-4 mb-6">
-    <!-- Warmup -->
+  <!-- Warmup Log -->
+  <div class="mb-4">
     <div class="bg-[#FFF8F0]/5 rounded-2xl border border-[#FFF8F0]/10 overflow-hidden">
       <button onclick="toggleSection('warmup')"
         class="w-full flex items-center justify-between p-4 text-left group">
@@ -33,7 +32,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 3v1m0 16v1m8.66-13l-.87.5M4.21 16.5l-.87.5M19.79 16.5l.87.5M4.21 7.5l.87.5M21 12h-1M4 12H3" />
           </svg>
-          Warmup
+          Warmup <span class="text-[#FFF8F0]/40 font-normal text-sm">(Optional)</span>
         </span>
         <svg id="warmup-chevron" class="w-4 h-4 text-[#FFF8F0]/40 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -65,51 +64,6 @@
           </div>
           <button class="w-full py-2 rounded-xl bg-[#FFD600] hover:bg-amber-400 text-[#0C0808] text-sm font-bold transition-colors">
             Save Warmup
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Finisher -->
-    <div class="bg-[#FFF8F0]/5 rounded-2xl border border-[#FFF8F0]/10 overflow-hidden">
-      <button onclick="toggleSection('finisher')"
-        class="w-full flex items-center justify-between p-4 text-left group">
-        <span class="flex items-center gap-2 font-semibold text-[#FFF8F0]">
-          <svg class="w-4 h-4 text-[#FF2D00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-          </svg>
-          Finisher
-        </span>
-        <svg id="finisher-chevron" class="w-4 h-4 text-[#FFF8F0]/40 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-      <div id="finisher-section" class="hidden px-4 pb-4">
-        {% if workout.finisher_duration_minutes %}
-        <div id="finisher-saved" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#AEFF00]/10 border border-[#AEFF00]/30 text-[#AEFF00] text-sm font-semibold mb-3">
-          <span>✓ Finisher logged</span>
-          <span class="text-[#AEFF00]/60 font-normal">— {{ workout.finisher_duration_minutes }} min{% if workout.finisher_notes %}: {{ workout.finisher_notes|truncatechars:50 }}{% endif %}</span>
-        </div>
-        {% else %}
-        <div id="finisher-saved"></div>
-        {% endif %}
-        <form hx-post="{% url 'save_finisher' workout.id %}" hx-target="#finisher-saved" hx-swap="outerHTML" class="space-y-2">
-          {% csrf_token %}
-          <div class="grid grid-cols-2 gap-2">
-            <label class="block">
-              <span class="text-[#FFF8F0]/60 text-xs uppercase tracking-wide">Duration (min)</span>
-              <input name="finisher_duration" type="number" min="0" max="60"
-                value="{{ workout.finisher_duration_minutes|default:'' }}"
-                class="w-full bg-[#FFF8F0]/[0.08] border border-[#FFF8F0]/10 rounded-xl p-2.5 mt-1 text-sm focus:border-[#FF2D00] focus:outline-none" />
-            </label>
-            <label class="block col-span-2">
-              <span class="text-[#FFF8F0]/60 text-xs uppercase tracking-wide">What did you do?</span>
-              <textarea name="finisher_notes" rows="2" placeholder="e.g., AMRAP cable rows, sled push…"
-                class="w-full bg-[#FFF8F0]/[0.08] border border-[#FFF8F0]/10 rounded-xl p-2.5 mt-1 text-sm focus:border-[#FF2D00] focus:outline-none resize-none">{{ workout.finisher_notes }}</textarea>
-            </label>
-          </div>
-          <button class="w-full py-2 rounded-xl bg-[#FF2D00] hover:bg-[#D42500] text-white text-sm font-bold transition-colors">
-            Save Finisher
           </button>
         </form>
       </div>
@@ -212,8 +166,53 @@
         {% include "partials/sets_list.html" %}
       </div>
 
-      <!-- End Workout Button (bottom of logged sets) -->
+      <!-- Finisher Log -->
       <div class="mt-6 pt-6 border-t border-[#FFF8F0]/10">
+        <div class="bg-[#FFF8F0]/5 rounded-2xl border border-[#FFF8F0]/10 overflow-hidden mb-4">
+          <button onclick="toggleSection('finisher')"
+            class="w-full flex items-center justify-between p-4 text-left">
+            <span class="flex items-center gap-2 font-semibold text-[#FFF8F0]">
+              <svg class="w-4 h-4 text-[#FF2D00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+              </svg>
+              Finisher <span class="text-[#FFF8F0]/40 font-normal text-sm">(Optional)</span>
+            </span>
+            <svg id="finisher-chevron" class="w-4 h-4 text-[#FFF8F0]/40 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div id="finisher-section" class="hidden px-4 pb-4">
+            {% if workout.finisher_duration_minutes %}
+            <div id="finisher-saved" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#AEFF00]/10 border border-[#AEFF00]/30 text-[#AEFF00] text-sm font-semibold mb-3">
+              <span>✓ Finisher logged</span>
+              <span class="text-[#AEFF00]/60 font-normal">— {{ workout.finisher_duration_minutes }} min{% if workout.finisher_notes %}: {{ workout.finisher_notes|truncatechars:50 }}{% endif %}</span>
+            </div>
+            {% else %}
+            <div id="finisher-saved"></div>
+            {% endif %}
+            <form hx-post="{% url 'save_finisher' workout.id %}" hx-target="#finisher-saved" hx-swap="outerHTML" class="space-y-2">
+              {% csrf_token %}
+              <label class="block">
+                <span class="text-[#FFF8F0]/60 text-xs uppercase tracking-wide">Duration (min)</span>
+                <input name="finisher_duration" type="number" min="0" max="60"
+                  value="{{ workout.finisher_duration_minutes|default:'' }}"
+                  class="w-full bg-[#FFF8F0]/[0.08] border border-[#FFF8F0]/10 rounded-xl p-2.5 mt-1 text-sm focus:border-[#FF2D00] focus:outline-none" />
+              </label>
+              <label class="block">
+                <span class="text-[#FFF8F0]/60 text-xs uppercase tracking-wide">What did you do?</span>
+                <textarea name="finisher_notes" rows="2" placeholder="e.g., AMRAP cable rows, sled push…"
+                  class="w-full bg-[#FFF8F0]/[0.08] border border-[#FFF8F0]/10 rounded-xl p-2.5 mt-1 text-sm focus:border-[#FF2D00] focus:outline-none resize-none">{{ workout.finisher_notes }}</textarea>
+              </label>
+              <button class="w-full py-2 rounded-xl bg-[#FF2D00] hover:bg-[#D42500] text-white text-sm font-bold transition-colors">
+                Save Finisher
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- End Workout Button (bottom of logged sets) -->
+      <div class="mt-4">
         <a id="end-workout-bottom" href="{% url 'end_workout' workout.id %}" class="end-workout-btn block w-full text-center px-6 py-4 rounded-xl bg-[#00B7FF] hover:bg-[#009AD8] text-white font-semibold text-lg shadow-lg shadow-[#00B7FF]/25 transition-all">
           End Workout
         </a>
