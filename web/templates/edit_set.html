@@ -18,14 +18,14 @@
       </label>
 
       <label class="block">
-        <span class="text-[#FFF8F0]/80 text-sm">Reps</span>
+        <span class="text-[#FFF8F0]/80 text-sm">Reps (Repetitions)</span>
         <input name="reps" type="number" min="0"
                value="{{ set.reps }}"
                class="w-full bg-[#FFF8F0]/[0.08] border border-[#FFF8F0]/10 rounded-xl p-3 mt-1" required />
       </label>
 
       <label class="block">
-        <span class="text-[#FFF8F0]/80 text-sm">Quality</span>
+        <span class="text-[#FFF8F0]/80 text-sm">Quality of the set</span>
         <select name="quality" class="w-full bg-[#FFF8F0]/[0.08] border border-[#FFF8F0]/10 rounded-xl p-3 mt-1" required>
           {% for q in qualities %}
             <option value="{{ q }}" {% if q == set.quality %}selected{% endif %}>
