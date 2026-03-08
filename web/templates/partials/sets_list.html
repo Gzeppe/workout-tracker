@@ -1,6 +1,6 @@
 {% for s in sets %}
-<div
-  class="bg-black/30 border border-brand-surfaceBorder hover:border-brand-accent/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors group">
+<div data-set-id="{{ s.id }}"
+  class="set-row relative overflow-hidden bg-black/30 border border-brand-surfaceBorder hover:border-brand-accent/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors group">
   <div class="flex-1">
     <div class="font-heading font-bold text-white text-lg flex items-center gap-2">
       {{ s.exercise_name }}
@@ -63,7 +63,7 @@
       <form method="post" action="{% url 'delete_set' s.id %}" hx-post="{% url 'delete_set' s.id %}"
         hx-target="#sets-container" hx-swap="innerHTML">
         {% csrf_token %}
-        <button type="submit"
+        <button type="submit" data-delete-btn
           class="px-4 py-2 rounded-lg bg-brand-danger/10 border border-brand-danger/20 hover:bg-brand-danger hover:text-white text-brand-danger text-sm font-semibold transition-all">
           Delete
         </button>

@@ -391,17 +391,40 @@ def weightlifting_workout_detail(request, workout_id: int):
 
     # Custom Workout / Other: no exercise dropdown, user types exercise name
     # Other days: filter exercises by day
+    import json as _json
     is_custom = w.day in ("Custom Workout", "Other")
     if is_custom:
         exercises = []
     else:
-        exercises = Exercise.objects.filter(day=w.day)
+        exercises = list(Exercise.objects.filter(day=w.day))
     sets = w.sets.select_related("exercise").order_by("position", "created_at")
+
+    # Build exercise history: last set per exercise (weight, reps, quality)
+    exercise_history = {}
+    for ex in exercises:
+        last = (
+            SetEntry.objects.filter(workout__user=request.user, exercise=ex)
+            .order_by("-created_at")
+            .first()
+        )
+        if last:
+            exercise_history[ex.id] = {
+                "weight": last.weight_lb,
+                "reps": last.reps,
+                "quality": last.quality,
+            }
 
     return render(
         request,
         "workout/detail_weightlifting.html",
-        {"workout": w, "exercises": exercises, "sets": sets, "qualities": QUALITIES, "is_custom": is_custom},
+        {
+            "workout": w,
+            "exercises": exercises,
+            "sets": sets,
+            "qualities": QUALITIES,
+            "is_custom": is_custom,
+            "exercise_history_json": _json.dumps(exercise_history),
+        },
     )
 
 

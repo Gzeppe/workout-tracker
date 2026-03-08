@@ -102,52 +102,80 @@
 
   <div class="grid md:grid-cols-2 gap-6">
     <div class="bg-[#FFF8F0]/5 rounded-2xl p-6 shadow-sm border border-[#FFF8F0]/10">
-      <h2 class="text-lg font-semibold mb-4 text-[#FFF8F0]">Add Set</h2>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-[#FFF8F0]">
+          Add Set <span id="set-counter-label" class="text-[#FFF8F0]/40 text-base font-normal"></span>
+        </h2>
+        <button id="same-as-last-btn" type="button"
+          class="hidden px-3 py-1.5 rounded-lg bg-[#FFF8F0]/10 hover:bg-[#FFF8F0]/20 text-[#FFF8F0]/70 text-xs font-semibold transition-colors">
+          ↑ Same as last
+        </button>
+      </div>
 
-      <form hx-post="{% url 'add_set' workout.id %}" hx-target="#sets-container" hx-swap="innerHTML" class="space-y-3">
+      <form id="add-set-form" hx-post="{% url 'add_set' workout.id %}" hx-target="#sets-container" hx-swap="innerHTML" class="space-y-4">
         {% csrf_token %}
 
-        <div class="bg-[#FFF8F0]/[0.08] rounded-xl p-3 space-y-2 border border-[#FFF8F0]/10">
+        <!-- Custom exercise fields (stacked) -->
+        <div class="bg-[#FFF8F0]/[0.08] rounded-xl p-3 space-y-3 border border-[#FFF8F0]/10">
           <div class="text-[#FFF8F0]/50 text-xs font-semibold uppercase tracking-wide">Custom Exercise</div>
-          <div class="grid grid-cols-2 gap-2">
-            <label class="block">
-              <span class="text-[#FFF8F0]/80 text-sm">Exercise Name</span>
-              <input name="custom_exercise_name" type="text" placeholder="e.g., Planks..."
-                     class="w-full bg-[#FFF8F0]/[0.08] border border-[#FFF8F0]/10 rounded-xl p-3 mt-1 focus:border-[#00B7FF] focus:outline-none" maxlength="120" />
-            </label>
-            <label class="block">
-              <span class="text-[#FFF8F0]/80 text-sm">Equipment (optional)</span>
-              <input name="custom_equipment" type="text" placeholder="e.g., Mat..."
-                     class="w-full bg-[#FFF8F0]/[0.08] border border-[#FFF8F0]/10 rounded-xl p-3 mt-1 focus:border-[#00B7FF] focus:outline-none" maxlength="80" />
-            </label>
-          </div>
+          <label class="block">
+            <span class="text-[#FFF8F0]/80 text-sm">Exercise Name</span>
+            <input id="custom-exercise-name" name="custom_exercise_name" type="text" placeholder="e.g., Planks…"
+                   class="w-full bg-[#FFF8F0]/[0.08] border border-[#FFF8F0]/10 rounded-xl p-3 mt-1 focus:border-[#00B7FF] focus:outline-none" maxlength="120" />
+          </label>
+          <label class="block">
+            <span class="text-[#FFF8F0]/80 text-sm">Equipment (optional)</span>
+            <input id="custom-equipment" name="custom_equipment" type="text" placeholder="e.g., Mat…"
+                   class="w-full bg-[#FFF8F0]/[0.08] border border-[#FFF8F0]/10 rounded-xl p-3 mt-1 focus:border-[#00B7FF] focus:outline-none" maxlength="80" />
+          </label>
         </div>
 
         {% if not is_custom %}
         <div class="text-center text-[#FFF8F0]/40 text-sm">— or select from list —</div>
-        <select name="exercise_id" class="w-full bg-[#FFF8F0]/[0.08] rounded-xl p-3 border border-[#FFF8F0]/10 focus:border-[#00B7FF] focus:outline-none">
-          <option value="" selected>Select an exercise...</option>
+
+        <!-- Previous best badge -->
+        <div id="prev-best" class="hidden px-3 py-2 rounded-lg bg-[#00B7FF]/10 border border-[#00B7FF]/20 text-[#00B7FF] text-xs font-semibold"></div>
+
+        <select id="exercise-select" name="exercise_id"
+          class="w-full bg-[#FFF8F0]/[0.08] rounded-xl p-3 border border-[#FFF8F0]/10 focus:border-[#00B7FF] focus:outline-none">
+          <option value="">Select an exercise…</option>
           {% for ex in exercises %}
           <option value="{{ ex.id }}">{{ ex.name }} | {{ ex.equipment }}</option>
           {% endfor %}
         </select>
         {% endif %}
 
-        <div class="grid grid-cols-2 gap-3">
-          <label class="block">
-            <span class="text-[#FFF8F0]/80 text-sm">Weight (0 = bodyweight)</span>
-            <input name="weight_lb" type="number" min="0" class="w-full bg-[#FFF8F0]/[0.08] rounded-xl p-3 mt-1 border border-[#FFF8F0]/10 focus:border-[#00B7FF] focus:outline-none" required />
-          </label>
+        <!-- Weight stepper -->
+        <label class="block">
+          <span class="text-[#FFF8F0]/80 text-sm">Weight <span class="text-[#FFF8F0]/40">(0 = bodyweight)</span></span>
+          <div class="flex items-center gap-2 mt-1">
+            <button type="button" data-step="-1" data-target="weight_lb"
+              class="stepper-btn w-12 h-12 rounded-xl bg-[#FFF8F0]/10 hover:bg-[#FFF8F0]/20 text-[#FFF8F0] font-bold text-xl flex items-center justify-center transition-colors flex-shrink-0 select-none">−</button>
+            <input id="weight-input" name="weight_lb" type="number" min="0" value="0"
+              class="flex-1 text-center bg-[#FFF8F0]/[0.08] rounded-xl p-3 border border-[#FFF8F0]/10 focus:border-[#00B7FF] focus:outline-none text-lg font-semibold" required />
+            <button type="button" data-step="1" data-target="weight_lb"
+              class="stepper-btn w-12 h-12 rounded-xl bg-[#FFF8F0]/10 hover:bg-[#FFF8F0]/20 text-[#FFF8F0] font-bold text-xl flex items-center justify-center transition-colors flex-shrink-0 select-none">+</button>
+          </div>
+        </label>
 
-          <label class="block">
-            <span class="text-[#FFF8F0]/80 text-sm">Reps</span>
-            <input name="reps" type="number" min="0" class="w-full bg-[#FFF8F0]/[0.08] rounded-xl p-3 mt-1 border border-[#FFF8F0]/10 focus:border-[#00B7FF] focus:outline-none" required />
-          </label>
-        </div>
+        <!-- Reps stepper -->
+        <label class="block">
+          <span class="text-[#FFF8F0]/80 text-sm">Reps</span>
+          <div class="flex items-center gap-2 mt-1">
+            <button type="button" data-step="-1" data-target="reps"
+              class="stepper-btn w-12 h-12 rounded-xl bg-[#FFF8F0]/10 hover:bg-[#FFF8F0]/20 text-[#FFF8F0] font-bold text-xl flex items-center justify-center transition-colors flex-shrink-0 select-none">−</button>
+            <input id="reps-input" name="reps" type="number" min="0" value="0"
+              class="flex-1 text-center bg-[#FFF8F0]/[0.08] rounded-xl p-3 border border-[#FFF8F0]/10 focus:border-[#00B7FF] focus:outline-none text-lg font-semibold" required />
+            <button type="button" data-step="1" data-target="reps"
+              class="stepper-btn w-12 h-12 rounded-xl bg-[#FFF8F0]/10 hover:bg-[#FFF8F0]/20 text-[#FFF8F0] font-bold text-xl flex items-center justify-center transition-colors flex-shrink-0 select-none">+</button>
+          </div>
+        </label>
 
+        <!-- Quality -->
         <label class="block">
           <span class="text-[#FFF8F0]/80 text-sm">Quality</span>
-          <select name="quality" class="w-full bg-[#FFF8F0]/[0.08] rounded-xl p-3 mt-1 border border-[#FFF8F0]/10 focus:border-[#00B7FF] focus:outline-none" required>
+          <select id="quality-select" name="quality"
+            class="w-full bg-[#FFF8F0]/[0.08] rounded-xl p-3 mt-1 border border-[#FFF8F0]/10 focus:border-[#00B7FF] focus:outline-none" required>
             {% for q in qualities %}
             <option value="{{ q }}" {% if q == "good" %}selected{% endif %}>{{ q|capfirst }}</option>
             {% endfor %}
@@ -155,7 +183,7 @@
         </label>
 
         <button id="add-set-btn" class="w-full px-5 py-3 rounded-xl bg-[#00B7FF] text-white font-semibold shadow-lg shadow-[#00B7FF]/25 transition-all duration-200">
-          Add Set
+          Add Set 1
         </button>
       </form>
     </div>
@@ -429,50 +457,161 @@
 
     loadState();
 
-    // ── Add Set button animation ──────────────────────────────────────────────
-    const addSetBtn = document.getElementById('add-set-btn');
-    const addSetForm = addSetBtn ? addSetBtn.closest('form') : null;
+    // ── Exercise history from server ──────────────────────────────────────────
+    const exerciseHistory = {{ exercise_history_json|safe }};
 
-    if (addSetForm) {
-      addSetForm.addEventListener('htmx:afterRequest', function (e) {
-        if (!e.detail.successful) return;
+    // ── DOM refs ──────────────────────────────────────────────────────────────
+    const addSetBtn    = document.getElementById('add-set-btn');
+    const addSetForm   = document.getElementById('add-set-form');
+    const exerciseSel  = document.getElementById('exercise-select');
+    const weightInput  = document.getElementById('weight-input');
+    const repsInput    = document.getElementById('reps-input');
+    const qualitySel   = document.getElementById('quality-select');
+    const prevBest     = document.getElementById('prev-best');
+    const sameLastBtn  = document.getElementById('same-as-last-btn');
+    const counterLabel = document.getElementById('set-counter-label');
 
-        addSetBtn.disabled = true;
-        addSetBtn.textContent = '✓ Set Added!';
-        addSetBtn.style.cssText = [
-          'background-color: #AEFF00',
-          'color: #0C0808',
-          'box-shadow: 0 0 20px rgba(174,255,0,0.4)',
-          'transform: scale(1.03)',
-        ].join(';');
+    // ── Stepper buttons (+/- 1) ───────────────────────────────────────────────
+    document.querySelectorAll('.stepper-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = document.querySelector(`[name="${btn.dataset.target}"]`);
+        input.value = Math.max(0, (parseInt(input.value) || 0) + parseInt(btn.dataset.step));
+      });
+    });
 
-        // Bounce back after brief hold
-        setTimeout(() => {
-          addSetBtn.style.transform = 'scale(1)';
-        }, 120);
+    // ── Set counter ───────────────────────────────────────────────────────────
+    function updateSetCounter() {
+      const count = document.querySelectorAll('#sets-container .set-row').length;
+      const next = count + 1;
+      if (counterLabel) counterLabel.textContent = '';
+      if (addSetBtn && !addSetBtn.disabled) addSetBtn.textContent = `Add Set ${next}`;
+    }
+    updateSetCounter();
 
-        setTimeout(() => {
-          addSetBtn.style.cssText = '';
-          addSetBtn.textContent = 'Add Set';
-          addSetBtn.disabled = false;
-        }, 1400);
+    // ── Auto-fill + prev-best when exercise selected ──────────────────────────
+    if (exerciseSel) {
+      exerciseSel.addEventListener('change', () => {
+        const id = parseInt(exerciseSel.value);
+        const h = exerciseHistory[id];
+        if (h) {
+          weightInput.value = h.weight;
+          repsInput.value   = h.reps;
+          // Restore quality: prefer localStorage, fall back to history
+          const storedQ = localStorage.getItem(`quality_ex_${id}`);
+          if (qualitySel) qualitySel.value = storedQ || h.quality;
+          if (prevBest) {
+            prevBest.textContent = `Last logged: ${h.weight} lb × ${h.reps} reps`;
+            prevBest.classList.remove('hidden');
+          }
+        } else {
+          weightInput.value = 0;
+          repsInput.value   = 0;
+          if (prevBest) prevBest.classList.add('hidden');
+        }
       });
     }
 
-    // ── End Workout button animation ─────────────────────────────────────────
+    // ── Remember quality per exercise in localStorage ─────────────────────────
+    if (addSetForm && qualitySel && exerciseSel) {
+      addSetForm.addEventListener('htmx:beforeRequest', () => {
+        const id = exerciseSel.value;
+        if (id) localStorage.setItem(`quality_ex_${id}`, qualitySel.value);
+      });
+    }
+
+    // ── "Same as last" tracking ───────────────────────────────────────────────
+    let lastSet = null;
+    if (sameLastBtn) {
+      sameLastBtn.addEventListener('click', () => {
+        if (!lastSet) return;
+        if (exerciseSel) exerciseSel.value = lastSet.exerciseId || '';
+        weightInput.value = lastSet.weight;
+        repsInput.value   = lastSet.reps;
+        if (qualitySel) qualitySel.value = lastSet.quality;
+        const nameEl = document.getElementById('custom-exercise-name');
+        const equipEl = document.getElementById('custom-equipment');
+        if (nameEl) nameEl.value = lastSet.customName || '';
+        if (equipEl) equipEl.value = lastSet.customEquip || '';
+      });
+    }
+
+    // ── After set added: animate, update counter, auto-start timer ───────────
+    if (addSetForm) {
+      addSetForm.addEventListener('htmx:afterRequest', e => {
+        if (!e.detail.successful) return;
+
+        // Capture last set before fields might change
+        lastSet = {
+          exerciseId: exerciseSel?.value || '',
+          weight: weightInput.value,
+          reps:   repsInput.value,
+          quality: qualitySel?.value || 'good',
+          customName: document.getElementById('custom-exercise-name')?.value || '',
+          customEquip: document.getElementById('custom-equipment')?.value || '',
+        };
+        if (sameLastBtn) sameLastBtn.classList.remove('hidden');
+
+        // Button success animation
+        addSetBtn.disabled = true;
+        addSetBtn.textContent = '✓ Set Added!';
+        addSetBtn.style.cssText = [
+          'background-color:#AEFF00', 'color:#0C0808',
+          'box-shadow:0 0 20px rgba(174,255,0,0.4)', 'transform:scale(1.03)',
+        ].join(';');
+        setTimeout(() => { addSetBtn.style.transform = 'scale(1)'; }, 120);
+        setTimeout(() => {
+          addSetBtn.style.cssText = '';
+          addSetBtn.disabled = false;
+          updateSetCounter();
+        }, 1400);
+
+        // Auto-start rest timer if not already running
+        if (!timerState.running) {
+          resetTimer();
+          startTimer();
+        }
+      });
+
+      // Update counter after HTMX swaps the sets list
+      addSetForm.addEventListener('htmx:afterSwap', updateSetCounter);
+    }
+
+    // ── End Workout button animation ──────────────────────────────────────────
     document.querySelectorAll('.end-workout-btn').forEach(btn => {
-      btn.addEventListener('click', function (e) {
-        // Let navigation happen but animate first (non-blocking)
+      btn.addEventListener('click', function () {
         this.textContent = 'Ending…';
         this.style.cssText = [
-          'background-color: #AEFF00',
-          'color: #0C0808',
-          'box-shadow: 0 0 24px rgba(174,255,0,0.5)',
-          'transform: scale(1.04)',
-          'transition: transform 0.15s ease, background-color 0.15s ease',
-          'pointer-events: none',
+          'background-color:#AEFF00', 'color:#0C0808',
+          'box-shadow:0 0 24px rgba(174,255,0,0.5)', 'transform:scale(1.04)',
+          'transition:transform 0.15s ease,background-color 0.15s ease',
+          'pointer-events:none',
         ].join(';');
       });
     });
+
+    // ── Swipe-to-delete on mobile ─────────────────────────────────────────────
+    const setsContainer = document.getElementById('sets-container');
+    let swipeStartX = 0;
+    let swipeEl = null;
+
+    setsContainer?.addEventListener('touchstart', e => {
+      swipeStartX = e.touches[0].clientX;
+      swipeEl = e.target.closest('.set-row');
+    }, { passive: true });
+
+    setsContainer?.addEventListener('touchend', e => {
+      if (!swipeEl) return;
+      const dx = e.changedTouches[0].clientX - swipeStartX;
+      if (dx < -80) {
+        // Highlight the row red briefly, then click delete
+        swipeEl.style.transition = 'background 0.2s';
+        swipeEl.style.background = 'rgba(255,45,0,0.15)';
+        const deleteBtn = swipeEl.querySelector('[data-delete-btn]');
+        if (deleteBtn) {
+          setTimeout(() => deleteBtn.click(), 200);
+        }
+      }
+      swipeEl = null;
+    }, { passive: true });
   </script>
 {% endblock %}
