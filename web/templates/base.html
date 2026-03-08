@@ -76,11 +76,9 @@
         <div class="flex justify-end mb-6 relative gap-2">
           <!-- Language Toggle -->
           <button id="lang-toggle" onclick="toggleLanguage()"
-            class="px-3 py-2.5 rounded-xl glass-panel hover:bg-brand-surfaceHover font-bold text-sm transition-all duration-300 flex items-center gap-1.5">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
-            </svg>
-            <span id="lang-toggle-label">ES</span>
+            class="px-3 py-2.5 rounded-xl glass-panel hover:bg-brand-surfaceHover text-lg transition-all duration-300"
+            title="Switch language">
+            <span id="lang-toggle-label">🇪🇸</span>
           </button>
 
           <button id="menu-toggle" class="px-5 py-2.5 rounded-xl glass-panel hover:bg-brand-surfaceHover font-medium flex items-center gap-2 transition-all duration-300">
@@ -553,7 +551,7 @@
     function updateToggleLabel() {
       var label = document.getElementById('lang-toggle-label');
       if (label) {
-        label.textContent = getLang() === 'es' ? 'EN' : 'ES';
+        label.textContent = getLang() === 'es' ? '🇺🇸' : '🇪🇸';
       }
     }
 
