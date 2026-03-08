@@ -19,3 +19,7 @@ whitenoise==6.8.2
 
 # Rate limiting
 django-ratelimit==4.1.0
+
+# Google OAuth
+social-auth-app-django==5.4.2
+social-auth-core==4.5.4
