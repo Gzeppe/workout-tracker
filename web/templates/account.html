@@ -53,28 +53,15 @@
   </div>
 
   <!-- Danger Zone -->
-  <div class="glass-panel p-8 md:p-10 border-brand-danger/30 relative overflow-hidden bg-brand-danger/[0.02]">
-    <div
-      class="absolute -right-10 -bottom-10 w-48 h-48 bg-brand-danger/10 blur-[60px] rounded-full pointer-events-none">
-    </div>
-
-    <h2 class="text-xl font-heading font-bold mb-4 text-brand-danger flex items-center gap-2 relative z-10">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-        </path>
-      </svg>
-      Danger Zone
-    </h2>
-
-    <div class="bg-brand-danger/10 border border-brand-danger/20 rounded-xl p-6 relative z-10">
-      <h3 class="font-bold mb-2 text-white">Delete Account</h3>
-      <p class="text-brand-textMuted text-sm mb-6 leading-relaxed">
-        Permanently delete your account and all associated data. This action cannot be undone.
-      </p>
+  <div class="glass-panel px-6 py-4 relative z-10">
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <div class="text-brand-textMuted text-xs font-bold uppercase tracking-wider mb-0.5">Danger Zone</div>
+        <p class="text-brand-textMuted/60 text-xs">Permanently delete your account and all data.</p>
+      </div>
       <a href="{% url 'delete_account' %}"
-        class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-brand-danger hover:bg-[#D42500] text-white font-bold transition-colors shadow-[0_0_15px_rgba(255,59,48,0.3)]">
-        Delete My Account
+        class="flex-shrink-0 px-4 py-2 rounded-xl border border-brand-danger/30 text-brand-danger hover:bg-brand-danger hover:text-white text-sm font-semibold transition-all">
+        Delete Account
       </a>
     </div>
   </div>
