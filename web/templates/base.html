@@ -73,7 +73,16 @@
     <div class="max-w-5xl mx-auto p-6 relative z-10">
       <header class="mb-10">
         <!-- Top Bar with Menu -->
-        <div class="flex justify-end mb-6 relative">
+        <div class="flex justify-end mb-6 relative gap-2">
+          <!-- Language Toggle -->
+          <button id="lang-toggle" onclick="toggleLanguage()"
+            class="px-3 py-2.5 rounded-xl glass-panel hover:bg-brand-surfaceHover font-bold text-sm transition-all duration-300 flex items-center gap-1.5">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
+            </svg>
+            <span id="lang-toggle-label">ES</span>
+          </button>
+
           <button id="menu-toggle" class="px-5 py-2.5 rounded-xl glass-panel hover:bg-brand-surfaceHover font-medium flex items-center gap-2 transition-all duration-300">
             <svg class="w-5 h-5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -159,5 +168,413 @@
         Built by <span class="text-white">Gtech LLC</span>
       </footer>
     </div>
+  <!-- Language Translation System -->
+  <script>
+  (function () {
+    var ES = {
+      // Nav / header
+      'Menu': 'Menú',
+      'About': 'Acerca de',
+      'How the App Works': 'Cómo funciona la app',
+      'Training Suggestions': 'Sugerencias de entrenamiento',
+      'Cardio Guide': 'Guía de cardio',
+      'HIIT Guide': 'Guía de HIIT',
+      'Account': 'Cuenta',
+      'My Account': 'Mi cuenta',
+      'Logout': 'Cerrar sesión',
+      'Privacy Policy': 'Política de privacidad',
+      'Built by': 'Desarrollado por',
+      'Start Tracking Your Workouts!': '¡Empieza a registrar tus entrenamientos!',
+      // Dashboard
+      'Start Workout': 'Iniciar entrenamiento',
+      'Choose weightlifting, cardio, or HIIT': 'Elige pesas, cardio o HIIT',
+      'Previous Workouts': 'Entrenamientos anteriores',
+      'View history and stats': 'Ver historial y estadísticas',
+      'Calendar': 'Calendario',
+      'Plan and schedule workouts': 'Planifica y programa entrenamientos',
+      'Quick Stats': 'Estadísticas rápidas',
+      'This Week': 'Esta semana',
+      'Day Streak': 'Racha de días',
+      'Strong Workouts': 'Entrenamientos intensos',
+      'Upcoming Workouts': 'Próximos entrenamientos',
+      'View Calendar': 'Ver calendario',
+      'Last Workout': 'Último entrenamiento',
+      'Full Summary': 'Resumen completo',
+      'sets': 'series',
+      'min warmup': 'min calentamiento',
+      'min finisher': 'min finalizador',
+      'View Summary': 'Ver resumen',
+      'Quick Start Templates': 'Plantillas de inicio rápido',
+      'View All': 'Ver todas',
+      // Workout type selection
+      'What type of workout today?': '¿Qué tipo de entrenamiento hoy?',
+      'Select a category to begin your session': 'Selecciona una categoría para empezar',
+      'Weightlifting': 'Pesas',
+      'Build muscle and strength with targeted exercises': 'Desarrolla músculo y fuerza con ejercicios dirigidos',
+      'Cardio': 'Cardio',
+      'Burn calories and build endurance': 'Quema calorías y desarrolla resistencia',
+      'HIIT': 'HIIT',
+      'High-intensity interval training for maximum burn': 'Entrenamiento de intervalos de alta intensidad',
+      'Quick Start from Template': 'Inicio rápido desde plantilla',
+      'Back to Dashboard': 'Volver al panel',
+      'Back': 'Volver',
+      // Start weightlifting
+      'Start Weightlifting': 'Iniciar entrenamiento de pesas',
+      'Use Previous Workout Template': 'Usar plantilla anterior',
+      '-- No Template --': '-- Sin plantilla --',
+      'Muscle Group': 'Grupo muscular',
+      'Select muscle group...': 'Selecciona grupo muscular...',
+      'If Other, name the Muscle(s) Group being trained today': 'Si es Otro, nombra el grupo muscular de hoy',
+      'e.g., Full Body, Push/Pull': 'ej., Cuerpo completo, Empuje/Jalón',
+      'Energy Level': 'Nivel de energía',
+      // Start cardio
+      'Start Cardio Workout': 'Iniciar entrenamiento de cardio',
+      'Cardio Type': 'Tipo de cardio',
+      'Select cardio type...': 'Selecciona tipo de cardio...',
+      'Equipment (Optional)': 'Equipo (Opcional)',
+      'e.g., Treadmill, Outdoor, Stationary Bike': 'ej., Caminadora, Al aire libre, Bicicleta estática',
+      'Target Duration (min)': 'Duración objetivo (min)',
+      'Target Distance (miles)': 'Distancia objetivo (millas)',
+      'Custom Name (Optional)': 'Nombre personalizado (Opcional)',
+      'e.g., Morning Run': 'ej., Carrera matutina',
+      'Start Cardio': 'Iniciar cardio',
+      // Start HIIT
+      'HIIT Training': 'Entrenamiento HIIT',
+      'What is HIIT?': '¿Qué es HIIT?',
+      'High-Intensity Interval Training (HIIT) alternates between intense bursts of activity and fixed periods of rest or lower-intensity activity.': 'El entrenamiento HIIT alterna entre ráfagas intensas de actividad y períodos fijos de descanso.',
+      'Burns more calories in less time': 'Quema más calorías en menos tiempo',
+      'Boosts metabolism for hours after': 'Acelera el metabolismo durante horas',
+      'Improves cardiovascular fitness': 'Mejora la condición cardiovascular',
+      'Quick Presets': 'Presets rápidos',
+      'Intervals': 'Intervalos',
+      'Work (sec)': 'Trabajo (seg)',
+      'Rest (sec)': 'Descanso (seg)',
+      'Total Session Time:': 'Tiempo total de sesión:',
+      'e.g., Morning HIIT': 'ej., HIIT matutino',
+      'Start HIIT Session': 'Iniciar sesión HIIT',
+      // Weightlifting workout detail
+      'End Workout': 'Finalizar entrenamiento',
+      'Warmup': 'Calentamiento',
+      '(Optional)': '(Opcional)',
+      '✓ Warmup logged': '✓ Calentamiento registrado',
+      'Duration (min)': 'Duración (min)',
+      'What did you do?': '¿Qué hiciste?',
+      'e.g., foam rolling, dynamic stretches…': 'ej., rodillo, estiramientos dinámicos…',
+      'Save Warmup': 'Guardar calentamiento',
+      'Rest Timer': 'Temporizador de descanso',
+      'Stopwatch': 'Cronómetro',
+      'Countdown': 'Cuenta regresiva',
+      '1 min': '1 min',
+      '2 min': '2 min',
+      '3 min': '3 min',
+      '4 min': '4 min',
+      '5 min': '5 min',
+      'Start': 'Iniciar',
+      'Pause': 'Pausar',
+      'Resume': 'Reanudar',
+      'Reset': 'Reiniciar',
+      'Add Set': 'Agregar serie',
+      '↑ Same as last': '↑ Igual que antes',
+      'Custom Exercise': 'Ejercicio personalizado',
+      'Exercise Name (e.g. Planks)': 'Nombre del ejercicio (ej. Planchas)',
+      'Equipment (e.g. Mat)': 'Equipo (ej. Tapete)',
+      '- or select from list -': '- o selecciona de la lista -',
+      'Select an exercise…': 'Selecciona un ejercicio…',
+      'Weight': 'Peso',
+      '(0 = bodyweight)': '(0 = peso corporal)',
+      'Reps': 'Repeticiones',
+      'Quality': 'Calidad',
+      'Logged Sets': 'Series registradas',
+      'No sets logged yet': 'Aún no hay series registradas',
+      'Add your first set below': 'Agrega tu primera serie abajo',
+      '✓ Finisher logged': '✓ Finalizador registrado',
+      'Save Finisher': 'Guardar finalizador',
+      'e.g., AMRAP cable rows, sled push…': 'ej., AMRAP jalones, empuje de trineo…',
+      'Finisher': 'Finalizador',
+      // Quality options
+      'Bad': 'Malo',
+      'Ok': 'Regular',
+      'Good': 'Bueno',
+      'Great': 'Excelente',
+      'bad': 'malo',
+      'ok': 'regular',
+      'good': 'bueno',
+      'great': 'excelente',
+      // Sets list
+      'Edit': 'Editar',
+      'Delete': 'Eliminar',
+      'Move up': 'Subir',
+      'Move down': 'Bajar',
+      // Cardio detail
+      'Session Timer': 'Temporizador de sesión',
+      'Log Interval': 'Registrar intervalo',
+      'Distance (miles)': 'Distancia (millas)',
+      'Speed (mph)': 'Velocidad (mph)',
+      'Incline (%)': 'Inclinación (%)',
+      'Effort': 'Esfuerzo',
+      'Add Interval': 'Agregar intervalo',
+      'Logged Intervals': 'Intervalos registrados',
+      'Total Time': 'Tiempo total',
+      'Total Distance': 'Distancia total',
+      'Avg Speed': 'Vel. promedio',
+      'Back to dashboard': 'Volver al panel',
+      // HIIT detail
+      'Ready': 'Listo',
+      'WORK': 'TRABAJO',
+      'REST': 'DESCANSO',
+      'COMPLETE!': '¡COMPLETADO!',
+      'Interval': 'Intervalo',
+      'Work': 'Trabajo',
+      'Rest': 'Descanso',
+      'Total': 'Total',
+      'Skip': 'Saltar',
+      'Stop': 'Detener',
+      // Summary
+      'Workout Summary': 'Resumen del entrenamiento',
+      'Complete!': '¡Completo!',
+      'Total Sets': 'Total de series',
+      'Good / Great Sets': 'Series Buenas / Excelentes',
+      'Duration': 'Duración',
+      'Distance': 'Distancia',
+      'Avg Incline': 'Incl. promedio',
+      'Work Time': 'Tiempo de trabajo',
+      'Rest Time': 'Tiempo de descanso',
+      'Protocol': 'Protocolo',
+      'Volume vs Last': 'Volumen vs. anterior',
+      '~same': '~igual',
+      'Days Since Last': 'Días desde el último',
+      'Weeks Training': 'Semanas entrenando',
+      'Personal Records': 'Récords personales',
+      'Improvements vs Last Session': 'Mejoras vs. sesión anterior',
+      'Streaks': 'Rachas',
+      'Areas to Address': 'Áreas a mejorar',
+      'Strength Trend': 'Tendencia de fuerza',
+      'Session Effort': 'Esfuerzo de sesión',
+      'Coach Notes': 'Notas del entrenador',
+      'Next Session Targets': 'Objetivos próxima sesión',
+      'Adaptive Plan - Next Session': 'Plan adaptativo - Próxima sesión',
+      'Enable Adaptive Programming?': '¿Activar programación adaptativa?',
+      'Get a concrete, personalised plan for your next session - specific weights, reps, and rest recommendations - generated automatically from your performance data.': 'Obtén un plan concreto y personalizado para tu próxima sesión, generado automáticamente a partir de tus datos de rendimiento.',
+      'Yes, enable it': 'Sí, activarlo',
+      'Not now': 'Ahora no',
+      '✓ Adaptive Programming on': '✓ Programación adaptativa activada',
+      'Turn off': 'Desactivar',
+      'Complete more workouts to unlock detailed analysis and progress tracking.': 'Completa más entrenamientos para desbloquear análisis detallado.',
+      'Session Notes': 'Notas de sesión',
+      'Session': 'Sesión',
+      'Add Session Notes': 'Agregar notas de sesión',
+      'How did it feel? Any pain, new PRs, life context…': '¿Cómo te sentiste? ¿Algún dolor, nuevos récords, contexto…?',
+      'Save Notes': 'Guardar notas',
+      'Save as Template': 'Guardar como plantilla',
+      'Start Another Workout': 'Iniciar otro entrenamiento',
+      'Dashboard': 'Panel',
+      'Delete this workout': 'Eliminar este entrenamiento',
+      // Edit / Delete set
+      'Edit Set': 'Editar serie',
+      'Weight (0 = bodyweight)': 'Peso (0 = peso corporal)',
+      'Save': 'Guardar',
+      'Cancel': 'Cancelar',
+      // Delete workout
+      'Delete workout?': '¿Eliminar entrenamiento?',
+      'This will permanently delete:': 'Esto eliminará permanentemente:',
+      'The workout': 'El entrenamiento',
+      'Yes, delete': 'Sí, eliminar',
+      // History
+      'Review your past performance and stats': 'Revisa tu rendimiento y estadísticas pasadas',
+      'List View': 'Vista de lista',
+      'Stats View': 'Vista de estadísticas',
+      'Filter:': 'Filtrar:',
+      'All': 'Todos',
+      'Overview': 'Resumen general',
+      'Total Workouts': 'Total de entrenamientos',
+      'Current Day Streak': 'Racha actual de días',
+      'Workout Types': 'Tipos de entrenamiento',
+      'sessions': 'sesiones',
+      'Weekly Activity': 'Actividad semanal',
+      '(Last 8 Weeks)': '(Últimas 8 semanas)',
+      'workouts': 'entrenamientos',
+      'No data yet': 'Sin datos aún',
+      'No workouts yet': 'Sin entrenamientos aún',
+      'Complete your first session to build history.': 'Completa tu primera sesión para construir historial.',
+      'Start a Workout': 'Iniciar un entrenamiento',
+      // Account
+      'Manage your profile and settings': 'Gestiona tu perfil y configuración',
+      'Username': 'Usuario',
+      'Email': 'Correo electrónico',
+      'Not set': 'No establecido',
+      'Member Since': 'Miembro desde',
+      'Danger Zone': 'Zona de peligro',
+      'Delete Account': 'Eliminar cuenta',
+      'Permanently delete your account and all associated data. This action cannot be undone.': 'Elimina permanentemente tu cuenta y todos los datos asociados. Esta acción no se puede deshacer.',
+      'Delete My Account': 'Eliminar mi cuenta',
+      // Templates
+      'My Workout Templates': 'Mis plantillas de entrenamiento',
+      'Manage and launch your pre-built routines': 'Gestiona y lanza tus rutinas predefinidas',
+      'Create Template': 'Crear plantilla',
+      'No templates yet': 'Sin plantillas aún',
+      'Create a reusable template for your favorite routines, or save completed workouts to easily run them again.': 'Crea una plantilla reutilizable para tus rutinas favoritas.',
+      'Create Your First Template': 'Crear tu primera plantilla',
+      'View': 'Ver',
+      'Launch Session': 'Lanzar sesión',
+      'Back to Templates': 'Volver a plantillas',
+      'Create Workout Template': 'Crear plantilla de entrenamiento',
+      'Save a workout structure to quickly start sessions later': 'Guarda una estructura de entrenamiento para empezar sesiones rápidamente',
+      'Template Name': 'Nombre de plantilla',
+      'e.g. Morning Cardio, Push Day': 'ej., Cardio matutino, Día de empuje',
+      'Workout Type': 'Tipo de entrenamiento',
+      'Select a day type...': 'Selecciona tipo de día...',
+      'Target Distance (mi)': 'Distancia objetivo (mi)',
+      'Work (s)': 'Trabajo (s)',
+      'Rest (s)': 'Descanso (s)',
+      'Common Presets:': 'Presets comunes:',
+      'Tabata: 8 intervals (20s work / 10s rest)': 'Tabata: 8 intervalos (20s trabajo / 10s descanso)',
+      '30/30: 10 intervals (30s work / 30s rest)': '30/30: 10 intervalos (30s trabajo / 30s descanso)',
+      'EMOM: 10 intervals (40s work / 20s rest)': 'EMOM: 10 intervalos (40s trabajo / 20s descanso)',
+      'Description (optional)': 'Descripción (opcional)',
+      'Notes about this template...': 'Notas sobre esta plantilla...',
+      'Description': 'Descripción',
+      'Saved Exercises': 'Ejercicios guardados',
+      'No exercises saved in this template.': 'No hay ejercicios guardados en esta plantilla.',
+      'Start a workout from this template to add some!': '¡Inicia un entrenamiento desde esta plantilla para agregar ejercicios!',
+      'Cardio Targets': 'Objetivos de cardio',
+      'Type': 'Tipo',
+      'Target Duration': 'Duración objetivo',
+      'Target Distance': 'Distancia objetivo',
+      'HIIT Settings': 'Configuración HIIT',
+      'Estimated Total Time:': 'Tiempo total estimado:',
+      'Start Session': 'Iniciar sesión',
+      // Calendar
+      'Workout Calendar': 'Calendario de entrenamientos',
+      'Plan and review your training schedule': 'Planifica y revisa tu horario de entrenamiento',
+      'Schedule': 'Programar',
+      'Previous': 'Anterior',
+      'Next': 'Siguiente',
+      'Sun': 'Dom',
+      'Mon': 'Lun',
+      'Tue': 'Mar',
+      'Wed': 'Mié',
+      'Thu': 'Jue',
+      'Fri': 'Vie',
+      'Sat': 'Sáb',
+      'Scheduled': 'Programado',
+      // Login / Register
+      'Your Personal Trainer, Built In': 'Tu entrenador personal integrado',
+      'Log your workouts, track progress, and get clear feedback on your training.': 'Registra tus entrenamientos y obtén retroalimentación clara sobre tu progreso.',
+      'Login': 'Iniciar sesión',
+      'Password': 'Contraseña',
+      'Invalid username or password.': 'Usuario o contraseña inválidos.',
+      'Forgot your password?': '¿Olvidaste tu contraseña?',
+      "Don't have an account?": '¿No tienes cuenta?',
+      'Sign up': 'Regístrate',
+      'Create Account': 'Crear cuenta',
+      'Letters, numbers, and underscores only. 3-30 characters.': 'Solo letras, números y guiones bajos. 3-30 caracteres.',
+      'Used for password recovery.': 'Usado para recuperación de contraseña.',
+      'At least 8 characters. Avoid common passwords.': 'Al menos 8 caracteres. Evita contraseñas comunes.',
+      'Confirm Password': 'Confirmar contraseña',
+      'Sign Up': 'Registrarse',
+      'Already have an account?': '¿Ya tienes cuenta?',
+      // Mood choices
+      'Exhausted': 'Agotado',
+      'Low Energy': 'Poca energía',
+      'Normal': 'Normal',
+      'Energetic': 'Enérgico',
+      // Muscle groups
+      'Back & Biceps': 'Espalda y Bíceps',
+      'Chest & Triceps': 'Pecho y Tríceps',
+      'Legs': 'Piernas',
+      'Core': 'Abdomen',
+      'Shoulders & Traps': 'Hombros y Trapecios',
+      'Other': 'Otro',
+      // Cardio types
+      'Running': 'Correr',
+      'Cycling': 'Ciclismo',
+      'Swimming': 'Natación',
+      'Rowing': 'Remo',
+      'Elliptical': 'Elíptica',
+      'Stair Climber': 'Escaladora',
+      'Jump Rope': 'Saltar la cuerda',
+      'Walking': 'Caminar',
+    };
+
+    var LS_KEY = 'wt_lang';
+
+    function getLang() {
+      return localStorage.getItem(LS_KEY) || 'en';
+    }
+
+    function applyTranslations() {
+      var lang = getLang();
+      var dict = lang === 'es' ? ES : {};
+      var keys = Object.keys(dict);
+      if (!keys.length) return;
+
+      // Walk all text nodes and replace exact matches
+      var walker = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+        { acceptNode: function(n) {
+          // Skip script and style content
+          var p = n.parentElement;
+          if (!p) return NodeFilter.FILTER_REJECT;
+          var tag = p.tagName;
+          if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }}
+      );
+
+      var nodes = [];
+      var node;
+      while ((node = walker.nextNode())) { nodes.push(node); }
+
+      nodes.forEach(function(n) {
+        var raw = n.textContent;
+        var trimmed = raw.trim();
+        if (trimmed && dict[trimmed] !== undefined) {
+          var leading = raw.match(/^(\s*)/)[1];
+          var trailing = raw.match(/(\s*)$/)[1];
+          n.textContent = leading + dict[trimmed] + trailing;
+        }
+      });
+
+      // Translate placeholder attributes
+      document.querySelectorAll('[placeholder]').forEach(function(el) {
+        var orig = el.getAttribute('data-ph-orig') || el.placeholder;
+        el.setAttribute('data-ph-orig', orig);
+        el.placeholder = dict[orig] !== undefined ? dict[orig] : orig;
+      });
+
+      // Translate title attributes (move up/down buttons)
+      document.querySelectorAll('[title]').forEach(function(el) {
+        var orig = el.getAttribute('data-title-orig') || el.title;
+        el.setAttribute('data-title-orig', orig);
+        el.title = dict[orig] !== undefined ? dict[orig] : orig;
+      });
+    }
+
+    function updateToggleLabel() {
+      var label = document.getElementById('lang-toggle-label');
+      if (label) {
+        label.textContent = getLang() === 'es' ? 'EN' : 'ES';
+      }
+    }
+
+    window.toggleLanguage = function () {
+      var next = getLang() === 'es' ? 'en' : 'es';
+      localStorage.setItem(LS_KEY, next);
+      location.reload();
+    };
+
+    // Run on initial load
+    document.addEventListener('DOMContentLoaded', function () {
+      updateToggleLabel();
+      applyTranslations();
+
+      // Re-apply after HTMX partial swaps (e.g. set list refresh)
+      document.body.addEventListener('htmx:afterSwap', function () {
+        applyTranslations();
+      });
+    });
+  })();
+  </script>
   </body>
 </html>
